@@ -23,12 +23,9 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Login",
-        iconButton: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+      appBar: const MyAppBar(
+        text: "Login",
+        appBarContent: "Title"
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -36,7 +33,7 @@ class LoginPage extends StatelessWidget {
           child: Column(
             children: [
               // Add space between elements
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
           
               // Phone Number label
               const MyLabel(

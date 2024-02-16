@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'rental_list_page.dart';
+import 'register_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,6 +19,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "SFProDisplay",
       ),
       home: LoginPage(),
+      // home: const RentalListPage()
     );
   }
 }

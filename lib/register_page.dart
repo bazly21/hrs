@@ -37,12 +37,9 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Register",
-        iconButton: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+      appBar: const MyAppBar(
+        text: "Register",
+        appBarContent: "Title"
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -123,12 +120,9 @@ class ConfirmationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Confirmation Code",
-        iconButton: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+      appBar: const MyAppBar(
+        text: "Confirmation Code",
+        appBarContent: "Title"
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -197,15 +191,13 @@ class PasswordPage extends StatelessWidget {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Create Account",
-        iconButton: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+      appBar: const MyAppBar(
+        text: "Create Account",
+        appBarContent: "Title"
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
