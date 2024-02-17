@@ -18,8 +18,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: "SFProDisplay",
       ),
-      home: LoginPage(),
-      // home: const RentalListPage()
+      // home: LoginPage(),
+      home: const RentalListPage()
     );
   }
 }
