@@ -37,10 +37,7 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        text: "Register",
-        appBarContent: "Title"
-      ),
+      appBar: const CustomAppBar(text: "Register"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
@@ -88,7 +85,7 @@ class RegisterPage extends StatelessWidget {
               // Add space between elements
               const SizedBox(height: 14),
 
-              MyRichText(
+              RichTextLink(
                 text1: "Already have an account? ", 
                 text2: "Login", 
                 onTap: () {
@@ -120,11 +117,7 @@ class ConfirmationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        text: "Confirmation Code",
-        appBarContent: "Title"
-      ),
-      backgroundColor: Colors.white,
+      appBar: const CustomAppBar(text: "Confirmation Code"),
       body: SafeArea(
         child: Center(
           child: Column(
@@ -195,10 +188,7 @@ class PasswordPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        text: "Create Account",
-        appBarContent: "Title"
-      ),
+      appBar: const CustomAppBar(text: "Create Account"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(

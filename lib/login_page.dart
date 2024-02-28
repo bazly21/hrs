@@ -23,10 +23,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(
-        text: "Login",
-        appBarContent: "Title"
-      ),
+      appBar: const CustomAppBar(text: "Login"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
@@ -103,7 +100,7 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: 14),
 
               // Link to the Register page
-              MyRichText(
+              RichTextLink(
                 text1: "Do not have an account? ", 
                 text2: "Register", 
                 onTap: () {

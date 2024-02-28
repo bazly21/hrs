@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 // import 'package:flutter/services.dart';
 
-class MyRichText extends StatelessWidget {
+class RichTextLink extends StatelessWidget {
   final String text1, text2;
   final VoidCallback onTap;
 
 
-  const MyRichText({
+  const RichTextLink({
     super.key,
     required this.text1,
     required this.text2,

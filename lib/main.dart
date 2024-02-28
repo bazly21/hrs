@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/navigation_page.dart';
 import 'login_page.dart';
 import 'rental_list_page.dart';
 import 'register_page.dart';
@@ -17,9 +18,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: "SFProDisplay",
+        scaffoldBackgroundColor: Colors.white
       ),
       // home: LoginPage(),
-      home: const RentalListPage()
+      home: const NavigationPage()
     );
   }
 }
