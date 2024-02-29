@@ -10,8 +10,12 @@
 // 3. Next, the user must enter their OTP
 // 4. If the entered OTP is correct, then they can proceed to create the password
 
-
 // Components import
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hrs/navigation_page.dart';
+import 'package:hrs/otp_confirmation_page.dart';
+import 'package:hrs/profile_page_login.dart';
+
 import 'components/my_textfield.dart';
 import 'components/my_label.dart';
 import 'components/my_button.dart';
@@ -25,14 +29,40 @@ import 'package:flutter/material.dart';
 // Pages import
 import 'login_page.dart';
 
-class RegisterPage extends StatelessWidget {
+// Firebase import
+import 'package:firebase_auth/firebase_auth.dart';
 
-  RegisterPage({
-    super.key,
-  });
+class RegisterPage extends StatelessWidget {
+  RegisterPage({super.key});
 
   // Text editing controller
   final phoneNumberController = TextEditingController();
+
+  // Function to send OTP code
+  Future<void> sendOTP(BuildContext context) async {
+    // Only support Malaysia phone number format "+60"
+    final phoneNumber = "+6${phoneNumberController.text.trim()}";
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        // Auto-retrieval or instant verification completed.
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        // Handle error.
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        // Navigate to ConfirmationPage and pass verificationId.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => OTPConfirmationPage(
+                  verificationId: verificationId, phoneNumber: phoneNumber, buttonText: 'Register')),
+        );
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +78,9 @@ class RegisterPage extends StatelessWidget {
 
               // Phone number label
               const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start, 
-                text: "Phone number", 
-                fontSize: 16.0
-              ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  text: "Phone number",
+                  fontSize: 16.0),
 
               // Add space between elements
               const SizedBox(height: 10),
@@ -62,111 +91,22 @@ class RegisterPage extends StatelessWidget {
                 hintText: "Enter your phone number",
                 obscureText: false,
                 textInputType: TextInputType.number,
-                filteringTextInputFormatter: [FilteringTextInputFormatter.digitsOnly],
+                filteringTextInputFormatter: [
+                  FilteringTextInputFormatter.digitsOnly
+                ],
               ),
-              
+
               // Add space between elements
               const SizedBox(height: 28),
 
               // Next button
               MyButton(
                 text: "Next",
-                onPressed: () {
-                  String phoneNumberStr = phoneNumberController.text; // Get data from the phone number textfield
-
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => ConfirmationPage(phoneNumber: phoneNumberStr))
-                  );
-                  // print("Go to register page");
-                },
+                onPressed: () => sendOTP(context),
               ),
 
               // Add space between elements
               const SizedBox(height: 14),
-
-              RichTextLink(
-                text1: "Already have an account? ", 
-                text2: "Login", 
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  );
-                }
-              ),       
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ConfirmationPage extends StatelessWidget {
-
-  ConfirmationPage({
-    super.key,
-    required this.phoneNumber
-  });
-
-  // Text editing controller
-  final String phoneNumber;
-  final confirmationCode = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(text: "Confirmation Code"),
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              // Add space between elements
-              const SizedBox(height: 20),
-
-              // Phone number label
-              const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start, 
-                text: "Confirmation code", 
-                fontSize: 16.0
-              ),
-
-              // Phone number label
-              MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start, 
-                text: "An SMS was sent to $phoneNumber", 
-                fontSize: 13.0,
-                color: const Color(0xFFA6A6A6),
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 10),
-
-              // Phone Number textfield
-              MyTextField(
-                controller: confirmationCode,
-                hintText: "Enter your confirmation code",
-                obscureText: false,
-                textInputType: TextInputType.number,
-                filteringTextInputFormatter: [FilteringTextInputFormatter.digitsOnly],
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 28),
-
-              // Next button
-              MyButton(
-                text: "Next",
-                onPressed: () {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (context) => PasswordPage())
-                  );
-                  // print("Go to register page");
-                },
-              ),
-              
             ],
           ),
         ),
@@ -176,19 +116,55 @@ class ConfirmationPage extends StatelessWidget {
 }
 
 class PasswordPage extends StatelessWidget {
-
   PasswordPage({super.key});
 
   // Text editing controller
   final nameController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
 
+  // Function to register profile name to the FireStore
+  void registerProfileName(BuildContext context) async {
+    // Get value of the name textfield in String / text format
+    String profileName = nameController.text.trim();
+
+    if (profileName.isNotEmpty) {
+      // Get current user's information
+      User? user = FirebaseAuth.instance.currentUser;
+      FirebaseFirestore db = FirebaseFirestore.instance;
+
+      if (user != null) {
+        //Get UID (User ID)
+        String uid = user.uid;
+
+        try {
+          // Store profileName to the FireStore database
+          await db.collection('users').doc(uid).set({
+            'name': profileName,
+          }, SetOptions(merge: true));
+
+          // Check if the widget is still mounted before navigating
+          if (context.mounted) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const NavigationPage()),
+              (Route<dynamic> route) =>
+                  false, // This predicate will never be true, so it removes all the routes below the new one.
+            );
+          }
+        } catch (e) {
+          if (context.mounted) {
+            // Display error message if the storing operation is failed
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    "Something happened while storing profile name. Please try again")));
+          }
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Create Account"),
+      appBar: const CustomAppBar(text: "Account Details"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
@@ -199,10 +175,9 @@ class PasswordPage extends StatelessWidget {
 
               // Name textfield label
               const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start, 
-                text: "Name", 
-                fontSize: 16.0
-              ),
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  text: "Name",
+                  fontSize: 16.0),
 
               // Add space between elements
               const SizedBox(height: 10),
@@ -211,47 +186,7 @@ class PasswordPage extends StatelessWidget {
               MyTextField(
                 controller: nameController,
                 hintText: "Enter your full name",
-                obscureText: true,
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 20),
-
-              // Password textfield label
-              const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start, 
-                text: "Password", 
-                fontSize: 16.0
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 10),
-
-              // Password textfield
-              MyTextField(
-                controller: passwordController,
-                hintText: "Enter your password",
-                obscureText: true,
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 20),
-
-              // Confirm password textfield label
-              const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start, 
-                text: "Confirm Password", 
-                fontSize: 16.0
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 10),
-
-              // Confirm password textfield
-              MyTextField(
-                controller: confirmPasswordController,
-                hintText: "Confirm your password",
-                obscureText: true,
+                obscureText: false,
               ),
 
               // Add space between elements
@@ -259,16 +194,8 @@ class PasswordPage extends StatelessWidget {
 
               // Next button
               MyButton(
-                text: "Create Account",
-                onPressed: () {
-                  // Navigator.push(
-                  //   context, 
-                  //   MaterialPageRoute(builder: (context) => ConfirmationPage(phoneNumber: phoneNumberStr))
-                  // );
-                  // print("Go to register page");
-                },
-              ),
-              
+                  text: "Create Account",
+                  onPressed: () => registerProfileName(context)),
             ],
           ),
         ),

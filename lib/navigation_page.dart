@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/chat_list_page.dart';
 import 'package:hrs/notification_page.dart';
@@ -15,15 +16,33 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPage extends State<NavigationPage> {
+  
   int _selectedIndex = 0; // Assuming Home is the central item
-  final List<Widget> _pages = [const RentalListPage(), ChatListPage(), const RentalDetailsPage(), const NotificationPage(), const ProfilePageNoAccount() ];
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+      body: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          // Determine the current user's authentication state
+          final User? user = snapshot.data;
+
+          // Define pages based on user's authentication state
+          final List<Widget> pages = [
+            const RentalListPage(),
+            ChatListPage(),
+            const RentalDetailsPage(),
+            const NotificationPage(),
+            user != null ? const ProfilePage() : const ProfilePageNoAccount(),
+          ];
+
+          return IndexedStack(
+            index: _selectedIndex,
+            children: pages,
+          );
+        },
       ),
       bottomNavigationBar: MyBottomNavigationBar(
         currentIndex: _selectedIndex,

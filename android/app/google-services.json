@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "439971324656",
+    "project_id": "house-renting-system-test",
+    "storage_bucket": "house-renting-system-test.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439971324656:android:ad0486038e936fb5361835",
+        "android_client_info": {
+          "package_name": "com.example.hrs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZD-Y5QimVspEtp6oeVY8QbPnSH7ejgTU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

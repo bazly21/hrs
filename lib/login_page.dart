@@ -1,4 +1,7 @@
 // Components import
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hrs/register_page.dart';
+
 import 'components/my_textfield.dart';
 import 'components/my_label.dart';
 import 'components/my_button.dart';
@@ -10,14 +13,39 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 // Pages import
-import 'register_page.dart';
+import 'otp_confirmation_page.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
   // Text editing controller
   final phoneNumberController = TextEditingController();
-  final passwordController = TextEditingController();
+
+  // Function to send OTP code
+  Future<void> sendOTP(BuildContext context) async {
+    // Only support Malaysia phone number format "+60"
+    final phoneNumber = "+6${phoneNumberController.text.trim()}";
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        // Auto-retrieval or instant verification completed.
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        // Handle error.
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        // Navigate to ConfirmationPage and pass verificationId.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => OTPConfirmationPage(
+                  verificationId: verificationId, phoneNumber: phoneNumber, buttonText: 'Login')),
+        );
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
+  }
 
   // This widget is the root of your application.
   @override
@@ -52,48 +80,12 @@ class LoginPage extends StatelessWidget {
               ),
 
               // Add space between elements
-              const SizedBox(height: 20),
-
-              // Password label
-              const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start, 
-                text: "Password", 
-                fontSize: 16.0
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 10),
-
-              // Password textfield
-              MyTextField(
-                controller: passwordController,
-                hintText: "Enter your password",
-                obscureText: true,
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 10),
-
-              // Forgot password
-              const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.end, 
-                text: "Forgot password?", 
-                fontSize: 12.0,
-                color: Color(0xFF8568F3)
-              ),
-
-              // Add space between elements
               const SizedBox(height: 28),
 
               // Log in button
               MyButton(
                 text: "Login",
-                onPressed: () {
-                  // Navigator.push(
-                  //   context, 
-                  //   MaterialPageRoute(builder: (context) => RegisterPage())
-                  // );
-                },
+                onPressed: () => sendOTP(context)
               ),
 
               // Add space between elements

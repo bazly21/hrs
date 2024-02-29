@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/navigation_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'login_page.dart';
-import 'rental_list_page.dart';
-import 'register_page.dart';
+// import 'rental_list_page.dart';
+// import 'register_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure flutter binding is initialized
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   runApp(const MyApp());
 }
 
@@ -18,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: "SFProDisplay",
-        scaffoldBackgroundColor: Colors.white
+        scaffoldBackgroundColor: Colors.white,
       ),
       // home: LoginPage(),
       home: const NavigationPage()

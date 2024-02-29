@@ -15,7 +15,7 @@ class ProfileMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: (){},
+      onTap: onPressed ?? (){},
       child: Row(
         children: [
           // Icon
@@ -32,7 +32,7 @@ class ProfileMenu extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon),
+            child: Icon(icon, size: 20,),
           ),
 
           // Add space between elements
@@ -51,7 +51,7 @@ class ProfileMenu extends StatelessWidget {
 
           // Arrow Icon
           IconButton(
-            onPressed: onPressed ?? (){}, 
+            onPressed: (){}, 
             icon: const Icon(Icons.arrow_forward)
           )
         ],
