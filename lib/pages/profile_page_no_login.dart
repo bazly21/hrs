@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
-import 'package:hrs/login_page.dart';
+import 'package:hrs/pages/login_page.dart';
 
 class ProfilePageNoAccount extends StatelessWidget {
   const ProfilePageNoAccount({super.key});

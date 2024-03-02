@@ -5,8 +5,8 @@ import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/components/my_button.dart';
 import 'package:hrs/components/my_label.dart';
 import 'package:hrs/components/my_textfield.dart';
-import 'package:hrs/navigation_page.dart';
-import 'package:hrs/register_page.dart';
+import 'package:hrs/pages/navigation_page.dart';
+import 'package:hrs/pages/register_page.dart';
 
 class OTPConfirmationPage extends StatelessWidget {
   OTPConfirmationPage(

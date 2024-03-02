@@ -12,12 +12,12 @@
 
 // Import
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hrs/navigation_page.dart';
-import 'package:hrs/otp_confirmation_page.dart';
-import 'components/my_textfield.dart';
-import 'components/my_label.dart';
-import 'components/my_button.dart';
-import 'components/my_appbar.dart';
+import 'package:hrs/pages/navigation_page.dart';
+import 'package:hrs/pages/otp_confirmation_page.dart';
+import 'package:hrs/components/my_textfield.dart';
+import 'package:hrs/components/my_label.dart';
+import 'package:hrs/components/my_button.dart';
+import 'package:hrs/components/my_appbar.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'components/my_appbar.dart';
-import 'components/my_rentallist.dart';
+import 'package:hrs/components/my_appbar.dart';
+import 'package:hrs/components/my_rentallist.dart';
 
 class RentalListPage extends StatelessWidget {
   const RentalListPage({super.key});

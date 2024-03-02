@@ -1,12 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hrs/chat_list_page.dart';
-import 'package:hrs/notification_page.dart';
-import 'package:hrs/profile_page_login.dart';
-import 'package:hrs/profile_page_no_login.dart';
-import 'package:hrs/rental_details_page.dart';
-import 'package:hrs/rental_list_page.dart';
-import 'components/my_bottomnavigationbar.dart';
+import 'package:hrs/pages/chat_list_page.dart';
+import 'package:hrs/pages/notification_page.dart';
+import 'package:hrs/pages/profile_page_login.dart';
+import 'package:hrs/pages/profile_page_no_login.dart';
+import 'package:hrs/pages/rental_details_page.dart';
+import 'package:hrs/pages/rental_list_page.dart';
+import 'package:hrs/components/my_bottomnavigationbar.dart';
 
 class NavigationPage extends StatefulWidget {
   const NavigationPage({super.key});

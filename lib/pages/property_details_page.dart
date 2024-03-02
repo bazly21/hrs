@@ -4,7 +4,7 @@ import 'package:hrs/components/my_circulariconbutton.dart';
 import 'package:hrs/components/my_propertydescription.dart';
 import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
-import 'package:hrs/view_profile_page.dart';
+import 'package:hrs/pages/view_profile_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
   const PropertyDetailsPage({super.key});
