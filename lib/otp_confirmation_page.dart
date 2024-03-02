@@ -60,8 +60,13 @@ class OTPConfirmationPage extends StatelessWidget {
           );
         }
       }
-    } on FirebaseAuthException catch (e) {
-      // Handle error.
+    } on FirebaseAuthException {
+        if (context.mounted) {
+          // Display error message if the storing operation is failed
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text(
+                  "Something error happened. Please try again")));
+        }
     }
   }
 

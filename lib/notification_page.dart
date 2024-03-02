@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hrs/components/rental_details.dart';
 
 class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});

@@ -1,10 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/navigation_page.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'login_page.dart';
-// import 'rental_list_page.dart';
-// import 'register_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure flutter binding is initialized

@@ -10,24 +10,17 @@
 // 3. Next, the user must enter their OTP
 // 4. If the entered OTP is correct, then they can proceed to create the password
 
-// Components import
+// Import
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hrs/navigation_page.dart';
 import 'package:hrs/otp_confirmation_page.dart';
-import 'package:hrs/profile_page_login.dart';
-
 import 'components/my_textfield.dart';
 import 'components/my_label.dart';
 import 'components/my_button.dart';
-import 'components/my_richtext.dart';
 import 'components/my_appbar.dart';
-
-// Packages import
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
-// Pages import
-import 'login_page.dart';
 
 // Firebase import
 import 'package:firebase_auth/firebase_auth.dart';
