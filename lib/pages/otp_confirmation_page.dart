@@ -43,7 +43,7 @@ class OTPConfirmationPage extends StatelessWidget {
         if (context.mounted) {
           // Navigate to the PasswordPage
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => PasswordPage()),
+            MaterialPageRoute(builder: (context) => PasswordPage(phoneNumber: phoneNumber)),
             (Route<dynamic> route) =>
                 false, // This predicate will never be true, so it removes all the routes below the new one.
           );

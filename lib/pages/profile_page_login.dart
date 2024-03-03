@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/components/my_starrating.dart';
+import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -148,7 +149,15 @@ class ProfilePage extends StatelessWidget {
                 // Add space between elements
                 SizedBox(height: MediaQuery.of(context).size.height * 0.015),
 
-                const ProfileMenu(text: "Login as Landlord", icon: Icons.login),
+                ProfileMenu(
+                  text: "Login as Landlord",
+                  icon: Icons.login,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LandlordLoginPage()),
+                  ),
+                ),
               ],
             ),
           ),
@@ -157,6 +166,3 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
-
-
