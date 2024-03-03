@@ -4,6 +4,7 @@ import 'package:hrs/components/my_circulariconbutton.dart';
 import 'package:hrs/components/my_propertydescription.dart';
 import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
+import 'package:hrs/pages/apply_rental_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
@@ -15,6 +16,9 @@ class PropertyDetailsPage extends StatefulWidget {
 
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   bool isWishlist = false; // Initial state of the wishlist icon
+  bool isApplicationExists = false;
+  final String rentalID = "ee1lkVxQjSOQbM7ZbpR4";
+
   Future<Map<String, dynamic>?>?
       rentalDetailsFuture; // To store rental's data that has been fetched from the Firestore
 
@@ -34,16 +38,16 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
       // Fetch the property document first
       DocumentSnapshot propertySnapshot = await FirebaseFirestore.instance
           .collection("properties")
-          .doc("ee1lkVxQjSOQbM7ZbpR") // Use the actual property ID
+          .doc(rentalID) // Use the actual property ID
           .get();
 
       if (propertySnapshot.exists) {
         Map<String, dynamic> propertyData =
             propertySnapshot.data() as Map<String, dynamic>;
+            
 
         // Check if the property document has a landlordID
         if (propertyData.containsKey('landlordID')) {
-
           // Use DocumentReference because propertyData['landlordID']'s
           // value is reference type.
           DocumentReference landlordRef = propertyData['landlordID'];
@@ -71,42 +75,62 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     }
   }
 
+  Stream<bool> checkUserApplicationStream(String rentalID) {
+    return FirebaseFirestore.instance
+        .collection('applications')
+        .where('rentalID', isEqualTo: rentalID)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.isNotEmpty);
+  }
+
+  Future<void> handleRefresh() async {
+    await fetchRentalDetails().then((newData) {
+      setState(() {
+        rentalDetailsFuture =
+            Future.value(newData); // Use the new data for the future
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: FutureBuilder(
-              future: rentalDetailsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  // If snapshot contains data
-                  if (snapshot.hasData && snapshot.data != null) {
-                    final Map<String, dynamic> propertyData = snapshot.data!;
-
-                    return buildContent(propertyData, context);
+      body: RefreshIndicator(
+        onRefresh: handleRefresh,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: FutureBuilder(
+                future: rentalDetailsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    // If snapshot contains data
+                    if (snapshot.hasData && snapshot.data != null) {
+                      final Map<String, dynamic> propertyData = snapshot.data!;
+        
+                      return buildContent(propertyData, context);
+                    }
+                    // If snapshot does not contain data
+                    else {
+                      // Document does not exist or no data, navigate back
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        Navigator.pop(context);
+                      });
+                      // Return an empty Container, SizedBox, or any widget to
+                      // fulfill the builder function requirement while the navigation
+                      // command is being prepared to execute.
+                      return const SizedBox();
+                    }
                   }
-                  // If snapshot does not contain data
-                  else {
-                    // Document does not exist or no data, navigate back
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      Navigator.pop(context);
-                    });
-                    // Return an empty Container, SizedBox, or any widget to
-                    // fulfill the builder function requirement while the navigation
-                    // command is being prepared to execute.
-                    return const SizedBox();
+                  // If something happen during fetch process
+                  else if (snapshot.hasError) {
+                    return SizedBox(
+                        child: Center(child: Text("Error: ${snapshot.error}")));
                   }
-                }
-                // If something happen during fetch process
-                else if (snapshot.hasError) {
                   return SizedBox(
-                      child: Center(child: Text("Error: ${snapshot.error}")));
-                }
-                return SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: const Center(child: CircularProgressIndicator()));
-              }),
+                      height: MediaQuery.of(context).size.height,
+                      child: const Center(child: CircularProgressIndicator()));
+                }),
+          ),
         ),
       ),
       bottomNavigationBar: FutureBuilder(
@@ -177,26 +201,42 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ),
 
             // Apply Button
-            ElevatedButton(
-              onPressed: () {}, // Go to chat page
-              style: ButtonStyle(
-                fixedSize: const MaterialStatePropertyAll(Size.fromHeight(42)),
-                elevation: const MaterialStatePropertyAll(0),
-                backgroundColor:
-                    const MaterialStatePropertyAll(Color(0xFF765CF8)),
-                shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(72), // Set corner radius
-                  ),
-                ),
-              ),
-              child: const Text(
-                'Apply',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+            StreamBuilder<bool>( 
+                stream: checkUserApplicationStream(rentalID),
+                builder: (context, snapshot) {
+                  // Disable button if stream emits true (application exists) or data is not yet available
+                  bool isButtonDisabled = snapshot.hasData && snapshot.data!;
+
+                  return ElevatedButton(
+                    onPressed: () {
+                      // Go to Apply Rental page
+                      if (!isButtonDisabled) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                ApplyRentalPage(rentalID: rentalID)));
+                      }
+                    },
+                    style: ButtonStyle(
+                      fixedSize:
+                          const MaterialStatePropertyAll(Size.fromHeight(42)),
+                      elevation: const MaterialStatePropertyAll(0),
+                      backgroundColor: MaterialStatePropertyAll(isButtonDisabled
+                          ? Colors.grey
+                          : const Color(0xFF765CF8)),
+                      shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(72), // Set corner radius
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      'Apply',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  );
+                }),
           ],
         ),
       ),
@@ -337,7 +377,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
               // ********* Landlord Profile Section (Start) *********
               UserDetails(
-                name: "Abdul Hakim",
+                name: propertyData["landlordName"],
                 rating: 5.0,
                 numReview: 1,
                 onPressed: () {
