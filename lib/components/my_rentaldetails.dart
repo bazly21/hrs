@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class PropertyDetails extends StatelessWidget {
   final String propertyName, propertyLocation;
-  final bool isFavorite;
+  final bool isFavorite; // For favourite/wishlist icon
   final bool showIcon;
+  final Icon? icon;
   final VoidCallback? onIconPressed;
 
   const PropertyDetails({
@@ -12,7 +13,8 @@ class PropertyDetails extends StatelessWidget {
     required this.propertyLocation,
     this.isFavorite = false,
     this.showIcon = false,
-    this.onIconPressed,
+    this.onIconPressed, 
+    this.icon,
   });
 
   @override
@@ -31,7 +33,7 @@ class PropertyDetails extends StatelessWidget {
             ),
             if (showIcon) // This will only build the IconButton if showIcon is true
               IconButton(
-                icon: Icon(
+                icon: icon ?? Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border_rounded,
                   size: 22.0,
                   color: isFavorite ? Colors.red : const Color(0xFF7D7F88),
@@ -44,22 +46,22 @@ class PropertyDetails extends StatelessWidget {
         if (!showIcon)
           const SizedBox(height: 8.0),
 
-        const Row(
+        Row(
           children: [
             // Location Icon
-            Icon(
+            const Icon(
               Icons.location_on_rounded,
               size: 18.0,
               color: Color(0xFF7D7F88),
             ),
 
             // Add space between elements
-            SizedBox(width: 5.0),
+            const SizedBox(width: 5.0),
 
             // Property's Location Text **Database Required**
             Text(
-              "Seksyen 9, Bangi", // Dummy data
-              style: TextStyle(
+              propertyLocation, // Dummy data
+              style: const TextStyle(
                 color: Color(0xFF7D7F88),
                 fontSize: 16.0
               ),

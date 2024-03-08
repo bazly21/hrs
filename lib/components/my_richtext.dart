@@ -32,3 +32,31 @@ class RichTextLink extends StatelessWidget {
     ); 
   }
 }
+
+class CustomRichText extends StatelessWidget {
+  final String text1, text2;
+  final double? fontSize;
+
+  const CustomRichText({
+    super.key,
+    required this.text1,
+    required this.text2, 
+    this.fontSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(color: Colors.black, fontSize: fontSize ?? 13), // Default text style
+        children: [
+          TextSpan(text: text1),
+          TextSpan(
+            text: text2,
+            style: const TextStyle(color: Color(0xFF7D7F88)),
+          ),
+        ],
+      ),
+    ); 
+  }
+}

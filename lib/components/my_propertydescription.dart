@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 
+// This is for description of the rental property
+// such as Description, Furnishing, Facilities and
+// Accessibility
 class PropertyDescription extends StatelessWidget {
   final String title;
   final String content;
 
   const PropertyDescription({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Get total screen height
+    double height = MediaQuery.of(context).size.height;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -23,7 +29,7 @@ class PropertyDescription extends StatelessWidget {
             fontSize: 18.0,
           ),
         ),
-        const SizedBox(height: 3.0),
+        SizedBox(height: height * 0.003),
         Text(
           content,
           textAlign: TextAlign.justify,
@@ -33,7 +39,7 @@ class PropertyDescription extends StatelessWidget {
             fontSize: 16.0,
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: height * 0.015),
       ],
     );
   }
