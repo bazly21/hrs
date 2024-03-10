@@ -17,7 +17,7 @@ class PropertyDetailsPage extends StatefulWidget {
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   bool isWishlist = false; // Initial state of the wishlist icon
   bool isApplicationExists = false;
-  final String rentalID = "ee1lkVxQjSOQbM7ZbpR4";
+  final String propertyID = "ee1lkVxQjSOQbM7ZbpR4";
 
   Future<Map<String, dynamic>?>?
       rentalDetailsFuture; // To store rental's data that has been fetched from the Firestore
@@ -38,7 +38,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
       // Fetch the property document first
       DocumentSnapshot propertySnapshot = await FirebaseFirestore.instance
           .collection("properties")
-          .doc(rentalID) // Use the actual property ID
+          .doc(propertyID) // Use the actual property ID
           .get();
 
       if (propertySnapshot.exists) {
@@ -75,10 +75,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     }
   }
 
-  Stream<bool> checkUserApplicationStream(String rentalID) {
+  Stream<bool> checkUserApplicationStream(String propertyID) {
     return FirebaseFirestore.instance
         .collection('applications')
-        .where('rentalID', isEqualTo: rentalID)
+        .where('propertyID', isEqualTo: propertyID)
         .snapshots()
         .map((snapshot) => snapshot.docs.isNotEmpty);
   }
@@ -202,18 +202,21 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
             // Apply Button
             StreamBuilder<bool>( 
-                stream: checkUserApplicationStream(rentalID),
+                stream: checkUserApplicationStream(propertyID),
                 builder: (context, snapshot) {
                   // Disable button if stream emits true (application exists) or data is not yet available
                   bool isButtonDisabled = snapshot.hasData && snapshot.data!;
+                  print(isButtonDisabled);
 
                   return ElevatedButton(
                     onPressed: () {
-                      // Go to Apply Rental page
+                      // If false, button is enabled,
+                      // This button will bring tenant
+                      // to the Apply Rental Page
                       if (!isButtonDisabled) {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
-                                ApplyRentalPage(rentalID: rentalID)));
+                                ApplyRentalPage(rentalID: propertyID)));
                       }
                     },
                     style: ButtonStyle(

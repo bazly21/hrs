@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:hrs/components/my_appbar.dart';
-import 'package:intl/intl.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_auth/firebase_auth.dart";
+import "package:flutter/material.dart";
+import "package:hrs/components/my_appbar.dart";
+import "package:intl/intl.dart";
+import "package:firebase_storage/firebase_storage.dart";
 
 class ApplyRentalPage extends StatefulWidget {
   final String rentalID;
@@ -21,10 +22,13 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
   DateTime _moveInDate = DateTime.now();
   int? _tenancyDuration;
 
+  // Get user ID
+  final String? userUID = FirebaseAuth.instance.currentUser?.uid;
+  
   // Define dropdown list items
-  final List<String> _profileTypes = ['Student', 'Working Adult', 'Family'];
+  final List<String> _profileTypes = ["Student", "Working Adult", "Family"];
   final List<int> _paxNumbers = List.generate(10, (index) => index + 1);
-  final List<String> _nationalities = ['Malaysian', 'Foreigner'];
+  final List<String> _nationalities = ["Malaysian", "Foreigner"];
   final List<int> _tenancyDurations = List.generate(6, (index) => index + 1);
 
   void _resetFields() {
@@ -49,33 +53,34 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
         _tenancyDuration == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Please fill in all fields before submitting.')),
+            content: Text("Please fill in all fields before submitting.")),
       );
       return; // Stop if any field is not filled in
     }
 
     // Prepare data to be saved
     Map<String, dynamic> applicationData = {
-      'rentalID': widget.rentalID,
-      'occupation': _occupation,
-      'profileType': _profileType,
-      'numberOfPax': _numberOfPax,
-      'nationality': _nationality,
-      'moveInDate': Timestamp.fromDate(
-          _moveInDate), // Convert DateTime to Timestamp for Firestore
-      'tenancyDuration': _tenancyDuration,
-      'submittedAt': FieldValue
+      "propertyID": widget.rentalID,
+      "applicantID": userUID,
+      "occupation": _occupation,
+      "profileType": _profileType,
+      "numberOfPax": _numberOfPax,
+      "nationality": _nationality,
+      "moveInDate": Timestamp.fromDate(_moveInDate), // Convert DateTime to Timestamp for Firestore
+      "tenancyDuration": _tenancyDuration,
+      "status": "Pending",
+      "submittedAt": FieldValue
           .serverTimestamp(), // Server timestamp for when the application is submitted
     };
 
     // Save data to Firestore
     try {
       await FirebaseFirestore.instance
-          .collection('applications')
+          .collection("applications")
           .add(applicationData);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Application submitted successfully!')),
+          const SnackBar(content: Text("Application submitted successfully!")),
         );
       }
 
@@ -87,7 +92,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text(
-                  'Failed to submit application. Please try again later.')),
+                  "Failed to submit application. Please try again later.")),
         );
       }
     }
@@ -103,7 +108,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
           children: [
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Occupation',
+                labelText: "Occupation",
               ),
               onChanged: (value) {
                 setState(() {
@@ -114,7 +119,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
               value: _profileType,
-              decoration: const InputDecoration(labelText: 'Profile Type'),
+              decoration: const InputDecoration(labelText: "Profile Type"),
               items: _profileTypes
                   .map((type) => DropdownMenuItem(
                         value: type,
@@ -130,7 +135,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
             const SizedBox(height: 20),
             DropdownButtonFormField<int>(
               value: _numberOfPax,
-              decoration: const InputDecoration(labelText: 'Number of Pax'),
+              decoration: const InputDecoration(labelText: "Number of Pax"),
               items: _paxNumbers
                   .map((number) => DropdownMenuItem(
                         value: number,
@@ -146,7 +151,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
               value: _nationality,
-              decoration: const InputDecoration(labelText: 'Nationality'),
+              decoration: const InputDecoration(labelText: "Nationality"),
               items: _nationalities
                   .map((country) => DropdownMenuItem(
                         value: country,
@@ -175,11 +180,11 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
                 }
               },
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: 'Move-in Date'),
+                decoration: const InputDecoration(labelText: "Move-in Date"),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(DateFormat('dd-MM-yyyy').format(_moveInDate)),
+                    Text(DateFormat("dd-MM-yyyy").format(_moveInDate)),
                     const Icon(Icons.calendar_today),
                   ],
                 ),
@@ -189,11 +194,11 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
             DropdownButtonFormField<int>(
               value: _tenancyDuration,
               decoration:
-                  const InputDecoration(labelText: 'Tenancy Duration (Months)'),
+                  const InputDecoration(labelText: "Tenancy Duration (Months)"),
               items: _tenancyDurations
                   .map((duration) => DropdownMenuItem(
                         value: duration,
-                        child: Text('$duration months'),
+                        child: Text("$duration months"),
                       ))
                   .toList(),
               onChanged: (value) {
@@ -211,13 +216,13 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
                     backgroundColor: Colors.red, // Reset button color
                   ),
                   child: const Text(
-                    'Reset',
+                    "Reset",
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: _submitApplication,
-                  child: const Text('Submit'),
+                  child: const Text("Submit"),
                 ),
               ],
             ),
