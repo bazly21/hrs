@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hrs/components/ink_button.dart';
 import 'package:hrs/components/my_propertydescription.dart';
 import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/my_richtext.dart';
 import 'package:hrs/components/my_starrating.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
+
+enum RefreshType { propertyDetails, propertyApplications }
 
 class LandlordPropertyDetailsPage extends StatefulWidget {
   final String snapshotId;
@@ -77,7 +80,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
     double height = screenSize.height;
 
     return RefreshIndicator(
-      onRefresh: handleRefresh,
+      onRefresh: () => refreshData(RefreshType.propertyDetails),
       child: SingleChildScrollView(
           child: FutureBuilder<Map<String, dynamic>?>(
               future: propertyDetailsFuture,
@@ -247,182 +250,252 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
     );
   }
 
-  Widget rentalPropertyApplicationsSection(BuildContext context, Size screenSize) {
+  RefreshIndicator rentalPropertyApplicationsSection(BuildContext context, Size screenSize) {
     double width = screenSize.width;
     double height = screenSize.height;
+    const appBarHeight = 56.0; // Default AppBar height
+    const tabBarHeight = 48.0; // Default TabBar height
+    final statusBarHeight = MediaQuery.of(context).padding.top; // Status bar height
 
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: propertyApplicationsFuture,
-      builder: (context, snapshot) {
-        // If snapshot contains data
-        // Note that empty list also makes
-        // snapshot.hasData equal to true
-        if(snapshot.connectionState == ConnectionState.waiting){
-          return const Center(child: CircularProgressIndicator());
-        }
-        // If there is data and the data is not empty
-        else if(snapshot.hasData && snapshot.data!.isNotEmpty){
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, index) {
-              final Map<String, dynamic> applicationData = snapshot.data![index];
+    return RefreshIndicator(
+      onRefresh: () => refreshData(RefreshType.propertyApplications),
+      child: FutureBuilder<List<Map<String, dynamic>>>(
+        future: propertyApplicationsFuture,
+        builder: (context, snapshot) {
+          // If snapshot contains data
+          // Note that empty list also makes
+          // snapshot.hasData equal to true
+          if(snapshot.connectionState == ConnectionState.waiting){
+            return const Center(child: CircularProgressIndicator());
+          }
+          // If there is data and the data is not empty
+          else if(snapshot.hasData && snapshot.data!.isNotEmpty){
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final Map<String, dynamic> applicationData = snapshot.data![index];
+                final bool isAccepted = applicationData['status'] == "Accepted";  // To check if the status of the application wether it is accepted or not
+                final String applicationID = applicationData["applicationID"];
 
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Card(
-                  child: Column(
-                    children: [
-                      // ********* Profile Picture and Rating Section (Start)  *********
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          border: Border(
-                            top: BorderSide(width: 0.3, color: Color(0xFF7D7F88)),
-                            left: BorderSide(width: 0.3, color: Color(0xFF7D7F88)),
-                            right: BorderSide(width: 0.3, color: Color(0xFF7D7F88)),
-                            // No bottom border
-                          ),
-                          borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10))
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
-                          child: Row(
-                          children: [
-                            // ********* Profile Picture and Rating Section (Start)  *********
-                            Column(
-                              children: [
-                                const CircleAvatar(
-                                  backgroundImage: NetworkImage('https://via.placeholder.com/150'),
-                                  radius: 40,
-                                ),
-                                SizedBox(height: height * 0.007),
-                                const StarRating(rating: 5.0, iconSize: 18),
-                                SizedBox(height: height * 0.007),
-                                const CustomRichText(text1: "5.0", text2: " (3 Reviews)")
-                              ],
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Card(
+                    elevation: isAccepted ? 0 : 1.0,
+                    child: Column(
+                      children: [
+                        // ********* Profile Picture and Rating Section (Start)  *********
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border(
+                              top: const BorderSide(width: 0.3, color: Color(0xFF7D7F88)),
+                              left: const BorderSide(width: 0.3, color: Color(0xFF7D7F88)),
+                              right: const BorderSide(width: 0.3, color: Color(0xFF7D7F88)),
+                              bottom: isAccepted ? const BorderSide(width: 0.3, color: Color(0xFF7D7F88)) : BorderSide.none,
                             ),
-                            // ********* Profile Picture and Rating Section (End)  *********
-                        
-                            SizedBox(width: width * 0.05),
-                        
-                            // ********* Applicant Details Section (Start)  *********
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            borderRadius:BorderRadius.circular(10.0).copyWith(
+                              bottomLeft: isAccepted ? null : Radius.zero,
+                              bottomRight: isAccepted ? null : Radius.zero,
+                            )
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(15.0, 8.0, 0, 8.0),
+                            child: Row(
+                            children: [
+                              // ********* Profile Picture and Rating Section (Start)  *********
+                              Column(
                                 children: [
-                                  // Applicant's Name
-                                  Text(applicationData["applicantName"], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
-                        
-                                  SizedBox(height: height * 0.005),
-                        
-                                  // Applicant's Details
-                                  Row(
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          // Occupation
-                                          const Text("Occupation:", style: TextStyle(fontSize: 13)),
-                                          Text(applicationData["occupation"], style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
-                        
-                                          // Profile Type
-                                          const Text("Profile type:", style: TextStyle(fontSize: 13)),
-                                          Text(applicationData["profileType"], style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
-                        
-                                          // Number of Pax
-                                          const Text("No. of pax:", style: TextStyle(fontSize: 13)),
-                                          Text("${applicationData["numberOfPax"]} pax", style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
-                                        ],
-                                      ),
-                        
-                                      SizedBox(width: width * 0.03),
-                        
-                                      Container(width: 1, color: const Color(0xFF8568F3), height: 110),
-                        
-                                      SizedBox(width: width * 0.03),
-                        
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          // Occupation
-                                          const Text("Nationality:", style: TextStyle(fontSize: 13)),
-                                          Text(applicationData["nationality"], style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
-                        
-                                          // Profile Type
-                                          const Text("Move-in date:", style: TextStyle(fontSize: 13)),
-                                          Text("${applicationData["moveInDate"]}", style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
-                        
-                                          // Number of Pax
-                                          const Text("Tenancy duration:", style: TextStyle(fontSize: 13)),
-                                          Text("${applicationData["tenancyDuration"]} months", style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
-                                        ],
-                                      ),
-                        
-                                    ],
+                                  const CircleAvatar(
+                                    backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                                    radius: 40,
                                   ),
+                                  SizedBox(height: height * 0.007),
+                                  const StarRating(rating: 5.0, iconSize: 18),
+                                  SizedBox(height: height * 0.007),
+                                  const CustomRichText(text1: "5.0", text2: " (3 Reviews)")
                                 ],
                               ),
-                            )
-                            // ********* Applicant Details Section (End)  *********
-                        
-                          ],
+                              // ********* Profile Picture and Rating Section (End)  *********
+                          
+                              SizedBox(width: width * 0.05),
+                          
+                              // ********* Applicant Details Section (Start)  *********
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Applicant's Name
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(applicationData["applicantName"], style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20)),
+
+                                        // If the application status is accepted,
+                                        // then show the 'Kebab' (three vertical dot) menu
+                                        if(isAccepted)
+                                          PopupMenuButton<String>(
+                                            position: PopupMenuPosition.under,
+                                            color: Colors.white,
+                                            onSelected: (String result) async  {
+                                              // Handle the menu item selected here
+                                              if(result == "Undo Application"){
+                                                showConfirmationAndUpdateStatus(
+                                                  context: context, 
+                                                  confirmationTitle: "Confirm Undo", 
+                                                  confirmationContent: "Are you sure you want to undo this application?",
+                                                  status: "Pending", 
+                                                  applicationID: applicationID
+                                                );
+                                              }
+                                            },
+                                            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                                              // First PopupMenuItem
+                                              const PopupMenuItem<String>(
+                                                value: 'Contact Tenant',
+                                                child: Text('Contact Tenant'),
+                                              ),
+
+                                              // Add divider between PopupMenuItem
+                                              const PopupMenuDivider(),
+
+                                              // Second PopupMenuItem
+                                              const PopupMenuItem<String>(
+                                                value: 'Undo Application',
+                                                child: Text(
+                                                  'Undo Application',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                            icon: const Icon(Icons.more_vert), // Icon for kebab menu (three vertical dots)
+                                          ),
+                                      ],
+                                    ),
+                          
+                                    SizedBox(height: height * 0.005),
+                          
+                                    // Applicant's Details
+                                    Row(
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // Occupation
+                                            const Text("Occupation:", style: TextStyle(fontSize: 13)),
+                                            Text(applicationData["occupation"], style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+                          
+                                            // Profile Type
+                                            const Text("Profile type:", style: TextStyle(fontSize: 13)),
+                                            Text(applicationData["profileType"], style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+                          
+                                            // Number of Pax
+                                            const Text("No. of pax:", style: TextStyle(fontSize: 13)),
+                                            Text("${applicationData["numberOfPax"]} pax", style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+                                          ],
+                                        ),
+                          
+                                        SizedBox(width: width * 0.03),
+                          
+                                        Container(width: 1, color: const Color(0xFF8568F3), height: 110),
+                          
+                                        SizedBox(width: width * 0.03),
+                          
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // Occupation
+                                            const Text("Nationality:", style: TextStyle(fontSize: 13)),
+                                            Text(applicationData["nationality"], style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+                          
+                                            // Profile Type
+                                            const Text("Move-in date:", style: TextStyle(fontSize: 13)),
+                                            Text("${applicationData["moveInDate"]}", style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+                          
+                                            // Number of Pax
+                                            const Text("Tenancy duration:", style: TextStyle(fontSize: 13)),
+                                            Text("${applicationData["tenancyDuration"]} months", style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+                                          ],
+                                        ),
+                          
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )
+                              // ********* Applicant Details Section (End)  *********
+                          
+                            ],
+                            ),
                           ),
                         ),
-                      ),
-                      // ********* Profile Picture and Rating Section (End)  *********
-                            
-                      // ********* Accept and Decline Buttons (Start)  *********
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Decline Button
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(3),
-                              height: 26,
-                              decoration: const BoxDecoration(
-                                  color: Color(0xFFFF5858),
-                                  borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(10))),
-                              child: const Text(
-                                "Decline",
-                                style: TextStyle(fontSize: 13, color: Colors.white),
-                                textAlign: TextAlign.center,
+                        // ********* Profile Picture and Rating Section (End)  *********
+                              
+                        // ********* Accept and Decline Buttons (Start)  *********
+                        if (!isAccepted)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // Decline Button
+                              Expanded(
+                                child: InkButton(
+                                  backgroundColor: Colors.red[400]!, 
+                                  onTap: () => showConfirmationAndUpdateStatus(
+                                    context: context, 
+                                    confirmationTitle: "Confirm Decline", 
+                                    confirmationContent: "Are you sure you want to decline this application?",
+                                    status: "Declined", 
+                                    applicationID: applicationID
+                                  ),
+                                  textButton: "Decline", 
+                                  splashColor: Colors.red[700]!.withOpacity(0.5), 
+                                  highlightColor: Colors.red[900]!.withOpacity(0.5),
+                                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(10)),
+                                )
                               ),
-                            ),
-                          ),
-                            
-                          // Accept Button
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(3),
-                              height: 26,
-                              decoration: const BoxDecoration(
-                                  color: Color(0xFF5BBA53),
-                                  borderRadius: BorderRadius.only(
-                                      bottomRight: Radius.circular(10))),
-                              child: const Text(
-                                "Accept",
-                                style: TextStyle(fontSize: 13, color: Colors.white),
-                                textAlign: TextAlign.center,
+                                
+                              // Accept Button
+                              Expanded(
+                                child: InkButton(
+                                  backgroundColor: Colors.green[400]!, 
+                                  onTap: () => showConfirmationAndUpdateStatus(
+                                    context: context, 
+                                    confirmationTitle: "Confirm Accept", 
+                                    confirmationContent: "Are you sure you want to accept this application?",
+                                    status: "Accepted", 
+                                    applicationID: applicationID
+                                  ), 
+                                  textButton: "Accept", 
+                                  splashColor: Colors.green[700]!.withOpacity(0.5), 
+                                  highlightColor: Colors.green[900]!.withOpacity(0.5)
+                                ),
                               ),
-                            ),
-                          ),
-                        ]
-                      )
-                      // ********* Accept and Decline Buttons (End)  *********
-                    ],
+                            ]
+                          )
+                        // ********* Accept and Decline Buttons (End)  *********
+                      ],
+                    ),
                   ),
+                );
+              }
+            );     
+          }
+          else {
+            // When there is no data
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(), // Ensures it's always scrollable to trigger refresh
+              child: 
+              SizedBox(
+                height: screenSize.height - statusBarHeight - appBarHeight - tabBarHeight,
+                child: const Center(
+                  child: Text('No application found'),
                 ),
-              );
-            }
-          );     
+              ),
+            );
+          }
         }
-        else {
-          // When there is no data
-          return const Center(child: Text('No properties found'));
-        }
-      }
+      ),
     );
   }
 
@@ -476,7 +549,9 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
     QuerySnapshot applicationSnapshots = await db
         .collection("applications")
         .where("propertyID", isEqualTo: widget.snapshotId)
+        .where("status", isNotEqualTo: "Declined")
         .get();
+        
 
     if (applicationSnapshots.docs.isNotEmpty) {
       // Fetch all applicant user documents in parallel
@@ -496,6 +571,9 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
         if (userSnapshot.exists) {
           String? applicantName = userSnapshot.get("name");
           if (applicantName != null && applicantName.isNotEmpty) {
+            // Get the document ID
+            applicationData["applicationID"] = applicationSnapshots.docs[i].id;
+
             // Create new property inside applicationData called applicantName
             applicationData["applicantName"] = applicantName;
 
@@ -519,12 +597,63 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
     return applicationDataList;
   }
 
-  Future<void> handleRefresh() async {
-    await fetchPropertyDetails().then((newData) {
-      setState(() {
-        propertyDetailsFuture =
-            Future.value(newData); // Use the new data for the future
-      });
-    });
+  Future<void> refreshData(RefreshType type) async {
+    switch (type) {
+      case RefreshType.propertyDetails:
+        await fetchPropertyDetails().then((newData) {
+          setState(() {
+            propertyDetailsFuture = Future.value(newData);
+          });
+        });
+        break;
+      case RefreshType.propertyApplications:
+        await fetchPropertyApplication().then((newData) {
+          setState(() {
+            propertyApplicationsFuture = Future.value(newData);
+          });
+        });
+        break;
+    }
   }
+
+  Future<void> showConfirmationAndUpdateStatus({
+    required BuildContext context,
+    required String confirmationTitle,
+    required String confirmationContent,
+    required String status,
+    required String applicationID
+  }) async {
+    final bool? isConfirmed = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(confirmationTitle),
+          content: Text(confirmationContent),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (isConfirmed ?? false) {
+      await db.collection("applications").doc(applicationID).update({
+        "status": status,
+      }).then((_) {
+        refreshData(RefreshType.propertyApplications);
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Something wrong happened. Please try again')),
+        );
+      });
+    }
+  }
+
 }
