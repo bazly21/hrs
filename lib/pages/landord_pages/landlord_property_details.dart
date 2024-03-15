@@ -5,6 +5,7 @@ import 'package:hrs/components/my_propertydescription.dart';
 import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/my_richtext.dart';
 import 'package:hrs/components/my_starrating.dart';
+import 'package:hrs/pages/landord_pages/landlord_edit_property_details_page.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart';
 
@@ -118,9 +119,19 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                   propertyName: propertyData["name"],
                                   propertyLocation: propertyData["address"],
                                   icon: const Icon(Icons.edit, size: 22),
-                                  showIcon:
-                                      true, // Set this to false to hide the icon button
-                                  onIconPressed: () {},
+                                  showIcon: true, // Set this to false to hide the icon button
+                                  onIconPressed: () {
+                                    Navigator.push(
+                                      context, 
+                                      MaterialPageRoute(builder: (context) => EditPropertyDetailsPage(propertyID: widget.snapshotId))
+                                    ).then((statusMessageFromPreviousPage) {
+                                      if (statusMessageFromPreviousPage != null) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(statusMessageFromPreviousPage)),
+                                        );
+                                      }
+                                    });
+                                  },
                                 ),
                                 // ********* Property Name, Property Location & Edit Button (End) *********
 
