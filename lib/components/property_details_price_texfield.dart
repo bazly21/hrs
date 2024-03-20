@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 
 class PropertyDetailsPriceTextField extends StatefulWidget {
   final String? rentalPrice;
+  final Function(String) getText;
   
   const PropertyDetailsPriceTextField({
     super.key, 
     this.rentalPrice, 
+    required this.getText, 
   });
 
   @override
@@ -19,15 +21,37 @@ class _PropertyDetailsPriceTextFieldState extends State<PropertyDetailsPriceText
   @override
   void initState() {
     super.initState();
+    // If rentalPrice has value including 0.00
     if (widget.rentalPrice != null) {
-      if (widget.rentalPrice!.contains('.')) {
-        rentalPriceTextController.text = widget.rentalPrice!;
-      } else {
-        rentalPriceTextController.text = '${widget.rentalPrice!}.00';
+      // Convert into double to use
+      // toStringAsFixed(2) function
+      // to ensure it always two decimals
+      // points.
+      double? dblRentalPrice = double.tryParse(widget.rentalPrice!);
+
+      // If the conversion to double format is successfull
+      if (dblRentalPrice != null) {
+        rentalPriceTextController.text = dblRentalPrice.toStringAsFixed(2);
       }
-    } else {
+      // Otherwise, returns empty string
+      else {
+        rentalPriceTextController.text = '';
+      }   
+    }
+    else {
       rentalPriceTextController.text = '';
     }
+
+
+    rentalPriceTextController.addListener(_handleTextChange);
+
+    // Once PropertyDetailsTextField widget is fully created,
+    // _invokeCallbackWithInitialText will automatically
+    // invoke. This invoke will allows to get initial value
+    // of the TextField.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _invokeCallbackWithInitialText();
+    });
   }
 
   @override
@@ -64,7 +88,7 @@ class _PropertyDetailsPriceTextFieldState extends State<PropertyDetailsPriceText
               minHeight: 0,
             ),
             hintText: '0.00',
-            hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+            hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14, fontWeight: FontWeight.normal),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -86,10 +110,22 @@ class _PropertyDetailsPriceTextFieldState extends State<PropertyDetailsPriceText
 
   @override
   void dispose() {
-    rentalPriceTextController.dispose(); // Dispose the controller
+    rentalPriceTextController.removeListener(_handleTextChange);
+    rentalPriceTextController.dispose();
     super.dispose();
   }
+
+  void _handleTextChange() {
+    widget.getText(rentalPriceTextController.text); // Call the callback function with the current text
+  }
+
+  // Function to invoke the callback with the initial value
+  void _invokeCallbackWithInitialText() {
+    widget.getText(rentalPriceTextController.text);
+  }
 }
+
+
 
 class CurrencyInputFormatter extends TextInputFormatter {
   @override

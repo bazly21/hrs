@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/property_details_price_texfield.dart';
 import 'package:hrs/components/property_details_textfield.dart';
-import 'package:hrs/components/size_bath_bed_textfield.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditPropertyDetailsPage extends StatefulWidget {
   final String propertyID;
@@ -14,8 +16,25 @@ class EditPropertyDetailsPage extends StatefulWidget {
 }
 
 class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
-  FirebaseFirestore db = FirebaseFirestore.instance;
+  final FirebaseFirestore db = FirebaseFirestore.instance;
+  final ImagePicker _picker = ImagePicker(); // Object to choose image from the gallery
   Future<DocumentSnapshot?>? propertyDetailsFuture;
+  List<String> _tempImagePaths = []; // Holds local paths of selected images
+  List<String> _savedImageUrls = []; // Holds URLs of images already saved in Firestore
+  bool _isSaving = false;
+
+  // Variable to store property information
+  String propertyName = '';
+  String propertyLocation = '';
+  String propertyDescription = '';
+  String propertyFurnishing = '';
+  String propertyFacilities = '';
+  String propertyAccessibilities = '';
+
+  dynamic propertySize = ''; 
+  dynamic propertyBathrooms = '';
+  dynamic propertyBedrooms = '';
+  dynamic rentalPrice = '';
 
   // Initialize state
   // Execute fetchPropertyDetails function and store it
@@ -32,7 +51,7 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFCFCFC),
       appBar: appBar(context),
-      body: bodyContent(context),
+      body: _isSaving ? const Center(child: CircularProgressIndicator()) : bodyContent(context),
     );
   }
 
@@ -67,6 +86,12 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
   }
 
   SingleChildScrollView propertyDetailsForm(DocumentSnapshot propertyData) {
+    final List<dynamic>? images = propertyData['image'];
+
+    if (images != null) {
+      _savedImageUrls = images.cast<String>();
+    }
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -92,34 +117,17 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
                   children: [
                     const Text('Property Image', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.0)),
                     TextButton(
-                      onPressed: () {
-                        // Handle add image process
-                      },
-                      child: const Text('Add'), // Adjust color as needed
+                      onPressed: _pickImages,
+                      child: const Text('Add'),
                     )
                   ],
                 ),
               ),
-      
-              SizedBox( // Use a Container with a fixed height
+
+              // Property Images
+              SizedBox( 
                 height: 180, // Example fixed height
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: 160,
-                      margin: const EdgeInsets.symmetric(horizontal: 5),
-                      child: ClipRRect(
-                        borderRadius: BorderRadiusDirectional.circular(10),
-                        child: Image.asset(
-                          'lib/images/city${index + 1}.jpg',
-                          fit: BoxFit.cover
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                child: _buildImageList(),
               ),
       
               Padding(
@@ -129,7 +137,11 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
                     // Property Name Textfield
                     PropertyDetailsTextField(
                       title: 'Property Name', 
-                      initialValue: propertyData['name']
+                      initialValue: propertyData['name'],
+                      hintText: 'Enter property name',
+                      getText: (String text) {
+                        propertyName = text;
+                      },
                     ),
       
                     // Add space between elements
@@ -138,22 +150,79 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
                     // Property Location Textfield
                     PropertyDetailsTextField(
                       title: 'Location', 
-                      initialValue: propertyData['address']
+                      initialValue: propertyData['address'],
+                      hintText: 'Enter property location',
+                      getText: (String text) {
+                        propertyLocation = text;
+                      },
                     ),
       
                     // Add space between elements
                     const SizedBox(height: 20),
   
                     // Rental Price TextField
-                    PropertyDetailsPriceTextField(rentalPrice: '${propertyData['rent']}'),
+                    PropertyDetailsPriceTextField(
+                      rentalPrice: '${propertyData['rent']}',
+                      getText: (String text) {
+                        // Convert text from String to int
+                        // If tryParse returns null then return 0
+                        rentalPrice = text;
+                      },
+                    ),
   
                     // Add space between elements
                     const SizedBox(height: 20),
   
-                    SizeBathBedTextField(
-                      propertySize: '${propertyData['size']}', 
-                      numBathroom: '${propertyData['bathrooms']}', 
-                      numBedroom: '${propertyData['bedrooms']}'
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PropertyDetailsTextField(
+                            title: 'Property Size', 
+                            initialValue: '${propertyData['size']}',
+                            hintText: '0',
+                            textInputType: TextInputType.number,
+                            getText: (String text) {
+                              // Convert text from String to int
+                              // If tryParse returns null then return 0
+                              propertySize = text;
+                            },
+                          ),
+                        ),
+                    
+                        // Add space between elements
+                        const SizedBox(width: 20.0),
+                    
+                        Expanded(
+                          child: PropertyDetailsTextField(
+                            title: 'Bathroom', 
+                            initialValue: '${propertyData['bathrooms']}',
+                            hintText: '0',
+                            textInputType: TextInputType.number,
+                            getText: (String text) {
+                              // Convert text from String to int
+                              // If tryParse returns null then return 0
+                              propertyBathrooms = text;
+                            },
+                          ),
+                        ),
+                    
+                        // Add space between elements
+                        const SizedBox(width: 20.0),
+                    
+                        Expanded(
+                          child: PropertyDetailsTextField(
+                            title: 'Bedroom', 
+                            initialValue: '${propertyData['bedrooms']}',
+                            hintText: '0',
+                            textInputType: TextInputType.number,
+                            getText: (String text) {
+                              // Convert text from String to int
+                              // If tryParse returns null then return 0
+                              propertyBedrooms = text;
+                            },
+                          ),
+                        ),
+                      ],
                     ),
   
                     // Add space between elements
@@ -163,7 +232,11 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
                     PropertyDetailsTextField(
                       title: 'Description', 
                       initialValue: propertyData['description'],
+                      hintText: 'Enter description',
                       textInputType: TextInputType.multiline,
+                      getText: (String text) {
+                        propertyDescription = text;
+                      },
                     ),
                     
                     // Add space between elements
@@ -173,7 +246,11 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
                     PropertyDetailsTextField(
                       title: 'Furnishing', 
                       initialValue: propertyData['furnishing'],
+                      hintText: 'List down furniture available in the property',
                       textInputType: TextInputType.multiline,
+                      getText: (String text) {
+                        propertyFurnishing = text;
+                      },
                     ),
   
                     // Add space between elements
@@ -183,7 +260,11 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
                     PropertyDetailsTextField(
                       title: 'Facilities', 
                       initialValue: propertyData['facilities'],
+                      hintText: 'List down available facilities with the property',
                       textInputType: TextInputType.multiline,
+                      getText: (String text) {
+                        propertyFacilities = text;
+                      },
                     ),
   
                     // Add space between elements
@@ -193,7 +274,11 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
                     PropertyDetailsTextField(
                       title: 'Accessibilities', 
                       initialValue: propertyData['accessibilities'],
+                      hintText: 'List down available accessibility near the property',
                       textInputType: TextInputType.multiline,
+                      getText: (String text) {
+                        propertyAccessibilities = text;
+                      },
                     ),
                   ],
                 ),
@@ -204,6 +289,59 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
       ),
     );
   }
+
+  // ************* Upload Image Functions (Start) *************
+  ListView _buildImageList() {
+    final totalImages = _savedImageUrls.length + _tempImagePaths.length;
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: totalImages,
+      itemBuilder: (context, index) {
+        // Display images from database
+        if (index < _savedImageUrls.length) {
+          return _showImage(_savedImageUrls[index], "Network");
+        } 
+         // Display added images temporarily
+        else {         
+          return _showImage(_tempImagePaths[index - _savedImageUrls.length], "File");
+        }
+      },
+    );
+  }
+
+  Container _showImage(String imageUrl, String imageType) {
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.symmetric(horizontal: 5),
+      child: ClipRRect(
+        borderRadius: BorderRadiusDirectional.circular(10),
+        child: imageType == "Network" 
+          ? Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+            ) 
+          : Image.file(
+              File(imageUrl),
+              fit: BoxFit.cover,
+            ),
+      ),
+    );
+  }
+
+  Future<void> _pickImages() async {
+    final List<XFile> pickedFiles = await _picker.pickMultiImage();
+    
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        // Add all selected images to _tempImagePaths
+        for (XFile image in pickedFiles) {
+          _tempImagePaths.add(image.path);
+        }
+      });
+    }
+  }
+  // ************* Upload Image Functions (End) *************
 
   AppBar appBar(BuildContext context) {
     return AppBar(
@@ -224,10 +362,11 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
         ),
       ),
       actions: [
+        // Save button
         TextButton(
           onPressed: () {
             // Handle 'Save' action
-            print('Save pressed');
+            saveUpdatedPropertyDetails(context);
           },
           child: const Text('Save'), // Adjust color as needed
         ),
@@ -263,5 +402,135 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
     
     // If there is no snapshot related with the propertyID
     return null;
+  }
+
+  // Function to fetch property details
+  Future<void> saveUpdatedPropertyDetails(BuildContext context) async {
+    // Check to ensure all fields are filled in
+    if (propertyName != '' &&
+        propertyLocation != '' &&
+        propertyDescription != '' &&
+        propertyFurnishing != '' &&
+        propertyFacilities != '' &&
+        propertyAccessibilities != '' &&
+        propertySize != '' &&
+        propertyBathrooms != '' &&
+        propertyBedrooms != '' &&
+        rentalPrice != '') 
+    {
+      setState(() {
+        _isSaving = true; // Start saving
+      });
+
+      // Converts all numeric text fields to number data type (int / double)
+      propertySize = num.tryParse(propertySize);
+      propertyBathrooms = int.tryParse(propertyBathrooms);
+      propertyBedrooms = int.tryParse(propertyBedrooms);
+      rentalPrice = double.tryParse(rentalPrice);
+
+      List<String>? newImageUrls;
+      bool newImageUrlsHasError = false;
+
+      // Upload images and get download URLs
+      if (_tempImagePaths.isNotEmpty){
+        newImageUrls = await _uploadImages();
+
+        if (newImageUrls == null) {
+          newImageUrlsHasError = true;
+        }
+      }
+
+      // If one of these variables contains null value
+      if (propertySize == null || propertyBathrooms == null || propertyBedrooms == null || rentalPrice == null || newImageUrlsHasError) {
+        setState(() {
+          _isSaving = false; // Stop saving
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Something error happen. Please try again'))
+          );
+        }
+        return;
+      }
+
+      // Stores the information in the database
+      try{
+        await db.collection('properties').doc(widget.propertyID).update({
+          'name': propertyName,
+          'address': propertyLocation,
+          'rent': rentalPrice,
+          'size': propertySize,
+          'bathrooms': propertyBathrooms,
+          'bedrooms': propertyBedrooms,
+          'description': propertyDescription,
+          'furnishing': propertyFurnishing,
+          'facilities': propertyFacilities,
+          'accessibilities': propertyAccessibilities,
+          // 'image': FieldValue.arrayUnion(newImageUrls),
+        }).then((_) {
+          if (mounted){
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('All informations have been updated successfully'))
+            );
+
+            _handleRefresh();
+          }  
+        });
+      }
+      catch(e) {
+        if (mounted){
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e. Please try again'))
+          );
+        }  
+      }
+      finally {
+        setState(() {
+          _isSaving = false; // Stop saving
+        });
+      }   
+    } 
+    else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please make sure all fields are filled in'))
+      );
+    }
+  }
+
+  Future<void> _handleRefresh() async {
+    _tempImagePaths.clear();
+
+    await fetchPropertyDetails().then((newData) {
+      setState(() {
+        propertyDetailsFuture =
+            Future.value(newData); // Use the new data for the future
+      });
+    });
+  }
+
+  Future<List<String>?> _uploadImages() async {
+    List<String> downloadUrls = [];
+
+    for (String imagePath in _tempImagePaths) {
+      File file = File(imagePath);
+      String fileName = "images/${DateTime.now().millisecondsSinceEpoch}_${file.uri.pathSegments.last}";
+      try {
+        final ref = FirebaseStorage.instance.ref().child(fileName);
+        
+        // Upload image
+        UploadTask uploadTask = ref.putFile(file);
+        final snapshot = await uploadTask;
+        
+        // Get download URL
+        final url = await snapshot.ref.getDownloadURL();
+        downloadUrls.add(url);
+      } 
+      catch (_) {
+        return null;
+      }
+    }
+
+    return downloadUrls;
   }
 }
