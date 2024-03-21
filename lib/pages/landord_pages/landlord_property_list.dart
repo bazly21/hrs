@@ -1,22 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_details.dart';
 
 class LandlordPropertyListPage extends StatelessWidget {
-  final String uid;
+  
+  final user = FirebaseAuth.instance.currentUser!;
 
-  const LandlordPropertyListPage({
-    super.key, 
-    required this.uid
-  });
+  LandlordPropertyListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(text: "Search property", appBarType: "Search"),
       body: FutureBuilder<List<DocumentSnapshot>>(
-        future: getPropertiesByLandlordId(uid),
+        future: getPropertiesByLandlordId(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -45,12 +44,12 @@ class LandlordPropertyListPage extends StatelessWidget {
     );
   }
 
-  Future<List<DocumentSnapshot>> getPropertiesByLandlordId(String uid) async {
-    DocumentReference landlordRef =
-        FirebaseFirestore.instance.collection('users').doc(uid);
+  Future<List<DocumentSnapshot>> getPropertiesByLandlordId() async {
+    final landlorID = user.uid;
+
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('properties')
-        .where('landlordID', isEqualTo: landlordRef)
+        .where('landlordID', isEqualTo: landlorID)
         .get();
 
     return querySnapshot.docs;

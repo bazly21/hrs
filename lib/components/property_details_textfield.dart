@@ -10,7 +10,7 @@ class PropertyDetailsTextField extends StatefulWidget {
   const PropertyDetailsTextField({
     super.key, 
     required this.title, 
-    required this.initialValue,
+    this.initialValue,
     required this.hintText, 
     this.textInputType = TextInputType.text, 
     required this.getText

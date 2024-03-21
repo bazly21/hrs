@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: "SFProDisplay",
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: const Color(0xFFFCFCFC),
       ),
       // home: LoginPage(),
       home: const NavigationPage()

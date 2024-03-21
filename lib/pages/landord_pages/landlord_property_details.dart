@@ -24,7 +24,7 @@ class LandlordPropertyDetailsPage extends StatefulWidget {
 class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPage> {
   bool isWishlist = false; // Initial state of the wishlist icon
   bool isApplicationExists = false;
-  Future<Map<String, dynamic>?>? propertyDetailsFuture; // To store rental's data that has been fetched from the Firestore
+  Future<DocumentSnapshot?>? propertyDetailsFuture; // To store rental's data that has been fetched from the Firestore
   Future<List<Map<String, dynamic>>>? propertyApplicationsFuture; // To store propertys's application data that has been fetched from the Firestore
   FirebaseFirestore db = FirebaseFirestore.instance;
 
@@ -52,6 +52,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
             "Rental Property Details",
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
           ),
+          centerTitle: true,
           bottom: const TabBar(
             tabs: [
               Tab(
@@ -83,14 +84,14 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
     return RefreshIndicator(
       onRefresh: () => refreshData(RefreshType.propertyDetails),
       child: SingleChildScrollView(
-          child: FutureBuilder<Map<String, dynamic>?>(
+          child: FutureBuilder<DocumentSnapshot?>(
               future: propertyDetailsFuture,
               builder: (context, snapshot) {
                 // If snapshot return other than null
                 // including empty Map
                 if (snapshot.connectionState == ConnectionState.done) {
                   // Check if the snapshot
-                  final Map<String, dynamic> propertyData = snapshot.data!;
+                  final DocumentSnapshot propertyData = snapshot.data!;
 
                   return Padding(
                       padding: const EdgeInsets.only(top: 16.0),
@@ -511,44 +512,23 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
   }
 
   // Function to fetch rental details along with the landlord's name from Firebase collection
-  Future<Map<String, dynamic>?> fetchPropertyDetails() async {
+  Future<DocumentSnapshot?> fetchPropertyDetails() async {
     try {
       // Fetch the property document first
       DocumentSnapshot propertySnapshot = await FirebaseFirestore.instance
           .collection("properties")
-          .doc(widget.snapshotId) // Use the actual property ID
+          .doc(widget.snapshotId)
           .get();
 
+      // Check if the property document exists
       if (propertySnapshot.exists) {
-        // Convert the propertySnapshot data to a Map
-        Map<String, dynamic> propertyData =
-            propertySnapshot.data() as Map<String, dynamic>;
-
-        // Check if the property document has a landlordID
-        if (propertyData.containsKey('landlordID')) {
-          // Use DocumentReference because propertyData['landlordID']'s
-          // value is a reference type.
-          DocumentReference landlordRef = propertyData['landlordID'];
-
-          // Fetch the landlord's data based on the reference in landlordRef
-          DocumentSnapshot landlordSnapshot = await landlordRef.get();
-
-          // Check if the landlord document exists and has data
-          if (landlordSnapshot.exists) {
-            // Get the landlord's name from the landlordSnapshot
-            String landlordName = landlordSnapshot.get('name');
-
-            // Add the landlord's name to the propertyData map
-            propertyData['landlordName'] = landlordName;
-
-            // Return the modified propertyData map;
-            return propertyData;
-          }
-        }
+        return propertySnapshot;
       }
+
+      // If the property document does not exist
       return null;
     } catch (e) {
-      print(e); // For debugging purpose
+      // If there is an error
       return null;
     }
   }

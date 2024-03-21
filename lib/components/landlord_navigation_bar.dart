@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class MyBottomNavigationBar extends StatelessWidget {
+class LandlordNavigationBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const MyBottomNavigationBar({
+  const LandlordNavigationBar({
     super.key,
     this.currentIndex = 0,
     required this.onTap,
@@ -19,18 +19,17 @@ class MyBottomNavigationBar extends StatelessWidget {
         elevation: 16.0,
         backgroundColor: Colors.white,
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: 'Explore'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Property'),
           BottomNavigationBarItem(icon: Icon(Icons.chat_rounded), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Rental'),
+          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'),
           BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notifications'),
           BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Profile'),
         ],
         currentIndex: currentIndex,
         selectedItemColor: const Color(0xFF8568F3),
         unselectedItemColor: const Color(0xFF7D7F88),
-        selectedFontSize: 14,
+        selectedFontSize: 12,
         unselectedFontSize: 12,
-        selectedIconTheme: const IconThemeData(size:28),
         iconSize: 24.0,
         onTap: onTap,
       ),

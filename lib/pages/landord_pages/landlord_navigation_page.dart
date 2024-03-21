@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hrs/components/my_appbar.dart';
+import 'package:hrs/components/landlord_navigation_bar.dart';
 import 'package:hrs/components/my_bottomnavigationbar.dart';
 import 'package:hrs/pages/chat_list_page.dart';
-import 'package:hrs/pages/landord_pages/landlord_property_details.dart';
+import 'package:hrs/pages/landlord_add_property_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_list.dart';
 import 'package:hrs/pages/navigation_page.dart';
 import 'package:hrs/pages/notification_page.dart';
@@ -34,12 +33,12 @@ class _LandlordNavigationPageState extends State<LandlordNavigationPage> {
 
           // If user is logged in
           if (user != null) {
-            final String uid = user.uid;
-
+            
             final List<Widget> pages = [
-              LandlordPropertyListPage(uid: uid),
+              LandlordPropertyListPage(),
               ChatListPage(),
-              const RentalDetailsPage(),
+              // Placeholder for AddPropertyPage
+              Container(),
               const NotificationPage(),
               const ProfilePage(),
             ];
@@ -49,9 +48,18 @@ class _LandlordNavigationPageState extends State<LandlordNavigationPage> {
                 index: _selectedIndex,
                 children: pages,
               ),
-              bottomNavigationBar: MyBottomNavigationBar(
+              bottomNavigationBar: LandlordNavigationBar(
                 currentIndex: _selectedIndex,
-                onTap: (index) => setState(() => _selectedIndex = index),
+                onTap: (index) {
+                  if (index == 2) {
+                    // Navigate to the AddPropertyPage without showing bottom navigation bar
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AddPropertyPage()));
+                  } else {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+                  }
+                },
               ),
             );
           }
@@ -68,8 +76,6 @@ class _LandlordNavigationPageState extends State<LandlordNavigationPage> {
             );
           }
 
-          // If user is not logged in
-          // return const NavigationPage();
         }
 
         return const Scaffold(
