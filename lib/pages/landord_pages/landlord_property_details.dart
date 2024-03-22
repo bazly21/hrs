@@ -56,13 +56,13 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
           bottom: const TabBar(
             tabs: [
               Tab(
-                  child: Text("Details",
+                  child: Text("DETAILS",
                       style: TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 17))),
+                          fontWeight: FontWeight.w600, fontSize: 14))),
               Tab(
-                  child: Text("Applications",
+                  child: Text("APPLICATIONS",
                       style: TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 17))),
+                          fontWeight: FontWeight.w600, fontSize: 14))),
             ],
           ),
         ),
@@ -99,7 +99,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                         children: [
                           // Image container
                           Container(
-                            height: 259, // The height of the image container
+                            height: 220, // The height of the image container
                             decoration: BoxDecoration(
                               image: DecorationImage(
                                 image: NetworkImage(propertyData["image"]
@@ -119,7 +119,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                 PropertyDetails(
                                   propertyName: propertyData["name"],
                                   propertyLocation: propertyData["address"],
-                                  icon: const Icon(Icons.edit, size: 22),
+                                  icon: const Icon(Icons.edit, size: 21),
                                   showIcon: true, // Set this to false to hide the icon button
                                   onIconPressed: () {
                                     Navigator.push(
@@ -137,7 +137,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                 // ********* Property Name, Property Location & Edit Button (End) *********
 
                                 // Add space between elements
-                                SizedBox(height: height * 0.03),
+                                SizedBox(height: height * 0.025),
 
                                 // ********* Property Main Details (Start)  *********
                                 Row(
@@ -146,7 +146,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                     // Property Size Icon
                                     const Icon(
                                       Icons.house_rounded,
-                                      size: 18.0,
+                                      size: 16.0,
                                       color: Color(0xFF7D7F88),
                                     ),
 
@@ -157,7 +157,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                     Text(
                                       "${propertyData["size"]} m\u00B2",
                                       style: const TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 14,
                                           color: Color(0xFF7D7F88)),
                                     ),
                                     // ********* Property Size Information (End) *********
@@ -169,7 +169,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                     // House's Size Icon
                                     const Icon(
                                       Icons.bed,
-                                      size: 18.0,
+                                      size: 16.0,
                                       color: Color(0xFF7D7F88),
                                     ),
 
@@ -180,7 +180,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                     Text(
                                       "${propertyData["bedrooms"]} Rooms",
                                       style: const TextStyle(
-                                          fontSize: 16.0,
+                                          fontSize: 14.0,
                                           color: Color(0xFF7D7F88)),
                                     ),
                                     // ********* Bed Information (End) *********
@@ -192,7 +192,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                     // Bathroom Icon
                                     const Icon(
                                       Icons.bathroom_rounded,
-                                      size: 18.0,
+                                      size: 16.0,
                                       color: Color(0xFF7D7F88),
                                     ),
 
@@ -203,7 +203,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                     Text(
                                       "${propertyData["bathrooms"]} Bathrooms",
                                       style: const TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 14,
                                           color: Color(0xFF7D7F88)),
                                     ),
                                     // ********* Number of Bed Information (End) *********
@@ -212,12 +212,12 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                 // ********* Property Main Details (End)  *********
 
                                 // Add space between elements
-                                SizedBox(height: height * 0.015),
+                                SizedBox(height: height * 0.01),
 
                                 const Divider(),
 
                                 // Add space between elements
-                                SizedBox(height: height * 0.015),
+                                SizedBox(height: height * 0.01),
 
                                 // ********* Property Description Section (Start) *********
                                 // Property Description Label
@@ -246,7 +246,7 @@ class _LandlordPropertyDetailsPageState extends State<LandlordPropertyDetailsPag
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black,
-                                      fontSize: 18.0),
+                                      fontSize: 16.0),
                                 ),
                                 // ********* Property Description Section (End) *********
                               ],

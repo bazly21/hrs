@@ -26,7 +26,7 @@ class PropertyDescription extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.w600,
             color: Colors.black,
-            fontSize: 18.0,
+            fontSize: 16.0,
           ),
         ),
         SizedBox(height: height * 0.003),
@@ -36,7 +36,7 @@ class PropertyDescription extends StatelessWidget {
           style: const TextStyle(
             fontWeight: FontWeight.normal,
             color: Color(0xFF7D7F88),
-            fontSize: 16.0,
+            fontSize: 14.0,
           ),
         ),
         SizedBox(height: height * 0.015),

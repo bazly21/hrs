@@ -327,7 +327,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       title: const Text(
         'Edit Property Details', 
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w600
         ),
       ),

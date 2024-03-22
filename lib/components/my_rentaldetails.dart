@@ -51,7 +51,7 @@ class PropertyDetails extends StatelessWidget {
             // Location Icon
             const Icon(
               Icons.location_on_rounded,
-              size: 18.0,
+              size: 16.0,
               color: Color(0xFF7D7F88),
             ),
 
@@ -63,7 +63,7 @@ class PropertyDetails extends StatelessWidget {
               propertyLocation, // Dummy data
               style: const TextStyle(
                 color: Color(0xFF7D7F88),
-                fontSize: 16.0
+                fontSize: 14.0
               ),
             )
           ],
