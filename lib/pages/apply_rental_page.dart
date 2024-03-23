@@ -3,7 +3,6 @@ import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:hrs/components/my_appbar.dart";
 import "package:intl/intl.dart";
-import "package:firebase_storage/firebase_storage.dart";
 
 class ApplyRentalPage extends StatefulWidget {
   final String rentalID;
