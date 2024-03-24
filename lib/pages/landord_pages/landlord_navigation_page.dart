@@ -1,14 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/landlord_navigation_bar.dart';
-import 'package:hrs/components/my_bottomnavigationbar.dart';
 import 'package:hrs/pages/chat_list_page.dart';
-import 'package:hrs/pages/landlord_add_property_page.dart';
+import 'package:hrs/pages/landord_pages/landlord_add_property_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_list.dart';
 import 'package:hrs/pages/navigation_page.dart';
 import 'package:hrs/pages/notification_page.dart';
 import 'package:hrs/pages/profile_page_login.dart';
-import 'package:hrs/pages/rental_details_page.dart';
 
 class LandlordNavigationPage extends StatefulWidget {
   const LandlordNavigationPage({super.key});

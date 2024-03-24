@@ -325,7 +325,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       ),
       // App Bar title
       title: const Text(
-        'Edit Property Details', 
+        'Add Property', 
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600
