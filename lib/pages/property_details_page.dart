@@ -6,20 +6,26 @@ import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
 import 'package:hrs/pages/apply_rental_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
+import 'package:hrs/services/chat/property_service.dart';
+import 'package:hrs/services/user_service.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
-  const PropertyDetailsPage({super.key});
+  final String propertyID;
+
+  const PropertyDetailsPage({super.key, required this.propertyID});
 
   @override
   State<PropertyDetailsPage> createState() => _PropertyDetailsPageState();
 }
 
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
+  final PropertyService propertyService = PropertyService();
+  final UserService userService = UserService();
+  bool rentalExists = false; // Initial state of the rental existence
   bool isWishlist = false; // Initial state of the wishlist icon
   bool isApplicationExists = false;
-  final String propertyID = "ee1lkVxQjSOQbM7ZbpR4";
 
-  Future<Map<String, dynamic>?>?
+  Future<Map<String, dynamic>>?
       rentalDetailsFuture; // To store rental's data that has been fetched from the Firestore
 
   // Initialize state
@@ -33,45 +39,37 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   // Function to fetch rental details along with the landlord's name from Firebase collection
-  Future<Map<String, dynamic>?> fetchRentalDetails() async {
+  Future<Map<String, dynamic>> fetchRentalDetails() async {
+    // Create propertyData map to store the fetched data
+    Map<String, dynamic> propertyData = {};
+
+    // Fetch the property document first
     try {
-      // Fetch the property document first
-      DocumentSnapshot propertySnapshot = await FirebaseFirestore.instance
-          .collection("properties")
-          .doc(propertyID) // Use the actual property ID
-          .get();
+      DocumentSnapshot propertySnapshot =
+          await propertyService.getPropertyDetails(widget.propertyID);
 
       if (propertySnapshot.exists) {
-        Map<String, dynamic> propertyData =
-            propertySnapshot.data() as Map<String, dynamic>;
-            
+        propertyData = propertyService.propertyDataToMap(propertySnapshot);
 
         // Check if the property document has a landlordID
         if (propertyData.containsKey('landlordID')) {
-          // Use DocumentReference because propertyData['landlordID']'s
-          // value is reference type.
-          DocumentReference landlordRef = propertyData['landlordID'];
+          String landlordID = propertyData['landlordID'];
 
-          // Fetch the landlord's data based on reference in landlordRef
-          DocumentSnapshot landlordSnapshot = await landlordRef.get();
+          // Fetch the landlord document using the landlordID
+          DocumentSnapshot landlordSnapshot =
+              await userService.getUserDetails(landlordID);
 
           // Check if the landlord document exists and has data
           if (landlordSnapshot.exists) {
-            Map<String, dynamic> landlordData =
-                landlordSnapshot.data() as Map<String, dynamic>;
-
             // Add the landlord's name to the propertyData map
-            propertyData['landlordName'] = landlordData['name'];
-
-            // Return the updated propertyData map including landlord's name
-            return propertyData;
+            propertyData['landlordName'] = landlordSnapshot['name'];
           }
         }
       }
-      return null;
+
+      return propertyData;
     } catch (e) {
-      print(e); // For debugging purpose
-      return null;
+      rethrow;
     }
   }
 
@@ -95,65 +93,56 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: handleRefresh,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: FutureBuilder(
-                future: rentalDetailsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    // If snapshot contains data
-                    if (snapshot.hasData && snapshot.data != null) {
-                      final Map<String, dynamic> propertyData = snapshot.data!;
-        
-                      return buildContent(propertyData, context);
-                    }
-                    // If snapshot does not contain data
-                    else {
-                      // Document does not exist or no data, navigate back
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        Navigator.pop(context);
-                      });
-                      // Return an empty Container, SizedBox, or any widget to
-                      // fulfill the builder function requirement while the navigation
-                      // command is being prepared to execute.
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: handleRefresh,
+          child: LayoutBuilder (
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: FutureBuilder(
+                    future: rentalDetailsFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return ConstrainedBox(
+                          constraints:
+                              BoxConstraints(minHeight: constraints.maxHeight),
+                          child: const Center(child: CircularProgressIndicator())
+                        );                
+                      } else if (snapshot.hasError) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Navigator.pop(
+                              context, 'Something went wrong. Please try again.');
+                        });
+                      } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                        return buildContent(snapshot.data!, context);                    
+                      }
+
+                      // Act as a placeholder
                       return const SizedBox();
-                    }
-                  }
-                  // If something happen during fetch process
-                  else if (snapshot.hasError) {
-                    return SizedBox(
-                        child: Center(child: Text("Error: ${snapshot.error}")));
-                  }
-                  return SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: const Center(child: CircularProgressIndicator()));
-                }),
+                    }),
+              );
+            }
           ),
         ),
       ),
-      bottomNavigationBar: FutureBuilder(
-          future: rentalDetailsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              // If snapshot contains data
-              if (snapshot.hasData && snapshot.data != null) {
-                final Map<String, dynamic> propertyData = snapshot.data!;
-                return buildBottomNavigationBar(propertyData);
-              }
-            } else if (snapshot.hasError) {
-              return SizedBox(
-                  child: Center(child: Text("Error: ${snapshot.error}")));
-            }
-            return SizedBox(
-                height: MediaQuery.of(context).size.height,
-                child: const Center(child: CircularProgressIndicator()));
-          }),
+      bottomNavigationBar: rentalDetailsFuture == null ? null : buildBottomNavigationBar(),
     );
   }
 
-  Container buildBottomNavigationBar(Map<String, dynamic> propertyData) {
+  FutureBuilder<Map<String, dynamic>> buildBottomNavigationBar() {
+    return FutureBuilder(
+      future: rentalDetailsFuture,
+      builder: (context, snapshot) {   
+        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          return bottomNavigationBarContent(snapshot.data!);
+        }
+        
+        return const SizedBox();
+      });
+  }
+
+  Container bottomNavigationBarContent(Map<String, dynamic> propertyData) {
     return Container(
       height: 80,
       decoration: BoxDecoration(boxShadow: [
@@ -201,12 +190,11 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ),
 
             // Apply Button
-            StreamBuilder<bool>( 
-                stream: checkUserApplicationStream(propertyID),
+            StreamBuilder<bool>(
+                stream: checkUserApplicationStream(widget.propertyID),
                 builder: (context, snapshot) {
                   // Disable button if stream emits true (application exists) or data is not yet available
                   bool isButtonDisabled = snapshot.hasData && snapshot.data!;
-                  print(isButtonDisabled);
 
                   return ElevatedButton(
                     onPressed: () {
@@ -216,7 +204,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                       if (!isButtonDisabled) {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
-                                ApplyRentalPage(rentalID: propertyID)));
+                                ApplyRentalPage(rentalID: widget.propertyID)));
                       }
                     },
                     style: ButtonStyle(
@@ -380,9 +368,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
               // ********* Landlord Profile Section (Start) *********
               UserDetails(
-                name: propertyData["landlordName"],
+                landlordName: propertyData["landlordName"],
                 rating: 5.0,
                 numReview: 1,
+                landlordID: propertyData["landlordID"],
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => const ProfileViewPage()));

@@ -23,7 +23,6 @@ class _RentalListPageState extends State<RentalListPage> {
     rentalListFuture = fetchRentalList();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,10 +39,9 @@ class _RentalListPageState extends State<RentalListPage> {
                 // Show a loading indicator while waiting for the data
                 return SizedBox(
                     height: MediaQuery.of(context).size.height,
-                    child: const Center(
-                        child: CircularProgressIndicator()));
+                    child: const Center(child: CircularProgressIndicator()));
               }
-              // If there's an error fetching the data 
+              // If there's an error fetching the data
               else if (snapshot.hasError) {
                 // Show an error message if there's an error fetching the data
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -51,38 +49,39 @@ class _RentalListPageState extends State<RentalListPage> {
                     SnackBar(content: Text('${snapshot.error}')),
                   );
                 });
-              } 
-              // If there is data and the data is empty                     
+              }
+              // If there is data and the data is empty
               else if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
                 int propertyCount = snapshot.data!.docs.length;
-        
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                      child: ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: propertyCount,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot propertyData = snapshot.data!.docs[index];
-                              
-                          // Return the rental list
-                          return rentalList(context, propertyData);
-                        },
-                      ),
-                    );
-                  }
-                );
-              } 
-        
+
+                return LayoutBuilder(builder: (context, constraints) {
+                  return ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: propertyCount,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        DocumentSnapshot propertyData =
+                            snapshot.data!.docs[index];
+
+                        // Return the rental list
+                        return rentalList(context, propertyData);
+                      },
+                    ),
+                  );
+                });
+              }
+
               // When there is no data
               return LayoutBuilder(
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight),
                       child: const Center(
                         child: Padding(
                           padding: EdgeInsets.all(16.0),
@@ -92,7 +91,7 @@ class _RentalListPageState extends State<RentalListPage> {
                     ),
                   );
                 },
-              );     
+              );
             }),
       ),
     );
@@ -101,17 +100,26 @@ class _RentalListPageState extends State<RentalListPage> {
   Widget rentalList(BuildContext context, DocumentSnapshot propertyData) {
     // Format the rental price to 2 decimal places
     double rentalPrice = propertyData['rent'];
-    String formattedRentalPrice = rentalPrice.toStringAsFixed(2); 
+    String formattedRentalPrice = rentalPrice.toStringAsFixed(2);
+    String propertyID = propertyData.id;
 
     return Padding(
-      padding: EdgeInsets.only(top:16, left: 16, right: 16),
+      padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
                 builder: (context) =>
-                    const PropertyDetailsPage()),
-          );
+                    PropertyDetailsPage(propertyID: propertyID)),
+          ).then((errorMessage) {
+            // Show an error message if there's an error
+            if (errorMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(errorMessage)),
+              );
+            }
+          
+          });
         }, // Go to property details page
         child: Container(
           constraints: const BoxConstraints(minHeight: 189),
@@ -131,82 +139,65 @@ class _RentalListPageState extends State<RentalListPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
-                constraints: const BoxConstraints(
-                    minHeight: 189),
+                constraints: const BoxConstraints(minHeight: 189),
                 width: 108,
                 decoration: BoxDecoration(
-                    borderRadius:
-                        const BorderRadius.only(
-                            topLeft:
-                                Radius.circular(10),
-                            bottomLeft:
-                                Radius.circular(10)),
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        bottomLeft: Radius.circular(10)),
                     image: DecorationImage(
-                        image: NetworkImage(
-                            propertyData["image"][0]),
+                        image: NetworkImage(propertyData["image"][0]),
                         fit: BoxFit.cover)),
               ),
               Expanded(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
-                      minHeight:
-                          189), // Set minimum height 189 pixel
+                      minHeight: 189), // Set minimum height 189 pixel
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
-                      mainAxisAlignment:
-                          MainAxisAlignment
-                              .spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment
-                          .start, // Align text to the left
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start, // Align text to the left
                       children: [
                         Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start, // Align text to the left
+                          crossAxisAlignment: CrossAxisAlignment
+                              .start, // Align text to the left
                           children: [
                             //////// Property Name Section (Start) //////
                             Text(
                               propertyData["name"],
                               style: const TextStyle(
                                 fontSize: 18,
-                                fontWeight:
-                                    FontWeight.w600,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             //////// Property Name Section (End) //////
-      
+
                             // Add space between elements
                             const SizedBox(height: 4.0),
-      
+
                             //////// Property Location Section (Start) //////
                             Text(
                               propertyData["address"],
                               style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(
-                                      0xFF7D7F88)),
+                                  fontSize: 14, color: Color(0xFF7D7F88)),
                             ),
                             //////// Property Location Section (End) //////
-      
+
                             // Add space between elements
                             const SizedBox(height: 8.0),
-      
+
                             //////// Profile and Rating Sections (Start) //////
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment
-                                      .start,
-                              crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 // Profile picture
                                 InkWell(
                                   onTap: () {},
                                   child: ClipOval(
-                                    child:
-                                        Image.network(
+                                    child: Image.network(
                                       'https://via.placeholder.com/150', // Replace with your profile picture URL
                                       width:
                                           20, // Width for the profile picture
@@ -217,98 +208,78 @@ class _RentalListPageState extends State<RentalListPage> {
                                     ),
                                   ),
                                 ),
-      
+
                                 // Add space between elements
-                                const SizedBox(
-                                    width: 5),
-      
+                                const SizedBox(width: 5),
+
                                 // Star icon
                                 const Icon(
                                   Icons.star_rounded,
-                                  color:
-                                      Color(0xFFFFBF75),
+                                  color: Color(0xFFFFBF75),
                                   size: 21.0,
                                 ),
-      
+
                                 // Rating value
                                 RichText(
-                                    text:
-                                        const TextSpan(
-      
-                                            // Default text style
-                                            style: TextStyle(
-                                                color: Colors
-                                                    .black,
-                                                fontSize:
-                                                    14),
-      
-                                            // Text
-                                            children: [
-                                      TextSpan(
-                                          text: "5.0"),
+                                    text: const TextSpan(
+
+                                        // Default text style
+                                        style: TextStyle(
+                                            color: Colors.black, fontSize: 14),
+
+                                        // Text
+                                        children: [
+                                      TextSpan(text: "5.0"),
                                       TextSpan(
                                           text: " (1)",
                                           style: TextStyle(
-                                              color: Color(
-                                                  0xFF7D7F88)))
+                                              color: Color(0xFF7D7F88)))
                                     ]))
                               ],
                             ),
                             //////// Profile and Rating Sections (End) //////
-      
+
                             // Add space between elements
-                            const SizedBox(
-                                height: 12.0),
-      
+                            const SizedBox(height: 12.0),
+
                             //////// Property Brief Information Section (Start) //////
                             Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment
-                                      .start,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 ////// Bed Information (Start) //////
                                 const Icon(
                                   Icons.bed,
                                   size: 21.0,
-                                  color:
-                                      Color(0xFF7D7F88),
+                                  color: Color(0xFF7D7F88),
                                 ),
-      
+
                                 // Add space between elements
-                                const SizedBox(
-                                    width: 5),
-      
+                                const SizedBox(width: 5),
+
                                 Text(
                                   "${propertyData["bedrooms"]} Rooms",
                                   style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Color(
-                                          0xFF7D7F88)),
+                                      fontSize: 14, color: Color(0xFF7D7F88)),
                                 ),
                                 ////// Bed Information (End) //////
-      
+
                                 // Add space between elements
-                                const SizedBox(
-                                    width: 10),
-      
+                                const SizedBox(width: 10),
+
                                 ////// Property Size Information (Start) //////
                                 const Icon(
                                   Icons.house_rounded,
                                   size: 21.0,
-                                  color:
-                                      Color(0xFF7D7F88),
+                                  color: Color(0xFF7D7F88),
                                 ),
-      
+
                                 // Add space between elements
-                                const SizedBox(
-                                    width: 5),
-      
+                                const SizedBox(width: 5),
+
                                 Text(
                                   "${propertyData["size"]} m\u00B2",
                                   style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Color(
-                                          0xFF7D7F88)),
+                                      fontSize: 14, color: Color(0xFF7D7F88)),
                                 )
                                 ////// Property Size Information (End) //////
                               ],
@@ -316,47 +287,36 @@ class _RentalListPageState extends State<RentalListPage> {
                           ],
                         ),
                         //////// Property Brief Information Section (End) //////
-      
+
                         //////// Rental Property's Price and Wishlist Section (Start) //////
                         Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment
-                                  .spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // Rental price
                             RichText(
                                 text: TextSpan(
                                     // Default text style
                                     style: const TextStyle(
-                                        color: Colors
-                                            .black,
+                                        color: Colors.black,
                                         fontSize: 18,
-                                        fontWeight:
-                                            FontWeight
-                                                .bold),
-      
+                                        fontWeight: FontWeight.bold),
+
                                     // Text
                                     children: [
                                   TextSpan(
-                                    text:
-                                        "RM$formattedRentalPrice",
+                                    text: "RM$formattedRentalPrice",
                                   ),
                                   const TextSpan(
                                       text: " / month",
                                       style: TextStyle(
-                                          color: Color(
-                                              0xFF7D7F88),
-                                          fontWeight:
-                                              FontWeight
-                                                  .normal,
-                                          fontSize:
-                                              14.0))
+                                          color: Color(0xFF7D7F88),
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 14.0))
                                 ])),
-      
+
                             // Wishlist Icon
                             const Icon(
-                              Icons
-                                  .favorite_border_rounded,
+                              Icons.favorite_border_rounded,
                               size: 20.0,
                               color: Color(0xFF7D7F88),
                             ),
@@ -377,7 +337,8 @@ class _RentalListPageState extends State<RentalListPage> {
 
   Future<QuerySnapshot?> fetchRentalList() async {
     // Fetch all the data inside properties collection
-    QuerySnapshot propertiesSnapshot = await FirebaseFirestore.instance.collection('properties').get();
+    QuerySnapshot propertiesSnapshot =
+        await FirebaseFirestore.instance.collection('properties').get();
 
     return propertiesSnapshot;
   }

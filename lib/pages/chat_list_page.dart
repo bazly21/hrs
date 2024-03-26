@@ -53,14 +53,14 @@ class ChatListPage extends StatelessWidget {
                   ),
                   onTap: () {
                     // Go to chat page
-                    Navigator.push(
-                      context, 
-                      MaterialPageRoute(
-                        builder: (context) => ChatPage(
-                          chatRoomId: chatRoom['id'],
-                        ),
-                      )
-                    );
+                    // Navigator.push(
+                    //   context, 
+                    //   MaterialPageRoute(
+                    //     builder: (context) => ChatPage(
+                    //       chatRoomId: chatRoom['id'],
+                    //     ),
+                    //   )
+                    // );
                   },
                 ),
                 Divider(indent: indentValue), // Indent the divider to start after the profile image

@@ -64,9 +64,10 @@ class RentalDetailsPage extends StatelessWidget {
 
                         // Landlord's details
                         const UserDetails(
-                          name: "Abdul Hakim", 
+                          landlordName: "Abdul Hakim", 
                           rating: 5.0, 
                           numReview: 1,
+                          landlordID: '12344', // Temporary ID
                           textButton: "Contact owner",
                         ),
                         

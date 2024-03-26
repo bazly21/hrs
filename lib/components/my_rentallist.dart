@@ -50,10 +50,10 @@ class MyRentalList extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: InkWell(
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => const PropertyDetailsPage()),
-                      );
+                      // Navigator.of(context).push(
+                      //   MaterialPageRoute(
+                      //       builder: (context) => const PropertyDetailsPage()),
+                      // );
                     }, // Go to property details page
                     child: Container(
                       constraints: const BoxConstraints(minHeight: 189),
