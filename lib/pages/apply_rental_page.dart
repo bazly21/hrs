@@ -27,12 +27,12 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
   // Define dropdown list items
   final List<String> _profileTypes = ["Student", "Working Adult", "Family"];
   final List<int> _paxNumbers = List.generate(10, (index) => index + 1);
-  final List<String> _nationalities = ["Malaysian", "Foreigner"];
+  final List<String> _nationalities = ["Malaysian", "Non-Malaysian"];
   final List<int> _tenancyDurations = List.generate(6, (index) => index + 1);
 
   void _resetFields() {
     setState(() {
-      _occupation = null;
+      _occupation = "";
       _profileType = null;
       _numberOfPax = null;
       _nationality = null;
@@ -86,7 +86,6 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
       // Optional: Clear the form or navigate to a different page after successful submission
       _resetFields();
     } catch (e) {
-      print(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

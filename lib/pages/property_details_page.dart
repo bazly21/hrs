@@ -296,7 +296,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   // House's Size Icon
                   const Icon(
                     Icons.bed,
-                    size: 18.0,
+                    size: 16.0,
                     color: Color(0xFF7D7F88),
                   ),
 
@@ -307,7 +307,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   Text(
                     "${propertyData["bedrooms"]} Rooms",
                     style: const TextStyle(
-                        fontSize: 16.0, color: Color(0xFF7D7F88)),
+                        fontSize: 14.0, color: Color(0xFF7D7F88)),
                   ),
                   // ********* Bed Information (End) *********
 
@@ -318,7 +318,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   // Property Size Icon
                   const Icon(
                     Icons.house_rounded,
-                    size: 18.0,
+                    size: 16.0,
                     color: Color(0xFF7D7F88),
                   ),
 
@@ -329,7 +329,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   Text(
                     "${propertyData["size"]} m\u00B2",
                     style:
-                        const TextStyle(fontSize: 16, color: Color(0xFF7D7F88)),
+                        const TextStyle(fontSize: 14, color: Color(0xFF7D7F88)),
                   ),
                   // ********* Property Size Information (End) *********
 
@@ -340,7 +340,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   // Bathroom Icon
                   const Icon(
                     Icons.bathroom_rounded,
-                    size: 18.0,
+                    size: 16.0,
                     color: Color(0xFF7D7F88),
                   ),
 
@@ -351,7 +351,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   Text(
                     "${propertyData["bathrooms"]} Bathrooms",
                     style:
-                        const TextStyle(fontSize: 16, color: Color(0xFF7D7F88)),
+                        const TextStyle(fontSize: 14, color: Color(0xFF7D7F88)),
                   ),
                   // ********* Number of Bed Information (End) *********
                 ],
@@ -359,12 +359,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               // ********* Property Main Details (End)  *********
 
               // Add space between elements
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
               const Divider(),
 
               // Add space between elements
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
 
               // ********* Landlord Profile Section (Start) *********
               UserDetails(
@@ -380,7 +380,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               // ********* Landlord Profile Section (End) *********
 
               // Add space between elements
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // ********* Property Description Section (Start) *********
               // Property Description Label
@@ -406,7 +406,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                 style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
-                    fontSize: 18.0),
+                    fontSize: 16.0),
               ),
               // ********* Property Description Section (End) *********
             ],
