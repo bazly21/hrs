@@ -25,11 +25,21 @@ class _ChatPageState extends State<ChatPage> {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   // Send message function
-  void sendMessage() async {
+  void sendMessage(BuildContext context) async {
     final String message = messageController.text.trim();
     if (message.isNotEmpty) {
-      await chatService.sendMessage(widget.receiverID, message);
-      messageController.clear();
+      try {
+        await chatService.sendMessage(widget.receiverID, message);
+        messageController.clear();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to send message. Please try again.'),
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -90,7 +100,7 @@ class _ChatPageState extends State<ChatPage> {
               Icons.send,
               color: Color(0xFF765CF8),
             ),
-            onPressed: sendMessage,
+            onPressed: () => sendMessage(context),
           ),
         ],
       ),
