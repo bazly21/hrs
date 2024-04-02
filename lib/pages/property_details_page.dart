@@ -6,7 +6,7 @@ import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
 import 'package:hrs/pages/apply_rental_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
-import 'package:hrs/services/chat/property_service.dart';
+import 'package:hrs/services/property_service.dart';
 import 'package:hrs/services/user_service.dart';
 
 class PropertyDetailsPage extends StatefulWidget {

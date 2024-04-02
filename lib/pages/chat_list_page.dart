@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_appbar.dart';
-import 'package:hrs/pages/login_page.dart';
+import 'package:hrs/model/chat_list_item.dart';
 import 'package:hrs/services/chat/chat_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -17,7 +17,6 @@ class _ChatListPageState extends State<ChatListPage> {
   final ChatService chatService = ChatService();
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +25,7 @@ class _ChatListPageState extends State<ChatListPage> {
         appBarType: "Search",
       ),
       body: Padding(
-        padding: const EdgeInsets.only(top: 5.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: StreamBuilder(
           stream: chatService.getChatList(firebaseAuth.currentUser!.uid),
           builder: (context, snapshot) {
@@ -36,24 +35,23 @@ class _ChatListPageState extends State<ChatListPage> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Failed to load chat rooms. Please try again.'),
+                    content:
+                        Text('Failed to load chat rooms. Please try again.'),
                   ),
                 );
               });
-            } else if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-              return ListView.builder(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                itemCount: snapshot.data!.docs.length,
+            } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              return ListView.separated(
+                itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
+                  return _buildChatList(snapshot.data![index]);
+                },
+                separatorBuilder: (context, index) {
                   double indentValue = 40.0 + 16.0 * 2;
-
-                  return Column(
-                    children: <Widget>[
-                      _buildChatList(snapshot.data!.docs[index]),
-                      Divider(indent: indentValue), // Indent the divider to start after the profile image
-                    ],
-                  );
+                  return Divider(
+                    // Indent the divider to start after the profile image
+                    indent: indentValue
+                  ); 
                 },
               );
             }
@@ -68,12 +66,9 @@ class _ChatListPageState extends State<ChatListPage> {
     );
   }
 
-  ListTile _buildChatList(DocumentSnapshot chatRoom) {
-    // Inside your build method or a function
-    final Timestamp lastMessageTimestamp = chatRoom['lastMessageTimestamp'];
+  ListTile _buildChatList(ChatListItem chatRoom) {
+    final Timestamp lastMessageTimestamp = chatRoom.lastMessageTime;
     final DateTime lastMessageDateTime = lastMessageTimestamp.toDate();
-
-    // Convert DateTime to a formatted string (e.g., 5 min ago)
     final String lastMessageTimeAgo = timeago.format(lastMessageDateTime);
 
     return ListTile(
@@ -83,11 +78,11 @@ class _ChatListPageState extends State<ChatListPage> {
         backgroundColor:
             Colors.transparent, // Make background transparent if using image
       ),
-      title: const Text(
-        "Chat Room Name", 
-        style: TextStyle(fontWeight: FontWeight.w600),
+      title: Text(
+        chatRoom.receiverName,
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      subtitle: Text(chatRoom['lastMessage']),
+      subtitle: Text(chatRoom.lastMessage),
       trailing: Text(
         lastMessageTimeAgo,
         style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -105,6 +100,4 @@ class _ChatListPageState extends State<ChatListPage> {
       },
     );
   }
-
-
 }
