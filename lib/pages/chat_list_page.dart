@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/model/chat_list_item.dart';
+import 'package:hrs/pages/chat_page.dart';
 import 'package:hrs/services/chat/chat_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -89,14 +90,15 @@ class _ChatListPageState extends State<ChatListPage> {
       ),
       onTap: () {
         // Go to chat page
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => ChatPage(
-        //       chatRoomId: chatRoom['id'],
-        //     ),
-        //   )
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatPage(
+              receiverID: chatRoom.receiverID,
+              receiverName: chatRoom.receiverName,
+            ),
+          )
+        );
       },
     );
   }

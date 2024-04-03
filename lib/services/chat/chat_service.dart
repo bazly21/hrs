@@ -75,13 +75,6 @@ class ChatService extends ChangeNotifier {
   }
 
   // Get chat list
-  // Stream<QuerySnapshot> getChatList(String userID) {
-  //   // Get chat list from database
-  //   return _fireStore
-  //       .collection('chats')
-  //       .where('users', arrayContains: userID)
-  //       .snapshots();
-  // }
   Stream<List<ChatListItem>> getChatList(String userID) {
     // Get chat list from database
     return _fireStore
@@ -104,7 +97,6 @@ class ChatService extends ChangeNotifier {
         
         // Create ChatListItem with receiver's name and last message data
         chatListItems.add(ChatListItem(
-          chatID: doc.id,
           receiverID: receiverID,
           receiverName: receiverName,
           lastMessageTime: lastMessageTime,
