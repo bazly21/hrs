@@ -12,22 +12,18 @@ class ChatService extends ChangeNotifier {
 
   // Send message
   Future<void> sendMessage(String receiverID, String message) async {
-    // Get current user info / sender info
     final String userID = _firebaseAuth.currentUser!.uid;
-    // Get current timestamp
     final Timestamp timestamp = Timestamp.now();
-    // Construct chat room ID from sender and receiver ID
     String chatRoomID = _getChatRoomID(userID, receiverID);
-    // Check if chat room exists
-    final bool ischatRoomExists =
-        await _chatRoomExists(userID, receiverID, chatRoomID);
-    // Reference to the chat document
     DocumentReference chatDocRef =
         _fireStore.collection('chats').doc(chatRoomID);
 
+    // Check if chat room exists
+    final bool ischatRoomExists = await _chatRoomExists(chatDocRef);
+
     // If chat room does not exist, create a new chat room
     if (!ischatRoomExists) {
-      await _createChatRoom(userID, receiverID, chatRoomID);
+      await _createChatRoom(userID, receiverID, chatDocRef);
     }
 
     // Create chat metadata
@@ -94,7 +90,7 @@ class ChatService extends ChangeNotifier {
         DocumentSnapshot<Map<String, dynamic>> receiverSnap =
             await _fireStore.collection('users').doc(receiverID).get();
         String receiverName = receiverSnap.data()!['name'];
-        
+
         // Create ChatListItem with receiver's name and last message data
         chatListItems.add(ChatListItem(
           receiverID: receiverID,
@@ -108,22 +104,20 @@ class ChatService extends ChangeNotifier {
   }
 
   // Check if chat room exists
-  Future<bool> _chatRoomExists(
-      String userID, String receiverID, chatRoomID) async {
+  Future<bool> _chatRoomExists(DocumentReference chatDocRef) async {
     // Get chat room from database
-    final DocumentSnapshot chatRoom =
-        await _fireStore.collection('chats').doc(chatRoomID).get();
+    final DocumentSnapshot chatRoom = await chatDocRef.get();
 
     return chatRoom.exists;
   }
 
   // Create chat room
   Future<void> _createChatRoom(
-      String userID, String receiverID, String chatRoomID) async {
+      String userID, String receiverID, DocumentReference chatDocRef) async {
     // Create list of users in the chat room
     List<String> users = [userID, receiverID];
 
     // Add chat room to database
-    await _fireStore.collection('chats').doc(chatRoomID).set({'users': users});
+    await chatDocRef.set({'users': users});
   }
 }
