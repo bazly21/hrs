@@ -33,12 +33,12 @@ class _LandlordNavigationPageState extends State<LandlordNavigationPage> {
           if (user != null) {
             
             final List<Widget> pages = [
-              LandlordPropertyListPage(),
-              ChatListPage(),
+              const LandlordPropertyListPage(),
+              const ChatListPage(),
               // Placeholder for AddPropertyPage
               Container(),
               const NotificationPage(),
-              ProfilePage(),
+              const ProfilePage(),
             ];
             
             return Scaffold(  

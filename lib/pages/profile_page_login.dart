@@ -7,7 +7,6 @@ import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
 import 'package:hrs/services/user_service.dart';
 
 class ProfilePage extends StatefulWidget {
-
   const ProfilePage({super.key});
 
   @override
@@ -21,9 +20,10 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _userDetails = _userService.getUserDetails(FirebaseAuth.instance.currentUser!.uid);
+    _userDetails =
+        _userService.getUserDetails(FirebaseAuth.instance.currentUser!.uid);
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 } else if (!snapshot.hasData || snapshot.data!.exists) {
                   return _buildProfile(context, snapshot.data!);
                 }
-                
+
                 return const Center(
                   child: Text("No data found"),
                 );
@@ -60,10 +60,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Column _buildProfile(BuildContext context, DocumentSnapshot profile) {
-    String name = profile['name'];
-    String ratingCount = profile['ratingCount'].toString();
-    double ratingAverage = (profile['ratingAverage'] as num).toDouble();
-    
+    Map<String, dynamic>? profileData = profile.data() as Map<String, dynamic>?;
+    String name = profileData?['name'] ?? 'N/A';
+    int ratingCount = profileData?['ratingCount'] ?? 0;
+    double ratingAverage = profileData?['ratingAverage'] ?? 0.0;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -89,36 +90,38 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 3.0),
 
         // Rating Icon
-        Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              StarRating(rating: ratingAverage),
+        if (ratingCount != 0)
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                StarRating(rating: ratingAverage),
 
-              // Expand More Button
-              InkWell(
-                onTap: () {
-                  // Handle tap
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.all(3.0), // Set your desired padding
-                  child:
-                      const Icon(Icons.expand_more), // Replace with your icon
+                // Expand More Button
+                InkWell(
+                  onTap: () {
+                    // Handle tap
+                  },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.all(3.0), // Set your desired padding
+                    child:
+                        const Icon(Icons.expand_more), // Replace with your icon
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
 
         // Add space between elements
-        const SizedBox(height: 3.0),
+        if (ratingCount != 0)
+          const SizedBox(height: 3.0),
 
         // Number of Reviews
         Text(
-          "($ratingCount reviews)",
+          ratingCount != 0 ? "($ratingCount reviews)" : "No reviews yet",
           style: const TextStyle(
             color: Color(0xFF7D7F88),
             fontSize: 16.0,
