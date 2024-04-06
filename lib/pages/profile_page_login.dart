@@ -1,11 +1,183 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
+import 'package:hrs/services/user_service.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
+
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final UserService _userService = UserService();
+  late Future<DocumentSnapshot> _userDetails;
+
+  @override
+  void initState() {
+    super.initState();
+    _userDetails = _userService.getUserDetails(FirebaseAuth.instance.currentUser!.uid);
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 37.0, 16.0, 0),
+          child: FutureBuilder<DocumentSnapshot>(
+              future: _userDetails,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (snapshot.hasError) {
+                  // Show error message through snackbar
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Error: ${snapshot.error}"),
+                      ),
+                    );
+                  });
+                } else if (!snapshot.hasData || snapshot.data!.exists) {
+                  return _buildProfile(context, snapshot.data!);
+                }
+                
+                return const Center(
+                  child: Text("No data found"),
+                );
+              }),
+        ),
+      ),
+    );
+  }
+
+  Column _buildProfile(BuildContext context, DocumentSnapshot profile) {
+    String name = profile['name'];
+    String ratingCount = profile['ratingCount'].toString();
+    double ratingAverage = (profile['ratingAverage'] as num).toDouble();
+    
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        // Profile Picture
+        const CircleAvatar(
+          radius: 50.0,
+          backgroundImage:
+              NetworkImage('https://via.placeholder.com/150'), // Example URL
+          backgroundColor:
+              Colors.transparent, // Make background transparent if using image
+        ),
+
+        // Add space between elements
+        const SizedBox(height: 14),
+
+        // Profile Name
+        Text(
+          name,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 24),
+        ),
+
+        // Add space between elements
+        const SizedBox(height: 3.0),
+
+        // Rating Icon
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StarRating(rating: ratingAverage),
+
+              // Expand More Button
+              InkWell(
+                onTap: () {
+                  // Handle tap
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.all(3.0), // Set your desired padding
+                  child:
+                      const Icon(Icons.expand_more), // Replace with your icon
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Add space between elements
+        const SizedBox(height: 3.0),
+
+        // Number of Reviews
+        Text(
+          "($ratingCount reviews)",
+          style: const TextStyle(
+            color: Color(0xFF7D7F88),
+            fontSize: 16.0,
+          ),
+        ),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+
+        const Divider(),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+
+        const ProfileMenu(text: "Personal Details", icon: Icons.person),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.017),
+
+        const ProfileMenu(text: "Wishlist", icon: Icons.favorite_rounded),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.017),
+
+        const ProfileMenu(text: "Rental History", icon: Icons.wallet),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.017),
+
+        const ProfileMenu(text: "Settings", icon: Icons.settings),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.017),
+
+        ProfileMenu(
+          text: "Logout",
+          icon: Icons.logout,
+          onPressed: () => showLogoutConfirmationDialog(context),
+        ),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+
+        const Divider(),
+
+        // Add space between elements
+        SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+
+        ProfileMenu(
+          text: "Login as Landlord",
+          icon: Icons.login,
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LandlordLoginPage()),
+          ),
+        ),
+      ],
+    );
+  }
 
   // Function to show confirmation dialog before logging out
   void showLogoutConfirmationDialog(BuildContext context) {
@@ -35,134 +207,6 @@ class ProfilePage extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 37.0, 16.0, 0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                // Profile Picture
-                const CircleAvatar(
-                  radius: 50.0,
-                  backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/150'), // Example URL
-                  backgroundColor: Colors
-                      .transparent, // Make background transparent if using image
-                ),
-
-                // Add space between elements
-                const SizedBox(height: 14),
-
-                // Profile Name
-                const Text(
-                  "Abdul Hakim",
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 24),
-                ),
-
-                // Add space between elements
-                const SizedBox(height: 3.0),
-
-                // Rating Icon
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const StarRating(rating: 5.0),
-
-                      // Expand More Button
-                      InkWell(
-                        onTap: () {
-                          // Handle tap
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(
-                              3.0), // Set your desired padding
-                          child: const Icon(
-                              Icons.expand_more), // Replace with your icon
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Add space between elements
-                const SizedBox(height: 3.0),
-
-                // Number of Reviews
-                const Text(
-                  "(3 reviews)",
-                  style: TextStyle(
-                    color: Color(0xFF7D7F88),
-                    fontSize: 16.0,
-                  ),
-                ),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.015),
-
-                const Divider(),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.015),
-
-                const ProfileMenu(text: "Personal Details", icon: Icons.person),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.017),
-
-                const ProfileMenu(
-                    text: "Wishlist", icon: Icons.favorite_rounded),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.017),
-
-                const ProfileMenu(text: "Rental History", icon: Icons.wallet),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.017),
-
-                const ProfileMenu(text: "Settings", icon: Icons.settings),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.017),
-
-                ProfileMenu(
-                  text: "Logout",
-                  icon: Icons.logout,
-                  onPressed: () => showLogoutConfirmationDialog(context),
-                ),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.015),
-
-                const Divider(),
-
-                // Add space between elements
-                SizedBox(height: MediaQuery.of(context).size.height * 0.015),
-
-                ProfileMenu(
-                  text: "Login as Landlord",
-                  icon: Icons.login,
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LandlordLoginPage()),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

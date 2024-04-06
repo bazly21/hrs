@@ -38,7 +38,7 @@ class _LandlordNavigationPageState extends State<LandlordNavigationPage> {
               // Placeholder for AddPropertyPage
               Container(),
               const NotificationPage(),
-              const ProfilePage(),
+              ProfilePage(),
             ];
             
             return Scaffold(  

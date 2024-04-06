@@ -37,7 +37,7 @@ class _NavigationPage extends State<NavigationPage> {
             user != null ? const ChatListPage() : Container(),
             user != null ? const RentalDetailsPage(): Container(),
             const NotificationPage(),
-            user != null ? const ProfilePage() : const ProfilePageNoAccount(),
+            user != null ? ProfilePage() : const ProfilePageNoAccount(),
           ];
 
           return IndexedStack(
