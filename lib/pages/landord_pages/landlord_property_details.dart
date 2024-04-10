@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/ink_button.dart';
-import 'package:hrs/components/my_propertydescription.dart';
-import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/my_richtext.dart';
 import 'package:hrs/components/my_starrating.dart';
-import 'package:hrs/pages/landord_pages/landlord_edit_property_details_page.dart';
+import 'package:hrs/pages/landord_pages/landlord_property_details_section.dart';
+import 'package:hrs/services/rental/rental_service.dart';
 import 'package:intl/intl.dart';
-import 'package:collection/collection.dart';
 
 enum RefreshType { propertyDetails, propertyApplications }
 
@@ -31,6 +30,7 @@ class _LandlordPropertyDetailsPageState
       propertyApplicationsFuture; // To store propertys's application data that has been fetched from the Firestore
   FirebaseFirestore db = FirebaseFirestore.instance;
   final TextEditingController _tenancyDateController = TextEditingController();
+  final RentalService _rentalService = RentalService();
   String? tenancyDuration;
   DateTime? startDate;
   DateTime? endDate;
@@ -81,7 +81,7 @@ class _LandlordPropertyDetailsPageState
         ),
         body: TabBarView(
           children: [
-            Center(child: rentalPropertyDetailsSection(context, screenSize)),
+            Center(child: PropertyDetailsSection(propertyID: widget.snapshotId)),
             rentalPropertyApplicationsSection(context, screenSize),
           ],
         ),
@@ -89,209 +89,10 @@ class _LandlordPropertyDetailsPageState
     );
   }
 
-  RefreshIndicator rentalPropertyDetailsSection(
-      BuildContext context, Size screenSize) {
-    double width = screenSize.width;
-    double height = screenSize.height;
-
-    return RefreshIndicator(
-      onRefresh: () => refreshData(RefreshType.propertyDetails),
-      child: SingleChildScrollView(
-          child: FutureBuilder<DocumentSnapshot?>(
-              future: propertyDetailsFuture,
-              builder: (context, snapshot) {
-                // If snapshot return other than null
-                // including empty Map
-                if (snapshot.connectionState == ConnectionState.done) {
-                  // Check if the snapshot
-                  final DocumentSnapshot propertyData = snapshot.data!;
-
-                  return Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: Column(
-                        children: [
-                          // Image container
-                          Container(
-                            height: 220, // The height of the image container
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(propertyData["image"]
-                                    [0]), // Replace with your image URL
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-
-                          // ********* Property Details Section (Start) *********
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // ********* Property Name, Property Location & Edit Button (Start) *********
-                                PropertyDetails(
-                                  propertyName: propertyData["name"],
-                                  propertyLocation: propertyData["address"],
-                                  icon: const Icon(Icons.edit, size: 21),
-                                  showIcon:
-                                      true, // Set this to false to hide the icon button
-                                  onIconPressed: () {
-                                    Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    EditPropertyDetailsPage(
-                                                        propertyID:
-                                                            widget.snapshotId)))
-                                        .then((statusMessageFromPreviousPage) {
-                                      if (statusMessageFromPreviousPage !=
-                                          null) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                              content: Text(
-                                                  statusMessageFromPreviousPage)),
-                                        );
-                                      }
-                                    });
-                                  },
-                                ),
-                                // ********* Property Name, Property Location & Edit Button (End) *********
-
-                                // Add space between elements
-                                SizedBox(height: height * 0.025),
-
-                                // ********* Property Main Details (Start)  *********
-                                Row(
-                                  children: [
-                                    // ********* Property Size Information (Start) *********
-                                    // Property Size Icon
-                                    const Icon(
-                                      Icons.house_rounded,
-                                      size: 16.0,
-                                      color: Color(0xFF7D7F88),
-                                    ),
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.015),
-
-                                    // Property Size Text **Database Required**
-                                    Text(
-                                      "${propertyData["size"]} m\u00B2",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF7D7F88)),
-                                    ),
-                                    // ********* Property Size Information (End) *********
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.04),
-
-                                    // ********* Bed Information (Start) *********
-                                    // House's Size Icon
-                                    const Icon(
-                                      Icons.bed,
-                                      size: 16.0,
-                                      color: Color(0xFF7D7F88),
-                                    ),
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.015),
-
-                                    // Propery's Size Text **Database Required**
-                                    Text(
-                                      "${propertyData["bedrooms"]} Rooms",
-                                      style: const TextStyle(
-                                          fontSize: 14.0,
-                                          color: Color(0xFF7D7F88)),
-                                    ),
-                                    // ********* Bed Information (End) *********
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.04),
-
-                                    // ********* Number of Bathroom Information (Start) *********
-                                    // Bathroom Icon
-                                    const Icon(
-                                      Icons.bathroom_rounded,
-                                      size: 16.0,
-                                      color: Color(0xFF7D7F88),
-                                    ),
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.015),
-
-                                    // Number of Bathroom Text **Database Required**
-                                    Text(
-                                      "${propertyData["bathrooms"]} Bathrooms",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF7D7F88)),
-                                    ),
-                                    // ********* Number of Bed Information (End) *********
-                                  ],
-                                ),
-                                // ********* Property Main Details (End)  *********
-
-                                // Add space between elements
-                                SizedBox(height: height * 0.01),
-
-                                const Divider(),
-
-                                // Add space between elements
-                                SizedBox(height: height * 0.01),
-
-                                // ********* Property Description Section (Start) *********
-                                // Property Description Label
-                                PropertyDescription(
-                                    title: "Description",
-                                    content: propertyData["description"]),
-
-                                // Furnishing Description Label
-                                PropertyDescription(
-                                    title: "Furnishing",
-                                    content: propertyData["furnishing"]),
-
-                                // Facilities Description Label
-                                PropertyDescription(
-                                    title: "Facilities",
-                                    content: propertyData["facilities"]),
-
-                                // Accessibility Description Label
-                                PropertyDescription(
-                                    title: "Accessibility",
-                                    content: propertyData["accessibilities"]),
-
-                                // Location Label
-                                const Text(
-                                  "Location",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                      fontSize: 16.0),
-                                ),
-                                // ********* Property Description Section (End) *********
-                              ],
-                            ),
-                          )
-                          // ********* Property Details Section (End) *********
-                        ],
-                      ));
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              })),
-    );
-  }
-
   RefreshIndicator rentalPropertyApplicationsSection(
       BuildContext context, Size screenSize) {
     double width = screenSize.width;
     double height = screenSize.height;
-    const appBarHeight = 56.0; // Default AppBar height
-    const tabBarHeight = 48.0; // Default TabBar height
-    final statusBarHeight =
-        MediaQuery.of(context).padding.top; // Status bar height
 
     return RefreshIndicator(
       onRefresh: () => refreshData(RefreshType.propertyApplications),
@@ -414,7 +215,10 @@ class _LandlordPropertyDetailsPageState
                                                     // If the user selects 'Start Tenancy'
                                                     else if (result ==
                                                         "Start Tenancy") {
-                                                      showTenancyForm(context);
+                                                      showTenancyForm(
+                                                          context,
+                                                          applicationData[
+                                                              "applicantID"]);
                                                     }
                                                   },
                                                   itemBuilder: (BuildContext
@@ -768,7 +572,7 @@ class _LandlordPropertyDetailsPageState
     }
   }
 
-  void showTenancyForm(BuildContext context) {
+  void showTenancyForm(BuildContext context, String tenantID) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -803,10 +607,22 @@ class _LandlordPropertyDetailsPageState
                   ElevatedButton(
                     child: const Text('Submit'),
                     onPressed: () {
-                      // Handle form submission
-                      print('Tenancy Duration: $tenancyDuration months');
-                      print('Start Date: $startDate');
-                      Navigator.pop(context); // Close the modal bottom sheet
+                      // Save tenancy information in database
+                      _rentalService
+                          .saveTenancyInfo(widget.snapshotId, tenantID,
+                              int.parse(tenancyDuration!), startDate!, endDate!)
+                          .then((_) => Navigator.pop(context))
+                          .catchError(
+                        (error) {
+                          // Show error message if the saving operation is failed
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Failed to save tenancy information. Please try again.'),
+                            ),
+                          );
+                        },
+                      );
                     },
                   ),
                 ],
