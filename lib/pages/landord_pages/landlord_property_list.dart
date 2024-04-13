@@ -90,7 +90,7 @@ class _LandlordPropertyListPageState extends State<LandlordPropertyListPage> {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                LandlordPropertyDetailsPage(snapshotId: propertyID),
+                LandlordPropertyDetailsPage(propertyID: propertyID),
           ),
         );
       },

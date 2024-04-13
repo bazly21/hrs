@@ -25,7 +25,7 @@ class RentalService {
       transaction.set(tenancyDocRef, newTenancy.toMap());
 
       // Update the property's status to rented
-      transaction.update(propertyDocRef, {'status': 'rented'});
+      transaction.update(propertyDocRef, {'status': 'Rented'});
     });
   }
 
