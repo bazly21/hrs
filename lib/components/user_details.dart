@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/pages/chat_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 
 class UserDetails extends StatelessWidget {
   final String landlordName, landlordID, position, textButton;
@@ -69,41 +70,8 @@ class UserDetails extends StatelessWidget {
             // Add space between elements
             const SizedBox(height: 1),
 
-            // Landlord's Overall Rating **Database Required**
-            Row(
-              children: [
-                // Star icon
-                const Icon(
-                  Icons.star_rounded,
-                  color: Color(0xFFFFBF75),
-                  size: 21.0,
-                ),
-
-                // Add space between elements
-                const SizedBox(width: 5),
-
-                // Rating value
-                RichText(
-                    text: TextSpan(
-
-                        // Default text style
-                        style:
-                            const TextStyle(color: Colors.black, fontSize: 14),
-
-                        // Text **Database Required**
-                        children: [
-                      rating > 0
-                          ? TextSpan(text: "$rating")
-                          : const TextSpan(text: "No Rating"),
-                      if (rating > 0)
-                        TextSpan(
-                            text: numReview > 1
-                                ? " ($numReview Reviews)"
-                                : " ($numReview Review)",
-                            style: const TextStyle(color: Color(0xFF7D7F88)))
-                    ])),
-              ],
-            ),
+            // Landlord's Overall Rating
+            _buildLandlordRating(),
           ],
         ),
 
@@ -112,13 +80,19 @@ class UserDetails extends StatelessWidget {
 
         ElevatedButton(
           onPressed: () {
-            print('Landlord ID: $landlordID');
-            Navigator.push(
+            NavigationUtils.pushPageWithSlideLeftAnimation(
               context,
-              MaterialPageRoute(
-                  builder: (context) => ChatPage(
-                      receiverID: landlordID, receiverName: landlordName)),
-            );
+              ChatPage(
+                receiverID: landlordID,
+                receiverName: landlordName
+              )
+            ); // Go to chat page
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //       builder: (context) => ChatPage(
+            //           receiverID: landlordID, receiverName: landlordName)),
+            // );
           },
           style: ButtonStyle(
             fixedSize: const MaterialStatePropertyAll(Size.fromHeight(42)),
@@ -139,5 +113,50 @@ class UserDetails extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildLandlordRating() {
+    // If there is no rating
+    if (numReview == 0 && rating == 0.0) {
+      return const Text(
+        "No reviews yet",
+        style: TextStyle(
+            fontWeight: FontWeight.normal,
+            color: Color(0xFF7D7F88),
+            fontSize: 14.0),
+      );
+    }
+    // If there is a rating
+    else {
+      return Row(
+        children: [
+          // Star icon
+          const Icon(
+            Icons.star_rounded,
+            color: Color(0xFFFFBF75),
+            size: 21.0,
+          ),
+
+          // Add space between elements
+          const SizedBox(width: 5),
+
+          // Rating value
+          RichText(
+            text: TextSpan(
+              // Default text style
+              style: const TextStyle(color: Colors.black, fontSize: 14),
+              
+              children: [
+                TextSpan(text: "$rating"), 
+                TextSpan(
+                  text: numReview > 1
+                      ? " ($numReview Reviews)"
+                      : " ($numReview Review)",
+                  style: const TextStyle(color: Color(0xFF7D7F88)))
+            ])
+          ),
+        ],
+      );
+    }
   }
 }
