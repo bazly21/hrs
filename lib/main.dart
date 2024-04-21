@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/pages/navigation_page.dart';
+import 'package:hrs/pages/rating_list_page.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -25,7 +26,8 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFFCFCFC),
       ),
       // home: LoginPage(),
-      home: const NavigationPage()
+      // home: const NavigationPage()
+      home: const RatingList()
     );
   }
 }
