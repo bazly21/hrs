@@ -46,6 +46,8 @@ dependencies:
   image_picker: ^1.0.7
   provider: ^6.1.2
   timeago: ^3.6.1
+  flutter_rating_bar: ^4.0.1
+  num: ^1.0.0
 
 dev_dependencies:
   flutter_test:

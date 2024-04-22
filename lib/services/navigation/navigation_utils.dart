@@ -20,7 +20,11 @@ class NavigationUtils {
               child: child,
             );
           },
-        ));
+        )).then((message) {
+          if(message != null) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+          }
+        });
   }
 
   static void pushPageWithSlideLeftAnimation(BuildContext context, Widget page) {
@@ -42,6 +46,10 @@ class NavigationUtils {
               child: child,
             );
           },
-        ));
+        )).then((message) {
+          if(message != null) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+          }
+        });
   }
 }

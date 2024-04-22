@@ -123,6 +123,7 @@ class RentalService {
             'landlordImageURL': (landlordData['image'] != null && landlordData['image'].isNotEmpty) ? landlordData['image'][0] : 'https://via.placeholder.com/150',
             'landlordRatingCount': landlordData['ratingCount'] ?? 0,
             'landlordRatingAverage': landlordData['ratingAverage'] as double? ?? 0.0,
+            'tenancyDocID': tenancyDoc.id,
             'tenancyStatus': tenancyData['status'] ?? 'Unknown',
             'isRated': tenancyData['isRated'] ?? false,
           };

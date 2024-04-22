@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/pages/rating_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/rental/rental_service.dart';
 
 class RatingList extends StatefulWidget {
@@ -26,7 +28,8 @@ class _RatingListState extends State<RatingList> {
               return Center(
                 child: Text('Error: ${snapshot.error}'),
               );
-            } else if (snapshot.hasData && (snapshot.data!.isNotEmpty || snapshot.data != null)) {
+            } else if (snapshot.hasData &&
+                (snapshot.data!.isNotEmpty || snapshot.data != null)) {
               final List<Map<String, dynamic>> tenancies = snapshot.data!;
               return ListView.builder(
                 itemCount: tenancies.length,
@@ -89,20 +92,21 @@ class _RatingListState extends State<RatingList> {
                 '${tenancyData['tenancyStatus']}',
                 style: const TextStyle(fontSize: 16),
               ),
-
             ],
           ),
           ElevatedButton(
-            onPressed: tenancyData['isRated'] ? null : () => _goToRatingPage(tenancyData['landlordID']),
+            onPressed: tenancyData['isRated']
+                ? null
+                : () => NavigationUtils.pushPageWithSlideLeftAnimation(
+                    context,
+                    RatingPage(
+                      landlordID: tenancyData['landlordID'],
+                      tenancyDocID: tenancyData['tenancyDocID'],
+                    )),
             child: const Text('Rate'),
           ),
         ],
       ),
     );
-  }
-  
-  _goToRatingPage(String landlordID) {
-    // Navigate to rating page
-    print('Navigate to rating page with landlordID: $landlordID');
   }
 }
