@@ -161,7 +161,7 @@ class _RatingPageState extends State<RatingPage> {
     );
 
     try {
-      await _ratingService.submitRating(newRating, widget.tenancyDocID);
+      await _ratingService.submitLandlordRating(newRating, widget.tenancyDocID);
 
       // Go back to the previous page
       if (mounted) {

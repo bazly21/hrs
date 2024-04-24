@@ -6,61 +6,64 @@ class RatingService {
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
 
   // Submit rating to database
-  Future<void> submitRating(LandlordRating landlordData, String tenancyDocID) async {
+  Future<void> submitLandlordRating(LandlordRating landlordRating, String tenancyDocID) async {
     final DocumentReference ratingDocRef = _fireStore
         .collection('users')
-        .doc(landlordData.landlordID)
+        .doc(landlordRating.landlordID)
         .collection('ratings')
         .doc();
 
-    final DocumentReference landlordDocRef = _fireStore.collection('users').doc(landlordData.landlordID);
+    final DocumentReference landlordDocRef = _fireStore.collection('users').doc(landlordRating.landlordID);
     final DocumentReference tenancyDocRef = _fireStore.collection('tenancies').doc(tenancyDocID);
 
     // Perform all operations within a single transaction
     await _fireStore.runTransaction((transaction) async {
       // Set operation: Save rating information in the database
-      transaction.set(ratingDocRef, landlordData.toMap());
+      DocumentSnapshot landlordSnapshot = await transaction.get(landlordDocRef);
+
+      // Check if the document exists
+      if (!landlordSnapshot.exists) {
+        throw Exception('Landlord does not exist');
+      }
+
+      // Convert the landlord data to a map
+      Map<String, dynamic> landlordData = landlordSnapshot.data() as Map<String, dynamic>;
+
+      // Calculate the average ratings
+      double totalSupportRating = 0.0;
+      double totalCommunicationRating = 0.0;
+      double totalMaintenanceRating = 0.0;
+      int ratingCount = landlordData['ratingCount'] ?? 0;
+
+      // Get the total ratings
+      totalSupportRating = ((landlordData['ratingAverage']?['supportRating'] ?? 0.0) * ratingCount);
+      totalCommunicationRating = ((landlordData['ratingAverage']?['communicationRating'] ?? 0.0) * ratingCount);
+      totalMaintenanceRating = ((landlordData['ratingAverage']?['maintenanceRating'] ?? 0.0) * ratingCount);
+
+      // Get new total ratings
+      totalSupportRating += landlordRating.supportRating;
+      totalCommunicationRating += landlordRating.communicationRating;
+      totalMaintenanceRating += landlordRating.maintenanceRating;
+
+      // Calculate the average ratings
+      double averageSupportRating = double.parse((totalSupportRating / (ratingCount + 1)).toStringAsFixed(2));
+      double averageCommunicationRating = double.parse((totalCommunicationRating / (ratingCount + 1)).toStringAsFixed(2));
+      double averageMaintenanceRating = double.parse((totalMaintenanceRating / (ratingCount + 1)).toStringAsFixed(2));
+      double overallRating = double.parse(((averageSupportRating + averageCommunicationRating + averageMaintenanceRating) / 3).toStringAsFixed(2));
+
+      transaction.set(ratingDocRef, landlordRating.toMap());
       transaction.update(tenancyDocRef, {
         'isRated': true,
       });
-    });
-
-    // Update rating average and count
-    await _updateRating(landlordDocRef);
-  }
-
-  // Update rating function
-  Future<void> _updateRating(DocumentReference landlordDocRef) async {
-
-    final QuerySnapshot ratingSnapshot = await landlordDocRef.collection('ratings').get();
-
-    // Calculate the average ratings
-    double totalSupportRating = 0;
-    double totalCommunicationRating = 0;
-    double totalMaintenanceRating = 0;
-    int ratingCount = ratingSnapshot.size;
-
-    for (final DocumentSnapshot doc in ratingSnapshot.docs) {
-      final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-      totalSupportRating += (data['supportRating'] ?? 0) as double;
-      totalCommunicationRating += (data['communicationRating'] ?? 0) as double;
-      totalMaintenanceRating += (data['maintenanceRating'] ?? 0) as double;
-    }
-
-    final double averageSupportRating = double.parse((ratingCount > 0 ? totalSupportRating / ratingCount : 0).toStringAsFixed(2));
-    final double averageCommunicationRating = double.parse((ratingCount > 0 ? totalCommunicationRating / ratingCount : 0).toStringAsFixed(2));
-    final double averageMaintenanceRating = double.parse((ratingCount > 0 ? totalMaintenanceRating / ratingCount : 0).toStringAsFixed(2));
-    final double overallRating = double.parse(((averageSupportRating + averageCommunicationRating + averageMaintenanceRating) / 3).toStringAsFixed(2));
-
-    // Update the landlord document with the new rating average and count
-    await landlordDocRef.update({
-      'ratingCount': ratingCount,
-      'ratingAverage': {
-        'supportRating': averageSupportRating,
-        'communicationRating': averageCommunicationRating,
-        'maintenanceRating': averageMaintenanceRating,
-        'overallRating': overallRating,
-      }
+      transaction.update(landlordDocRef, {
+        'ratingCount': ratingCount + 1,
+        'ratingAverage': {
+          'supportRating': averageSupportRating,
+          'communicationRating': averageCommunicationRating,
+          'maintenanceRating': averageMaintenanceRating,
+          'overallRating': overallRating,
+        }
+      });
     });
   }
 }
