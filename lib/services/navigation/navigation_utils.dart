@@ -21,14 +21,16 @@ class NavigationUtils {
             );
           },
         )).then((message) {
-          if(message != null) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-          }
-        });
+      if (message != null) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
+    });
   }
 
-  static void pushPageWithSlideLeftAnimation(BuildContext context, Widget page) {
-    Navigator.push(
+  static Future pushPageWithSlideLeftAnimation(
+      BuildContext context, Widget page) {
+    return Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -46,10 +48,6 @@ class NavigationUtils {
               child: child,
             );
           },
-        )).then((message) {
-          if(message != null) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-          }
-        });
+        ));
   }
 }

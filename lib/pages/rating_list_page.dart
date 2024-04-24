@@ -12,36 +12,46 @@ class RatingList extends StatefulWidget {
 
 class _RatingListState extends State<RatingList> {
   final RentalService _rentalService = RentalService();
+  Future<List<Map<String, dynamic>>?>? _endedTenancies;
+
+  @override
+  void initState() {
+    super.initState();
+    _endedTenancies = _rentalService.fetchEndedTenancies();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-      child: FutureBuilder<List<Map<String, dynamic>>?>(
-          future: _rentalService.fetchEndedTenancies(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
+      child: RefreshIndicator(
+        onRefresh: _refreshEndedTenancies,
+        child: FutureBuilder<List<Map<String, dynamic>>?>(
+            future: _endedTenancies,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              } else if (snapshot.hasData &&
+                  (snapshot.data!.isNotEmpty || snapshot.data != null)) {
+                final List<Map<String, dynamic>> tenancies = snapshot.data!;
+                return ListView.builder(
+                  itemCount: tenancies.length,
+                  itemBuilder: (context, index) {
+                    return _buildRentalItem(tenancies[index]);
+                  },
+                );
+              }
               return const Center(
-                child: CircularProgressIndicator(),
+                child: Text('No tenancies found'),
               );
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            } else if (snapshot.hasData &&
-                (snapshot.data!.isNotEmpty || snapshot.data != null)) {
-              final List<Map<String, dynamic>> tenancies = snapshot.data!;
-              return ListView.builder(
-                itemCount: tenancies.length,
-                itemBuilder: (context, index) {
-                  return _buildRentalItem(tenancies[index]);
-                },
-              );
-            }
-            return const Center(
-              child: Text('No tenancies found'),
-            );
-          }),
+            }),
+      ),
     ));
   }
 
@@ -98,15 +108,34 @@ class _RatingListState extends State<RatingList> {
             onPressed: tenancyData['isRated']
                 ? null
                 : () => NavigationUtils.pushPageWithSlideLeftAnimation(
-                    context,
-                    RatingPage(
-                      landlordID: tenancyData['landlordID'],
-                      tenancyDocID: tenancyData['tenancyDocID'],
-                    )),
-            child: const Text('Rate'),
+                        context,
+                        RatingPage(
+                          landlordID: tenancyData['landlordID'],
+                          tenancyDocID: tenancyData['tenancyDocID'],
+                        )).then((message) {
+                      if (message != null) {
+                        // Show success message
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text(message)));
+
+                        // Refresh the list of tenancies
+                        _refreshEndedTenancies();
+                      }
+                    }),
+            child: Text(tenancyData['isRated'] ? 'Rated' : 'Rate'),
           ),
         ],
       ),
     );
   }
+
+  Future<void> _refreshEndedTenancies() async {
+    await _rentalService.fetchEndedTenancies().then((newData) {
+      setState(() {
+        _endedTenancies =
+            Future.value(newData); // Use the new data for the future
+      });
+    });
+  }
+
 }

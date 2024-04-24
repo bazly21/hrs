@@ -122,7 +122,7 @@ class RentalService {
             'landlordID': landlordID,
             'landlordImageURL': (landlordData['image'] != null && landlordData['image'].isNotEmpty) ? landlordData['image'][0] : 'https://via.placeholder.com/150',
             'landlordRatingCount': landlordData['ratingCount'] ?? 0,
-            'landlordRatingAverage': landlordData['ratingAverage'] as double? ?? 0.0,
+            'landlordRatingAverage': landlordData['ratingAverage']['overallRating'] as double? ?? 0.0,
             'tenancyDocID': tenancyDoc.id,
             'tenancyStatus': tenancyData['status'] ?? 'Unknown',
             'isRated': tenancyData['isRated'] ?? false,
@@ -133,6 +133,7 @@ class RentalService {
       return expiredTenancies;
 
     } catch (e) {
+      print(e);
       return null; // Return null in case of any errors
     }
   }
