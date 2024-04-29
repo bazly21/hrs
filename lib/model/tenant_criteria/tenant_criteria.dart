@@ -1,8 +1,8 @@
 class TenantCriteria {
-  final String profileType;
-  final int numberOfPax;
-  final String nationality;
-  final String tenancyDuration;
+  final String? profileType;
+  final String? numberOfPax;
+  final String? nationality;
+  final String? tenancyDuration;
 
   TenantCriteria({
     required this.profileType,

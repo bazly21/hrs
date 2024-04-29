@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hrs/model/tenant_criteria/tenant_criteria.dart';
 
 class TenantCriteriaSettingPage extends StatefulWidget {
   final String propertyID;
@@ -22,12 +23,12 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
 
   void saveTenantCriteria() {
     // Create a map with the criteria data
-    Map<String, dynamic> criteriaData = {
-      'profileType': selectedProfileType,
-      'numberOfPax': selectedNumberOfPax,
-      'nationality': selectedNationality,
-      'tenancyDuration': selectedTenancyDuration,
-    };
+    TenantCriteria criteriaData = TenantCriteria(
+      profileType: selectedProfileType,
+      numberOfPax: selectedNumberOfPax,
+      nationality: selectedNationality,
+      tenancyDuration: selectedTenancyDuration,
+    );
 
     // Save the criteria data to Firestore
     FirebaseFirestore.instance
@@ -35,7 +36,7 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
         .doc(widget.propertyID)
         .collection('tenantCriteria')
         .doc('criteria')
-        .set(criteriaData)
+        .set(criteriaData.toMap())
         .then((_) {
       // Criteria saved successfully
       ScaffoldMessenger.of(context).showSnackBar(
