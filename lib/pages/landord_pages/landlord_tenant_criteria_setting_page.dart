@@ -11,14 +11,14 @@ class TenantCriteriaSettingPage extends StatefulWidget {
 
 class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
   String? selectedProfileType;
-  int? selectedNumberOfPax;
+  String? selectedNumberOfPax;
   String? selectedNationality;
-  int? selectedTenancyDuration;
+  String? selectedTenancyDuration;
 
   final List<String> profileTypes = ['Student', 'Working Adult', 'Family'];
-  final List<int> numberOfPaxOptions = List.generate(10, (index) => index + 1);
+  final List<String> numberOfPaxOptions = ['Single or Couple', 'Small Family (1 to 4 pax)', 'Large Family (5+ pax)'];
   final List<String> nationalities = ['Malaysian', 'Non-Malaysian'];
-  final List<int> tenancyDurations = List.generate(6, (index) => index + 1);
+  final List<String> tenancyDurations = ['Short term (< 4 Months)', 'Mid term (4-9 Months)', 'Long term (10-12 months)'];
 
   void saveTenantCriteria() {
     // Create a map with the criteria data
@@ -77,10 +77,10 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
             ),
             const SizedBox(height: 16.0),
             const Text('Number of Pax'),
-            DropdownButtonFormField<int>(
+            DropdownButtonFormField<String>(
               value: selectedNumberOfPax,
               items: numberOfPaxOptions.map((number) {
-                return DropdownMenuItem<int>(
+                return DropdownMenuItem<String>(
                   value: number,
                   child: Text(number.toString()),
                 );
@@ -109,12 +109,12 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
             ),
             const SizedBox(height: 16.0),
             const Text('Tenancy Duration'),
-            DropdownButtonFormField<int>(
+            DropdownButtonFormField<String>(
               value: selectedTenancyDuration,
               items: tenancyDurations.map((duration) {
-                return DropdownMenuItem<int>(
+                return DropdownMenuItem<String>(
                   value: duration,
-                  child: Text('$duration months'),
+                  child: Text(duration),
                 );
               }).toList(),
               onChanged: (value) {
