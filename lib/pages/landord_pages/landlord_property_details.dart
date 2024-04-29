@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_details_section.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_applications_section.dart';
+import 'package:hrs/pages/landord_pages/landlord_tenant_criteria_setting_page.dart';
 
 enum RefreshType { propertyDetails, propertyApplications }
 
@@ -40,6 +41,20 @@ class _LandlordPropertyDetailsPageState
                           fontWeight: FontWeight.w600, fontSize: 14))),
             ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                // Navigate to the tenant criteria setting page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TenantCriteriaSettingPage(propertyID: widget.propertyID),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         body: TabBarView(
           children: [

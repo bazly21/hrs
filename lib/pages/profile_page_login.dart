@@ -63,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
     Map<String, dynamic>? profileData = profile.data() as Map<String, dynamic>?;
     String name = profileData?['name'] ?? 'N/A';
     int ratingCount = profileData?['ratingCount'] ?? 0;
-    double ratingAverage = profileData?['ratingAverage'] ?? 0.0;
+    double ratingAverage = profileData?['ratingAverage']?['overallRating'] ?? 0.0;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

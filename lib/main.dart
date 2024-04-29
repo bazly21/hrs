@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFFFCFCFC),
       ),
       // home: LoginPage(),
-      // home: const NavigationPage()
-      home: const RatingList()
+      home: const NavigationPage()
+      // home: const RatingList()
     );
   }
 }
