@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:collection/collection.dart';
+import 'package:hrs/model/tenant_criteria/tenant_criteria.dart';
 import 'package:hrs/services/user_service.dart';
 import 'package:intl/intl.dart';
 
@@ -62,5 +63,15 @@ class ApplicationService {
     }
 
     return applicationDataList;
+  }
+
+  // Save tenant criteria
+  Future<void> saveTenantCriteria(String propertyID, TenantCriteria tenantCriteria) async {
+    DocumentReference propertyDocRef = _fireStore.collection('properties').doc(propertyID);
+
+    // Update the tenant criteria on property document
+    await propertyDocRef.update({
+      'tenantCriteria': tenantCriteria.toMap(),
+    });
   }
 }

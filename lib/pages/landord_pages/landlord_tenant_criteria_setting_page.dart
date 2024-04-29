@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hrs/model/tenant_criteria/tenant_criteria.dart';
+import 'package:hrs/services/property/application_service.dart';
 
 class TenantCriteriaSettingPage extends StatefulWidget {
   final String propertyID;
   const TenantCriteriaSettingPage({super.key, required this.propertyID});
 
   @override
-  State<TenantCriteriaSettingPage> createState() => _TenantCriteriaSettingPageState();
+  State<TenantCriteriaSettingPage> createState() =>
+      _TenantCriteriaSettingPageState();
 }
 
 class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
@@ -16,12 +17,22 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
   String? selectedNationality;
   String? selectedTenancyDuration;
 
-  final List<String> profileTypes = ['Student', 'Working Adult', 'Family'];
-  final List<String> numberOfPaxOptions = ['Single or Couple', 'Small Family (1 to 4 pax)', 'Large Family (5+ pax)'];
-  final List<String> nationalities = ['Malaysian', 'Non-Malaysian'];
-  final List<String> tenancyDurations = ['Short term (< 4 Months)', 'Mid term (4-9 Months)', 'Long term (10-12 months)'];
+  final ApplicationService _applicationService = ApplicationService();
 
-  void saveTenantCriteria() {
+  final List<String> profileTypes = ['Student', 'Working Adult', 'Family'];
+  final List<String> numberOfPaxOptions = [
+    'Single or Couple',
+    'Small Family (1 to 4 pax)',
+    'Large Family (5+ pax)'
+  ];
+  final List<String> nationalities = ['Malaysian', 'Non-Malaysian'];
+  final List<String> tenancyDurations = [
+    'Short term (< 4 Months)',
+    'Mid term (4-9 Months)',
+    'Long term (10-12 months)'
+  ];
+
+  void saveTenantCriteria() async {
     // Create a map with the criteria data
     TenantCriteria criteriaData = TenantCriteria(
       profileType: selectedProfileType,
@@ -31,18 +42,9 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
     );
 
     // Save the criteria data to Firestore
-    FirebaseFirestore.instance
-        .collection('properties')
-        .doc(widget.propertyID)
-        .collection('tenantCriteria')
-        .doc('criteria')
-        .set(criteriaData.toMap())
-        .then((_) {
-      // Criteria saved successfully
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Tenant criteria saved')),
-      );
-    }).catchError((error) {
+    await _applicationService
+        .saveTenantCriteria(widget.propertyID, criteriaData)
+        .catchError((error) {
       // Handle error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to save tenant criteria')),
