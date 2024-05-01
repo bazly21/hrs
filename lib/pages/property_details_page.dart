@@ -19,14 +19,13 @@ class PropertyDetailsPage extends StatefulWidget {
 }
 
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
-  final PropertyService propertyService = PropertyService();
-  final UserService userService = UserService();
+  final PropertyService _propertyService = PropertyService();
+  final UserService _userService = UserService();
   bool rentalExists = false; // Initial state of the rental existence
   bool isWishlist = false; // Initial state of the wishlist icon
   bool isApplicationExists = false;
 
-  Future<Map<String, dynamic>>?
-      rentalDetailsFuture; // To store rental's data that has been fetched from the Firestore
+  late Future<Map<String, dynamic>> rentalDetailsFuture;
 
   // Initialize state
   // Execute fetchRentalDetails function and store it
@@ -35,42 +34,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   @override
   void initState() {
     super.initState();
-    rentalDetailsFuture = fetchRentalDetails();
-  }
-
-  // Function to fetch rental details along with the landlord's name from Firebase collection
-  Future<Map<String, dynamic>> fetchRentalDetails() async {
-    // Create propertyData map to store the fetched data
-    Map<String, dynamic> propertyData = {};
-
-    // Fetch the property document first
-    try {
-      DocumentSnapshot propertySnapshot =
-          await propertyService.getPropertyDetails(widget.propertyID);
-
-      if (propertySnapshot.exists) {
-        propertyData = propertyService.propertyDataToMap(propertySnapshot);
-
-        // Check if the property document has a landlordID
-        if (propertyData.containsKey('landlordID')) {
-          String landlordID = propertyData['landlordID'];
-
-          // Fetch the landlord document using the landlordID
-          DocumentSnapshot landlordSnapshot =
-              await userService.getUserDetails(landlordID);
-
-          // Check if the landlord document exists and has data
-          if (landlordSnapshot.exists) {
-            // Add the landlord's name to the propertyData map
-            propertyData['landlordName'] = landlordSnapshot['name'];
-          }
-        }
-      }
-
-      return propertyData;
-    } catch (e) {
-      rethrow;
-    }
+    rentalDetailsFuture =
+        _propertyService.getPropertyFullDetails(widget.propertyID);
   }
 
   Stream<bool> checkUserApplicationStream(String propertyID) {
@@ -82,10 +47,11 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Future<void> handleRefresh() async {
-    await fetchRentalDetails().then((newData) {
+    await _propertyService
+        .getPropertyFullDetails(widget.propertyID)
+        .then((newData) {
       setState(() {
-        rentalDetailsFuture =
-            Future.value(newData); // Use the new data for the future
+        rentalDetailsFuture = Future.value(newData);
       });
     });
   }
@@ -96,50 +62,49 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: handleRefresh,
-          child: LayoutBuilder (
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: FutureBuilder(
-                    future: rentalDetailsFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return ConstrainedBox(
+          child: LayoutBuilder(builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: FutureBuilder(
+                  future: rentalDetailsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return ConstrainedBox(
                           constraints:
                               BoxConstraints(minHeight: constraints.maxHeight),
-                          child: const Center(child: CircularProgressIndicator())
-                        );                
-                      } else if (snapshot.hasError) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          Navigator.pop(
-                              context, 'Something went wrong. Please try again.');
-                        });
-                      } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                        return buildContent(snapshot.data!, context);                    
-                      }
+                          child:
+                              const Center(child: CircularProgressIndicator()));
+                    } else if (snapshot.hasError) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        Navigator.pop(
+                            context, 'Something went wrong. Please try again.');
+                      });
+                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      return buildContent(snapshot.data!, context);
+                    }
 
-                      // Act as a placeholder
-                      return const SizedBox();
-                    }),
-              );
-            }
-          ),
+                    // Act as a placeholder
+                    return const SizedBox();
+                  }),
+            );
+          }),
         ),
       ),
-      bottomNavigationBar: rentalDetailsFuture == null ? null : buildBottomNavigationBar(),
+      bottomNavigationBar:
+          rentalDetailsFuture == null ? null : buildBottomNavigationBar(),
     );
   }
 
   FutureBuilder<Map<String, dynamic>> buildBottomNavigationBar() {
     return FutureBuilder(
-      future: rentalDetailsFuture,
-      builder: (context, snapshot) {   
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          return bottomNavigationBarContent(snapshot.data!);
-        }
-        
-        return const SizedBox();
-      });
+        future: rentalDetailsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            return bottomNavigationBarContent(snapshot.data!);
+          }
+
+          return const SizedBox();
+        });
   }
 
   Container bottomNavigationBarContent(Map<String, dynamic> propertyData) {
@@ -368,9 +333,9 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
               // ********* Landlord Profile Section (Start) *********
               UserDetails(
-                landlordName: propertyData["landlordName"],
-                rating: 5.0,
-                numReview: 1,
+                landlordName: propertyData["landlordName"] ?? "N/A",
+                rating: propertyData["landlordOverallRating"] ?? 0,
+                numReview: propertyData["landlordRatingCount"] ?? 0,
                 landlordID: propertyData["landlordID"],
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
