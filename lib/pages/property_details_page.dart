@@ -157,11 +157,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ElevatedButton(
               onPressed: propertyData["hasApplied"]
                   ? null
-                  : () => NavigationUtils.pushPageWithSlideUpAnimation(
+                  : () => NavigationUtils.pushPage(
                       context,
                       ApplyRentalPage(
                         rentalID: widget.propertyID,
-                      )),
+                      ),
+                      SlideDirection.left),
               style: AppStyles.elevatedButtonStyle,
               child: const Text(
                 'Apply',

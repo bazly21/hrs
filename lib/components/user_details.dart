@@ -80,19 +80,14 @@ class UserDetails extends StatelessWidget {
 
         ElevatedButton(
           onPressed: () {
-            NavigationUtils.pushPageWithSlideLeftAnimation(
+            NavigationUtils.pushPage(
               context,
               ChatPage(
                 receiverID: landlordID,
                 receiverName: landlordName
-              )
+              ),
+              SlideDirection.left
             ); // Go to chat page
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //       builder: (context) => ChatPage(
-            //           receiverID: landlordID, receiverName: landlordName)),
-            // );
           },
           style: ButtonStyle(
             fixedSize: const MaterialStatePropertyAll(Size.fromHeight(42)),

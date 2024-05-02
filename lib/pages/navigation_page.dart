@@ -18,7 +18,7 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPage extends State<NavigationPage> {
-  
+
   int _selectedIndex = 0; // Assuming Home is the central item
 
   @override
@@ -56,7 +56,7 @@ class _NavigationPage extends State<NavigationPage> {
   // Handle navigation tap
   void _handleNavigationTap(int index) {
     if ((index == 1 || index == 2) && FirebaseAuth.instance.currentUser == null) {
-      NavigationUtils.pushPageWithSlideUpAnimation(context, LoginPage());
+      NavigationUtils.pushPage(context, LoginPage(), SlideDirection.up);
     } else {
       setState(() => _selectedIndex = index);
     }

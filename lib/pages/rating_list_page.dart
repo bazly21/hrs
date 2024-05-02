@@ -107,12 +107,13 @@ class _RatingListState extends State<RatingList> {
           ElevatedButton(
             onPressed: tenancyData['isRated']
                 ? null
-                : () => NavigationUtils.pushPageWithSlideLeftAnimation(
+                : () => NavigationUtils.pushPage(
                         context,
                         RatingPage(
                           landlordID: tenancyData['landlordID'],
                           tenancyDocID: tenancyData['tenancyDocID'],
-                        )).then((message) {
+                        ),
+                        SlideDirection.left).then((message) {
                       if (message != null) {
                         // Show success message
                         ScaffoldMessenger.of(context)

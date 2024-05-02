@@ -36,7 +36,7 @@ class _CustomChatListState extends State<CustomChatList> {
     _timer.cancel();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final String receiverName = widget.chatRoom.receiverName;
@@ -62,12 +62,13 @@ class _CustomChatListState extends State<CustomChatList> {
       ),
       onTap: () {
         // Go to chat page
-          NavigationUtils.pushPageWithSlideLeftAnimation(
+          NavigationUtils.pushPage(
             context,
             ChatPage(
               receiverID: receiverID,
               receiverName: receiverName,
             ),
+            SlideDirection.left,
           );
       }
     );

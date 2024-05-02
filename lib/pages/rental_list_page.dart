@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/pages/property_details_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 
 class RentalListPage extends StatefulWidget {
   const RentalListPage({super.key});
@@ -112,18 +113,17 @@ class _RentalListPageState extends State<RentalListPage> {
       padding: const EdgeInsets.only(top: 16, left: 16, right: 16),
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-                builder: (context) =>
-                    PropertyDetailsPage(propertyID: propertyID)),
-          ).then((errorMessage) {
+          NavigationUtils.pushPage(
+            context,
+            PropertyDetailsPage(propertyID: propertyID),
+            SlideDirection.left)
+          .then((errorMessage) {
             // Show an error message if there's an error
             if (errorMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(errorMessage)),
               );
             }
-          
           });
         }, // Go to property details page
         child: Container(
