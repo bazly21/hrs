@@ -36,8 +36,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   @override
   void initState() {
     super.initState();
-    rentalDetailsFuture =
-        _propertyService.getPropertyFullDetails(widget.propertyID, _auth.currentUser!.uid);
+    rentalDetailsFuture = _propertyService.getPropertyFullDetails(
+        widget.propertyID, _auth.currentUser!.uid);
   }
 
   Stream<bool> checkUserApplicationStream(String propertyID) {
@@ -107,6 +107,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Container bottomNavigationBarContent(Map<String, dynamic> propertyData) {
+    // Format the rental price to 2 decimal places
+    double rentalPrice = propertyData['rent'];
+    String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
+        ? rentalPrice.toStringAsFixed(2)
+        : rentalPrice.toStringAsFixed(0);
+
     return Container(
       height: 80,
       decoration: BoxDecoration(boxShadow: [
@@ -135,7 +141,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
                         // Text **Database Required**
                         children: [
-                      TextSpan(text: "RM${propertyData["rent"]}"),
+                      TextSpan(text: "RM$formattedRentalPrice"),
                       const TextSpan(
                         text: " / month",
                         style: TextStyle(

@@ -101,12 +101,9 @@ class _RentalListPageState extends State<RentalListPage> {
   Widget rentalList(BuildContext context, DocumentSnapshot propertyData) {
     // Format the rental price to 2 decimal places
     double rentalPrice = propertyData['rent'];
-    String formattedRentalPrice;
-    if (rentalPrice == rentalPrice.roundToDouble()) {
-      formattedRentalPrice = rentalPrice.toStringAsFixed(0);
-    } else {
-      formattedRentalPrice = rentalPrice.toStringAsFixed(2);
-    }
+    String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
+        ? rentalPrice.toStringAsFixed(2)
+        : rentalPrice.toStringAsFixed(0);
     String propertyID = propertyData.id;
 
     return Padding(
