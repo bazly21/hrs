@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Application {
-  final String propertyID;
   final String applicantID;
   final String occupation;
   final String profileType;
@@ -13,7 +12,6 @@ class Application {
   final FieldValue submittedAt = FieldValue.serverTimestamp();
 
   Application({
-    required this.propertyID,
     required this.applicantID,
     required this.occupation,
     required this.profileType,
@@ -26,7 +24,6 @@ class Application {
   // Convert a message object into a map
   Map<String, dynamic> toMap() {
     return {
-      "propertyID": propertyID,
       "applicantID": applicantID,
       "occupation": occupation,
       "profileType": profileType,
@@ -35,6 +32,7 @@ class Application {
       "moveInDate": Timestamp.fromDate(moveInDate), // Convert DateTime to Timestamp for Firestore
       "tenancyDuration": tenancyDuration,
       "status": status,
+      "submittedAt": submittedAt,
     };
   }
 }

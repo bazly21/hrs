@@ -94,10 +94,10 @@ class ApplicationService {
   }
 
   // Save application
-  Future saveApplication(Application applicationData) async {
+  Future saveApplication(String propertyID, Application applicationData) async {
     await _fireStore
         .collection("properties")
-        .doc(applicationData.propertyID)
+        .doc(propertyID)
         .collection("applications")
         .add(applicationData.toMap());
   }

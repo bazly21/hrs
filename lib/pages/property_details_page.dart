@@ -166,7 +166,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   : () => NavigationUtils.pushPage(
                         context,
                         ApplyRentalPage(
-                          rentalID: widget.propertyID,
+                          propertyID: widget.propertyID,
                         ),
                         SlideDirection.left,
                       ).then((message) {

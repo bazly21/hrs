@@ -6,9 +6,9 @@ import "package:hrs/services/property/application_service.dart";
 import "package:intl/intl.dart";
 
 class ApplyRentalPage extends StatefulWidget {
-  final String rentalID;
+  final String propertyID;
 
-  const ApplyRentalPage({super.key, required this.rentalID});
+  const ApplyRentalPage({super.key, required this.propertyID});
 
   @override
   ApplyRentalPageState createState() => ApplyRentalPageState();
@@ -196,7 +196,6 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
 
     // Create an application object
     Application application = Application(
-      propertyID: widget.rentalID,
       applicantID: userUID!,
       occupation: occupation,
       profileType: _profileType!,
@@ -207,7 +206,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
     );
 
     // Save data to Firestore
-    await _applicationService.saveApplication(application).then(
+    await _applicationService.saveApplication(widget.propertyID, application).then(
       (_) {
         // Reset the form after successful submission
         _resetFields();

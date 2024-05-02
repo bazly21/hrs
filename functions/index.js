@@ -48,11 +48,12 @@ exports.updateTenancyAndPropertyStatus = functions.pubsub
   });
 
 exports.calculateTenantCriteriaScore = functions.firestore
-  .document("applications/{documentId}")
+  .document("properties/{propertyId}/applications/{applicationId}")
   .onCreate(async (snapshot, context) => {
     try {
       const db = admin.firestore();
       const applicationData = snapshot.data();
+      const propertyID = context.params.propertyId;
 
       // Check if the document contains the propertyID field
       if (!applicationData.propertyID) {
@@ -63,7 +64,7 @@ exports.calculateTenantCriteriaScore = functions.firestore
       // Fetch the property document
       const propertySnapshot = await db
         .collection("properties")
-        .doc(applicationData.propertyID)
+        .doc(propertyID)
         .get();
 
       // Check if the property document exists
