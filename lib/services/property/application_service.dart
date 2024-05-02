@@ -85,8 +85,9 @@ class ApplicationService {
   Future<bool> checkUserApplication(
       String propertyID, String applicantID) async {
     QuerySnapshot applicationSnapshots = await _fireStore
+        .collection("properties")
+        .doc(propertyID)
         .collection("applications")
-        .where("propertyID", isEqualTo: propertyID)
         .where("applicantID", isEqualTo: applicantID)
         .get();
 
