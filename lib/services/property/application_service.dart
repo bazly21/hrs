@@ -60,6 +60,9 @@ class ApplicationService {
           }
         }
       }
+
+      // Sort the applicationDataList based on the criteriaScore field in descending order
+      applicationDataList.sort((a, b) => b["criteriaScore"].compareTo(a["criteriaScore"]));
     }
 
     return applicationDataList;
