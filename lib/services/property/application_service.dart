@@ -17,8 +17,9 @@ class ApplicationService {
 
     // Fetch the rental property's applications
     QuerySnapshot applicationSnapshots = await _fireStore
+        .collection("properties")
+        .doc(propertyID)
         .collection("applications")
-        .where("propertyID", isEqualTo: propertyID)
         .where("status", isNotEqualTo: "Declined")
         .get();
 

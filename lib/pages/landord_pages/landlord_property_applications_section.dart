@@ -17,7 +17,8 @@ class PropertyApplicationsSection extends StatefulWidget {
       _PropertyApplicationsSectionState();
 }
 
-class _PropertyApplicationsSectionState extends State<PropertyApplicationsSection> {
+class _PropertyApplicationsSectionState
+    extends State<PropertyApplicationsSection> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ApplicationService _applicationService = ApplicationService();
   late Future<List<Map<String, dynamic>>> propertyApplicationsFuture;
@@ -424,7 +425,12 @@ class _PropertyApplicationsSectionState extends State<PropertyApplicationsSectio
     );
 
     if (isConfirmed ?? false) {
-      await _firestore.collection("applications").doc(applicationID).update({
+      await _firestore
+          .collection("properties")
+          .doc(widget.propertyID)
+          .collection("applications")
+          .doc(applicationID)
+          .update({
         "status": status,
       }).then((_) {
         refreshData();
