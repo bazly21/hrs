@@ -1,7 +1,11 @@
+import "dart:math";
+
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:hrs/components/my_appbar.dart";
+import "package:hrs/model/application/application_model.dart";
+import "package:hrs/services/property/application_service.dart";
 import "package:intl/intl.dart";
 
 class ApplyRentalPage extends StatefulWidget {
@@ -14,87 +18,23 @@ class ApplyRentalPage extends StatefulWidget {
 }
 
 class ApplyRentalPageState extends State<ApplyRentalPage> {
-  String? _occupation;
+  final ApplicationService _applicationService = ApplicationService();
+  final TextEditingController _occupationController = TextEditingController();
+
   String? _profileType;
   int? _numberOfPax;
   String? _nationality;
-  DateTime _moveInDate = DateTime.now();
+  DateTime? _moveInDate;
   int? _tenancyDuration;
 
   // Get user ID
   final String? userUID = FirebaseAuth.instance.currentUser?.uid;
-  
+
   // Define dropdown list items
   final List<String> _profileTypes = ["Student", "Working Adult", "Family"];
   final List<int> _paxNumbers = List.generate(10, (index) => index + 1);
   final List<String> _nationalities = ["Malaysian", "Non-Malaysian"];
-  final List<int> _tenancyDurations = List.generate(6, (index) => index + 1);
-
-  void _resetFields() {
-    setState(() {
-      _occupation = "";
-      _profileType = null;
-      _numberOfPax = null;
-      _nationality = null;
-      _moveInDate = DateTime.now();
-      _tenancyDuration = null;
-    });
-  }
-
-  Future<void> _submitApplication() async {
-    // Validate all fields are filled in
-    if (_occupation == null ||
-        _occupation!.isEmpty ||
-        _profileType == null ||
-        _numberOfPax == null ||
-        _nationality == null ||
-        _moveInDate == null ||
-        _tenancyDuration == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Please fill in all fields before submitting.")),
-      );
-      return; // Stop if any field is not filled in
-    }
-
-    // Prepare data to be saved
-    Map<String, dynamic> applicationData = {
-      "propertyID": widget.rentalID,
-      "applicantID": userUID,
-      "occupation": _occupation,
-      "profileType": _profileType,
-      "numberOfPax": _numberOfPax,
-      "nationality": _nationality,
-      "moveInDate": Timestamp.fromDate(_moveInDate), // Convert DateTime to Timestamp for Firestore
-      "tenancyDuration": _tenancyDuration,
-      "status": "Pending",
-      "submittedAt": FieldValue
-          .serverTimestamp(), // Server timestamp for when the application is submitted
-    };
-
-    // Save data to Firestore
-    try {
-      await FirebaseFirestore.instance
-          .collection("applications")
-          .add(applicationData);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Application submitted successfully!")),
-        );
-      }
-
-      // Optional: Clear the form or navigate to a different page after successful submission
-      _resetFields();
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  "Failed to submit application. Please try again later.")),
-        );
-      }
-    }
-  }
+  final List<int> _tenancyDurations = List.generate(12, (index) => index + 1);
 
   @override
   Widget build(BuildContext context) {
@@ -105,14 +45,10 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
         child: Column(
           children: [
             TextField(
+              controller: _occupationController,
               decoration: const InputDecoration(
                 labelText: "Occupation",
               ),
-              onChanged: (value) {
-                setState(() {
-                  _occupation = value;
-                });
-              },
             ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
@@ -167,7 +103,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
               onTap: () async {
                 final selectedDate = await showDatePicker(
                   context: context,
-                  initialDate: _moveInDate,
+                  initialDate: DateTime.now(),
                   firstDate: DateTime.now(),
                   lastDate: DateTime(2101),
                 );
@@ -182,7 +118,9 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(DateFormat("dd-MM-yyyy").format(_moveInDate)),
+                    Text(_moveInDate != null
+                        ? DateFormat("dd-MM-yyyy").format(_moveInDate!)
+                        : ""),
                     const Icon(Icons.calendar_today),
                   ],
                 ),
@@ -228,5 +166,63 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
         ),
       ),
     );
+  }
+
+  void _resetFields() {
+    setState(() {
+      _occupationController.clear();
+      _profileType = null;
+      _numberOfPax = null;
+      _nationality = null;
+      _moveInDate = null;
+      _tenancyDuration = null;
+    });
+  }
+
+  Future<void> _submitApplication() async {
+    // Get the occupation from the text field
+    String occupation = _occupationController.text.trim();
+
+    // Validate all fields are filled in
+    if (occupation.isEmpty ||
+        _profileType == null ||
+        _numberOfPax == null ||
+        _nationality == null ||
+        _moveInDate == null ||
+        _tenancyDuration == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Please fill in all fields before submitting.")),
+      );
+      return; // Stop if any field is not filled in
+    }
+
+    // Create an application object
+    Application application = Application(
+      propertyID: widget.rentalID,
+      applicantID: userUID!,
+      occupation: occupation,
+      profileType: _profileType!,
+      numberOfPax: _numberOfPax!,
+      nationality: _nationality!,
+      moveInDate: _moveInDate!,
+      tenancyDuration: _tenancyDuration!,
+    );
+
+    // Save data to Firestore
+    await _applicationService.saveApplication(application).then(
+      (_) {
+        // Reset the form after successful submission
+        _resetFields();
+
+        Navigator.pop(context, "Application submitted successfully!");
+      },
+    ).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to submit application. Error: $error"),
+        ),
+      );
+    });
   }
 }

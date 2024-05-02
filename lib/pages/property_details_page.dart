@@ -164,16 +164,21 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               onPressed: propertyData["hasApplied"]
                   ? null
                   : () => NavigationUtils.pushPage(
-                      context,
-                      ApplyRentalPage(
-                        rentalID: widget.propertyID,
-                      ),
-                      SlideDirection.left),
+                        context,
+                        ApplyRentalPage(
+                          rentalID: widget.propertyID,
+                        ),
+                        SlideDirection.left,
+                      ).then((message) {
+                        if (message != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
+                        }
+                      }),
               style: AppStyles.elevatedButtonStyle,
-              child: const Text(
-                'Apply',
-              ),
-            )
+              child: const Text('Apply'),
+            ),
           ],
         ),
       ),
