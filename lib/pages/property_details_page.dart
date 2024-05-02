@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_circulariconbutton.dart';
 import 'package:hrs/components/my_propertydescription.dart';
@@ -6,8 +7,9 @@ import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
 import 'package:hrs/pages/apply_rental_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
-import 'package:hrs/services/user_service.dart';
+import 'package:hrs/style/app_style.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
   final String propertyID;
@@ -20,7 +22,7 @@ class PropertyDetailsPage extends StatefulWidget {
 
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   final PropertyService _propertyService = PropertyService();
-  final UserService _userService = UserService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool rentalExists = false; // Initial state of the rental existence
   bool isWishlist = false; // Initial state of the wishlist icon
   bool isApplicationExists = false;
@@ -35,7 +37,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   void initState() {
     super.initState();
     rentalDetailsFuture =
-        _propertyService.getPropertyFullDetails(widget.propertyID);
+        _propertyService.getPropertyFullDetails(widget.propertyID, _auth.currentUser!.uid);
   }
 
   Stream<bool> checkUserApplicationStream(String propertyID) {
@@ -48,7 +50,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
   Future<void> handleRefresh() async {
     await _propertyService
-        .getPropertyFullDetails(widget.propertyID)
+        .getPropertyFullDetails(widget.propertyID, _auth.currentUser!.uid)
         .then((newData) {
       setState(() {
         rentalDetailsFuture = Future.value(newData);
@@ -82,7 +84,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                     } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                       return buildContent(snapshot.data!, context);
                     }
-
                     // Act as a placeholder
                     return const SizedBox();
                   }),
@@ -90,8 +91,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           }),
         ),
       ),
-      bottomNavigationBar:
-          rentalDetailsFuture == null ? null : buildBottomNavigationBar(),
+      bottomNavigationBar: buildBottomNavigationBar(),
     );
   }
 
@@ -102,7 +102,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             return bottomNavigationBarContent(snapshot.data!);
           }
-
           return const SizedBox();
         });
   }
@@ -155,44 +154,19 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ),
 
             // Apply Button
-            StreamBuilder<bool>(
-                stream: checkUserApplicationStream(widget.propertyID),
-                builder: (context, snapshot) {
-                  // Disable button if stream emits true (application exists) or data is not yet available
-                  bool isButtonDisabled = snapshot.hasData && snapshot.data!;
-
-                  return ElevatedButton(
-                    onPressed: () {
-                      // If false, button is enabled,
-                      // This button will bring tenant
-                      // to the Apply Rental Page
-                      if (!isButtonDisabled) {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                ApplyRentalPage(rentalID: widget.propertyID)));
-                      }
-                    },
-                    style: ButtonStyle(
-                      fixedSize:
-                          const MaterialStatePropertyAll(Size.fromHeight(42)),
-                      elevation: const MaterialStatePropertyAll(0),
-                      backgroundColor: MaterialStatePropertyAll(isButtonDisabled
-                          ? Colors.grey
-                          : const Color(0xFF765CF8)),
-                      shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(72), // Set corner radius
-                        ),
-                      ),
-                    ),
-                    child: const Text(
-                      'Apply',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                }),
+            ElevatedButton(
+              onPressed: propertyData["hasApplied"]
+                  ? null
+                  : () => NavigationUtils.pushPageWithSlideUpAnimation(
+                      context,
+                      ApplyRentalPage(
+                        rentalID: widget.propertyID,
+                      )),
+              style: AppStyles.elevatedButtonStyle,
+              child: const Text(
+                'Apply',
+              ),
+            )
           ],
         ),
       ),

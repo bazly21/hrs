@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hrs/services/property/application_service.dart';
 
 class PropertyService {
   // Get instance of auth and firestore
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
+  final ApplicationService _applicationService = ApplicationService();
 
   // Get property details
   Future<DocumentSnapshot<Map<String, dynamic>>> getPropertyDetails(String propertyID) async {
@@ -10,7 +12,7 @@ class PropertyService {
   }
 
   // Get property full details including landlord details
-  Future<Map<String, dynamic>> getPropertyFullDetails(String propertyID) async {
+  Future<Map<String, dynamic>> getPropertyFullDetails(String propertyID, String applicantID) async {
     Map<String, dynamic> propertyFullDetails = {};
 
     DocumentSnapshot<Map<String, dynamic>> propertyDoc = await getPropertyDetails(propertyID);
@@ -32,12 +34,15 @@ class PropertyService {
     // Early return if landlord data is not exist
     if (landlordData == null) throw("Landlord data is not exist");
 
+    final bool hasApplied = await _applicationService.checkUserApplication(propertyID, applicantID);
+
     // Collect all necessary data
     propertyFullDetails = {
       ...propertyData,
       "landlordName": landlordData["name"],
       "landlordRatingCount": landlordData["ratingCount"],
       "landlordOverallRating": landlordData["ratingAverage"]?["overallRating"],
+      "hasApplied": hasApplied,
     };
 
     return propertyFullDetails;

@@ -74,4 +74,14 @@ class ApplicationService {
       'tenantCriteria': tenantCriteria.toMap(),
     });
   }
+
+  Future<bool> checkUserApplication (String propertyID, String applicantID) async {
+    QuerySnapshot applicationSnapshots = await _fireStore
+        .collection("applications")
+        .where("propertyID", isEqualTo: propertyID)
+        .where("applicantID", isEqualTo: applicantID)
+        .get();
+
+    return applicationSnapshots.docs.isNotEmpty;
+  }
 }
