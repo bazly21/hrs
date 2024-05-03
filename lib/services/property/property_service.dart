@@ -12,8 +12,9 @@ class PropertyService {
   }
 
   // Get property full details including landlord details
-  Future<Map<String, dynamic>> getPropertyFullDetails(String propertyID, String applicantID) async {
+  Future<Map<String, dynamic>> getPropertyFullDetails(String propertyID, String? applicantID) async {
     Map<String, dynamic> propertyFullDetails = {};
+    bool hasApplied = false;
 
     DocumentSnapshot<Map<String, dynamic>> propertyDoc = await getPropertyDetails(propertyID);
     Map<String, dynamic>? propertyData = propertyDoc.data();
@@ -34,7 +35,10 @@ class PropertyService {
     // Early return if landlord data is not exist
     if (landlordData == null) throw("Landlord data is not exist");
 
-    final bool hasApplied = await _applicationService.checkUserApplication(propertyID, applicantID);
+    // Check user application if applicant ID is not null
+    if (applicantID != null) {
+      hasApplied = await _applicationService.checkUserApplication(propertyID, applicantID);
+    }
 
     // Collect all necessary data
     propertyFullDetails = {

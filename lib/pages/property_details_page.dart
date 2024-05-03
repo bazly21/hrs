@@ -36,7 +36,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   void initState() {
     super.initState();
     rentalDetailsFuture = _propertyService.getPropertyFullDetails(
-        widget.propertyID, _auth.currentUser!.uid);
+        widget.propertyID, _auth.currentUser?.uid);
   }
 
   Future<void> handleRefresh() async {
