@@ -5,6 +5,7 @@ import 'package:hrs/components/my_propertydescription.dart';
 import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
 import 'package:hrs/pages/apply_rental_page.dart';
+import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
@@ -22,7 +23,7 @@ class PropertyDetailsPage extends StatefulWidget {
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   final PropertyService _propertyService = PropertyService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  bool rentalExists = false; // Initial state of the rental existence
+  final User? user = FirebaseAuth.instance.currentUser;
   bool isWishlist = false; // Initial state of the wishlist icon
   bool hasApplied = false;
 
@@ -152,33 +153,13 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ),
 
             // Apply Button
-            StatefulBuilder(
-              builder: (context, setState) {
-                return ElevatedButton(
-                  onPressed: hasApplied
-                      ? null
-                      : () => NavigationUtils.pushPage(
-                            context,
-                            ApplyRentalPage(
-                              propertyID: widget.propertyID,
-                            ),
-                            SlideDirection.left,
-                          ).then((result) {
-                            if (result != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(result["message"])),
-                              );
-
-                              setState(() {
-                                hasApplied = result["hasApplied"];
-                              });
-                            }
-                          }),
-                  style: AppStyles.elevatedButtonStyle,
-                  child: const Text('Apply'),
-                );
-              }
-            ),
+            StatefulBuilder(builder: (context, setState) {
+              return ElevatedButton(
+                onPressed: hasApplied ? null : () => goToPage(setState, context),
+                style: AppStyles.elevatedButtonStyle,
+                child: const Text('Apply'),
+              );
+            }),
           ],
         ),
       ),
@@ -365,5 +346,37 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         ),
       ],
     );
+  }
+
+  void goToPage(StateSetter setState, BuildContext context) {
+    if (user != null) {
+      NavigationUtils.pushPage(
+        context,
+        ApplyRentalPage(
+          propertyID: widget.propertyID,
+        ),
+        SlideDirection.left,
+      ).then((result) {
+        if (result != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result["message"])),
+          );
+          setState(() {
+            hasApplied = result["hasApplied"];
+          });
+        }
+      });
+    } else {
+      // User is not logged in, navigate to LoginPage
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please log in first before applying.")),
+      );
+
+      NavigationUtils.pushPage(
+        context,
+        LoginPage(),
+        SlideDirection.left,
+      );
+    }
   }
 }
