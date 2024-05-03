@@ -8,7 +8,7 @@ import 'package:hrs/components/property_details_textfield.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddPropertyPage extends StatefulWidget {
-  
+
   const AddPropertyPage({super.key});
 
   @override
@@ -18,7 +18,7 @@ class AddPropertyPage extends StatefulWidget {
 class _AddPropertyPageState extends State<AddPropertyPage> {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   final ImagePicker _picker = ImagePicker(); // Object to choose image from the gallery
-  final List<String> _tempImagePaths = []; // Holds local paths of selected images 
+  final List<String> _tempImagePaths = []; // Holds local paths of selected images
   Future<DocumentSnapshot?>? propertyDetailsFuture;
   bool _isSaving = false;
 
@@ -29,7 +29,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
   late String propertyFurnishing;
   late String propertyFacilities;
   late String propertyAccessibilities;
-  late String propertySize; 
+  late String propertySize;
   late String propertyBathrooms;
   late String propertyBedrooms ;
   late String rentalPrice;
@@ -86,11 +86,11 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
               ),
 
               // Property Images
-              SizedBox( 
+              SizedBox(
                 height: _tempImagePaths.isEmpty? null : 180, // Example fixed height
                 child: _tempImagePaths.isEmpty
                   ? Text(
-                      'No images selected', 
+                      'No images selected',
                       style: TextStyle(
                         color: Colors.grey[500],
                         fontSize: 14,
@@ -98,7 +98,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                     )
                   : _buildImageList(),
               ),
-      
+
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -111,10 +111,10 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                         propertyName = text;
                       },
                     ),
-      
+
                     // Add space between elements
                     const SizedBox(height: 20),
-                    
+
                     // Property Location Textfield
                     PropertyDetailsTextField(
                       title: 'Location',
@@ -123,27 +123,27 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                         propertyLocation = text;
                       },
                     ),
-      
+
                     // Add space between elements
                     const SizedBox(height: 20),
-  
+
                     // Rental Price TextField
-                    PropertyDetailsPriceTextField(                     
+                    PropertyDetailsPriceTextField(
                       getText: (String text) {
                         // Convert text from String to int
                         // If tryParse returns null then return 0
                         rentalPrice = text;
                       },
                     ),
-  
+
                     // Add space between elements
                     const SizedBox(height: 20),
-  
+
                     Row(
                       children: [
                         Expanded(
                           child: PropertyDetailsTextField(
-                            title: 'Property Size', 
+                            title: 'Property Size',
                             hintText: '0',
                             textInputType: TextInputType.number,
                             getText: (String text) {
@@ -153,13 +153,13 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                             },
                           ),
                         ),
-                    
+
                         // Add space between elements
                         const SizedBox(width: 20.0),
-                    
+
                         Expanded(
                           child: PropertyDetailsTextField(
-                            title: 'Bathroom', 
+                            title: 'Bathroom',
                             hintText: '0',
                             textInputType: TextInputType.number,
                             getText: (String text) {
@@ -169,13 +169,13 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                             },
                           ),
                         ),
-                    
+
                         // Add space between elements
                         const SizedBox(width: 20.0),
-                    
+
                         Expanded(
                           child: PropertyDetailsTextField(
-                            title: 'Bedroom', 
+                            title: 'Bedroom',
                             hintText: '0',
                             textInputType: TextInputType.number,
                             getText: (String text) {
@@ -187,52 +187,52 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                         ),
                       ],
                     ),
-  
+
                     // Add space between elements
                     const SizedBox(height: 20),
-                    
+
                     // Description Textfield
                     PropertyDetailsTextField(
-                      title: 'Description', 
+                      title: 'Description',
                       hintText: 'Enter description',
                       textInputType: TextInputType.multiline,
                       getText: (String text) {
                         propertyDescription = text;
                       },
                     ),
-                    
+
                     // Add space between elements
                     const SizedBox(height: 20),
-                    
+
                     // Furnishing Textfield
                     PropertyDetailsTextField(
-                      title: 'Furnishing', 
+                      title: 'Furnishing',
                       hintText: 'List down furniture available in the property',
                       textInputType: TextInputType.multiline,
                       getText: (String text) {
                         propertyFurnishing = text;
                       },
                     ),
-  
+
                     // Add space between elements
                     const SizedBox(height: 20),
-                    
+
                     // Facilities Textfield
                     PropertyDetailsTextField(
-                      title: 'Facilities', 
+                      title: 'Facilities',
                       hintText: 'List down available facilities with the property',
                       textInputType: TextInputType.multiline,
                       getText: (String text) {
                         propertyFacilities = text;
                       },
                     ),
-  
+
                     // Add space between elements
                     const SizedBox(height: 20),
-                    
+
                     // Accesibilities Textfield
                     PropertyDetailsTextField(
-                      title: 'Accessibilities', 
+                      title: 'Accessibilities',
                       hintText: 'List down available accessibility near the property',
                       textInputType: TextInputType.multiline,
                       getText: (String text) {
@@ -281,7 +281,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
           right: 5,
           top: 0,
           child: InkWell(
-            onTap: () => _removeImage(index),           
+            onTap: () => _removeImage(index),
             child: Container(
               decoration: const BoxDecoration(
                 color: Colors.red,
@@ -301,7 +301,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
 
   Future<void> _pickImages() async {
     final List<XFile> pickedFiles = await _picker.pickMultiImage();
-    
+
     if (pickedFiles.isNotEmpty) {
       setState(() {
         // Add all selected images to _tempImagePaths
@@ -320,12 +320,12 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       centerTitle: true,
       // Cancel Button
       leading: TextButton(
-        onPressed: () => Navigator.pop(context), 
+        onPressed: () => Navigator.pop(context),
         child: const Text('Cancel'),
       ),
       // App Bar title
       title: const Text(
-        'Add Property', 
+        'Add Property',
         style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600
@@ -364,15 +364,15 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       String fileName = "images/${DateTime.now().millisecondsSinceEpoch}_${file.uri.pathSegments.last}";
       try {
         final ref = FirebaseStorage.instance.ref().child(fileName);
-        
+
         // Upload image
         UploadTask uploadTask = ref.putFile(file);
         final snapshot = await uploadTask;
-        
+
         // Get download URL
         final url = await snapshot.ref.getDownloadURL();
         downloadUrls.add(url);
-      } 
+      }
       catch (_) {
         return null;
       }
@@ -387,7 +387,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       _tempImagePaths.removeAt(index);
     });
   }
-  
+
   Future<void> addPropertyDetails(BuildContext context) async {
     // Check to ensure all fields are filled in
     if (propertyName.isNotEmpty &&
@@ -399,7 +399,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         propertySize.isNotEmpty &&
         propertyBathrooms.isNotEmpty &&
         propertyBedrooms .isNotEmpty &&
-        rentalPrice.isNotEmpty) 
+        rentalPrice.isNotEmpty)
     {
       setState(() {
         _isSaving = true; // Start saving
@@ -408,7 +408,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       // Get landlordID from the current user
       final User user = FirebaseAuth.instance.currentUser!;
       final String landlordID = user.uid;
-      
+
       // Converts all numeric text fields to number data type (int / double)
       num? formattedPropertySize = num.tryParse(propertySize);
       int? formattedPropertyBathrooms = int.tryParse(propertyBathrooms);
@@ -428,11 +428,11 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       }
 
       // If one of these variables contains null value
-      if (formattedPropertySize == null || 
-          formattedPropertyBathrooms == null || 
-          formattedPropertyBedrooms == null || 
-          formattedRentalPrice == null || 
-          newImageUrlsHasError) 
+      if (formattedPropertySize == null ||
+          formattedPropertyBathrooms == null ||
+          formattedPropertyBedrooms == null ||
+          formattedRentalPrice == null ||
+          newImageUrlsHasError)
       {
         setState(() {
           _isSaving = false; // Stop saving
@@ -466,10 +466,10 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('All informations have been added successfully'))
           );
-          
+
           // Navigate to the previous page
           Navigator.pop(context);
-        }  
+        }
       });
       }
       catch(e) {
@@ -477,14 +477,14 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error: $e. Please try again'))
           );
-        }  
+        }
       }
       finally {
         setState(() {
           _isSaving = false; // Stop saving
         });
-      }   
-    } 
+      }
+    }
     else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please make sure all fields are filled in'))
