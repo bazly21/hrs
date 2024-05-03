@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_circulariconbutton.dart';
@@ -25,7 +24,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool rentalExists = false; // Initial state of the rental existence
   bool isWishlist = false; // Initial state of the wishlist icon
-  bool isApplicationExists = false;
+  bool hasApplied = false;
 
   late Future<Map<String, dynamic>> rentalDetailsFuture;
 
@@ -38,14 +37,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     super.initState();
     rentalDetailsFuture = _propertyService.getPropertyFullDetails(
         widget.propertyID, _auth.currentUser!.uid);
-  }
-
-  Stream<bool> checkUserApplicationStream(String propertyID) {
-    return FirebaseFirestore.instance
-        .collection('applications')
-        .where('propertyID', isEqualTo: propertyID)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.isNotEmpty);
   }
 
   Future<void> handleRefresh() async {
@@ -112,6 +103,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
         ? rentalPrice.toStringAsFixed(2)
         : rentalPrice.toStringAsFixed(0);
+    hasApplied = propertyData["hasApplied"];
 
     return Container(
       height: 80,
@@ -160,24 +152,32 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ),
 
             // Apply Button
-            ElevatedButton(
-              onPressed: propertyData["hasApplied"]
-                  ? null
-                  : () => NavigationUtils.pushPage(
-                        context,
-                        ApplyRentalPage(
-                          propertyID: widget.propertyID,
-                        ),
-                        SlideDirection.left,
-                      ).then((message) {
-                        if (message != null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(message)),
-                          );
-                        }
-                      }),
-              style: AppStyles.elevatedButtonStyle,
-              child: const Text('Apply'),
+            StatefulBuilder(
+              builder: (context, setState) {
+                return ElevatedButton(
+                  onPressed: hasApplied
+                      ? null
+                      : () => NavigationUtils.pushPage(
+                            context,
+                            ApplyRentalPage(
+                              propertyID: widget.propertyID,
+                            ),
+                            SlideDirection.left,
+                          ).then((result) {
+                            if (result != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result["message"])),
+                              );
+
+                              setState(() {
+                                hasApplied = result["hasApplied"];
+                              });
+                            }
+                          }),
+                  style: AppStyles.elevatedButtonStyle,
+                  child: const Text('Apply'),
+                );
+              }
             ),
           ],
         ),

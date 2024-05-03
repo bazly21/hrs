@@ -211,7 +211,10 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
         // Reset the form after successful submission
         _resetFields();
 
-        Navigator.pop(context, "Application submitted successfully!");
+        Navigator.pop(context, {
+          "message": "Application submitted successfully",
+          "hasApplied": true,
+        });
       },
     ).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
