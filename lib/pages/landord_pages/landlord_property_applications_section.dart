@@ -5,6 +5,7 @@ import 'package:hrs/components/my_richtext.dart';
 import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/services/property/application_service.dart';
 import 'package:hrs/services/rental/rental_service.dart';
+import 'package:hrs/test.dart';
 import 'package:intl/intl.dart';
 
 class PropertyApplicationsSection extends StatefulWidget {
@@ -69,302 +70,8 @@ class _PropertyApplicationsSectionState
                     final String applicationID =
                         applicationData["applicationID"];
 
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Card(
-                        elevation: isAccepted ? 0 : 1.0,
-                        child: Column(
-                          children: [
-                            // ********* Profile Picture and Rating Section (Start)  *********
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border(
-                                    top: const BorderSide(
-                                        width: 0.3, color: Color(0xFF7D7F88)),
-                                    left: const BorderSide(
-                                        width: 0.3, color: Color(0xFF7D7F88)),
-                                    right: const BorderSide(
-                                        width: 0.3, color: Color(0xFF7D7F88)),
-                                    bottom: isAccepted
-                                        ? const BorderSide(
-                                            width: 0.3,
-                                            color: Color(0xFF7D7F88))
-                                        : BorderSide.none,
-                                  ),
-                                  borderRadius:
-                                      BorderRadius.circular(10.0).copyWith(
-                                    bottomLeft: isAccepted ? null : Radius.zero,
-                                    bottomRight:
-                                        isAccepted ? null : Radius.zero,
-                                  )),
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    15.0, 8.0, 0, 8.0),
-                                child: Row(
-                                  children: [
-                                    // ********* Profile Picture and Rating Section (Start)  *********
-                                    Column(
-                                      children: [
-                                        const CircleAvatar(
-                                          backgroundImage: NetworkImage(
-                                              'https://via.placeholder.com/150'),
-                                          radius: 40,
-                                        ),
-                                        SizedBox(height: height * 0.007),
-                                        const StarRating(
-                                            rating: 5.0, iconSize: 18),
-                                        SizedBox(height: height * 0.007),
-                                        const CustomRichText(
-                                            text1: "5.0", text2: " (3 Reviews)")
-                                      ],
-                                    ),
-                                    // ********* Profile Picture and Rating Section (End)  *********
-
-                                    SizedBox(width: width * 0.05),
-
-                                    // ********* Applicant Details Section (Start)  *********
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // Applicant's Name
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                  applicationData[
-                                                      "applicantName"],
-                                                  style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 20)),
-
-                                              // If the application status is accepted,
-                                              // then show the 'Kebab' (three vertical dot) menu
-                                              if (isAccepted)
-                                                PopupMenuButton<String>(
-                                                  position:
-                                                      PopupMenuPosition.under,
-                                                  color: Colors.white,
-                                                  onSelected:
-                                                      (String result) async {
-                                                    // Handle the menu item selected here
-                                                    if (result ==
-                                                        "Undo Application") {
-                                                      showConfirmationAndUpdateStatus(
-                                                          context: context,
-                                                          confirmationTitle:
-                                                              "Confirm Undo",
-                                                          confirmationContent:
-                                                              "Are you sure you want to undo this application?",
-                                                          status: "Pending",
-                                                          applicationID:
-                                                              applicationID);
-                                                    }
-                                                    // If the user selects 'Start Tenancy'
-                                                    else if (result ==
-                                                        "Start Tenancy") {
-                                                      showTenancyForm(
-                                                          context,
-                                                          applicationData[
-                                                              "applicantID"]);
-                                                    }
-                                                  },
-                                                  itemBuilder: (BuildContext
-                                                          context) =>
-                                                      <PopupMenuEntry<String>>[
-                                                    // First PopupMenuItem
-                                                    const PopupMenuItem<String>(
-                                                      value: 'Start Tenancy',
-                                                      child:
-                                                          Text('Start Tenancy'),
-                                                    ),
-
-                                                    // Add divider between PopupMenuItem
-                                                    const PopupMenuDivider(),
-
-                                                    const PopupMenuItem<String>(
-                                                      value: 'Contact Tenant',
-                                                      child: Text(
-                                                          'Contact Tenant'),
-                                                    ),
-
-                                                    // Add divider between PopupMenuItem
-                                                    const PopupMenuDivider(),
-
-                                                    const PopupMenuItem<String>(
-                                                      value: 'Undo Application',
-                                                      child: Text(
-                                                        'Undo Application',
-                                                        style: TextStyle(
-                                                          color: Colors.red,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                  icon: const Icon(Icons
-                                                      .more_vert), // Icon for kebab menu (three vertical dots)
-                                                ),
-                                            ],
-                                          ),
-
-                                          SizedBox(height: height * 0.005),
-
-                                          // Applicant's Details
-                                          Row(
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  // Occupation
-                                                  const Text("Occupation:",
-                                                      style: TextStyle(
-                                                          fontSize: 13)),
-                                                  Text(
-                                                      applicationData[
-                                                          "occupation"],
-                                                      style: const TextStyle(
-                                                          fontSize: 13,
-                                                          color: Color(
-                                                              0xFF7D7F88))),
-
-                                                  // Profile Type
-                                                  const Text("Profile type:",
-                                                      style: TextStyle(
-                                                          fontSize: 13)),
-                                                  Text(
-                                                      applicationData[
-                                                          "profileType"],
-                                                      style: const TextStyle(
-                                                          fontSize: 13,
-                                                          color: Color(
-                                                              0xFF7D7F88))),
-
-                                                  // Number of Pax
-                                                  const Text("No. of pax:",
-                                                      style: TextStyle(
-                                                          fontSize: 13)),
-                                                  Text(
-                                                      "${applicationData["numberOfPax"]} pax",
-                                                      style: const TextStyle(
-                                                          fontSize: 13,
-                                                          color: Color(
-                                                              0xFF7D7F88))),
-                                                ],
-                                              ),
-                                              SizedBox(width: width * 0.03),
-                                              Container(
-                                                  width: 1,
-                                                  color:
-                                                      const Color(0xFF8568F3),
-                                                  height: 110),
-                                              SizedBox(width: width * 0.03),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  // Occupation
-                                                  const Text("Nationality:",
-                                                      style: TextStyle(
-                                                          fontSize: 13)),
-                                                  Text(
-                                                      applicationData[
-                                                          "nationality"],
-                                                      style: const TextStyle(
-                                                          fontSize: 13,
-                                                          color: Color(
-                                                              0xFF7D7F88))),
-
-                                                  // Profile Type
-                                                  const Text("Move-in date:",
-                                                      style: TextStyle(
-                                                          fontSize: 13)),
-                                                  Text(
-                                                      "${applicationData["moveInDate"]}",
-                                                      style: const TextStyle(
-                                                          fontSize: 13,
-                                                          color: Color(
-                                                              0xFF7D7F88))),
-
-                                                  // Number of Pax
-                                                  const Text(
-                                                      "Tenancy duration:",
-                                                      style: TextStyle(
-                                                          fontSize: 13)),
-                                                  Text(
-                                                      "${applicationData["tenancyDuration"]} months",
-                                                      style: const TextStyle(
-                                                          fontSize: 13,
-                                                          color: Color(
-                                                              0xFF7D7F88))),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                    // ********* Applicant Details Section (End)  *********
-                                  ],
-                                ),
-                              ),
-                            ),
-                            // ********* Profile Picture and Rating Section (End)  *********
-
-                            // ********* Accept and Decline Buttons (Start)  *********
-                            if (!isAccepted)
-                              Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    // Decline Button
-                                    Expanded(
-                                        child: InkButton(
-                                      backgroundColor: Colors.red[400]!,
-                                      onTap: () => showConfirmationAndUpdateStatus(
-                                          context: context,
-                                          confirmationTitle: "Confirm Decline",
-                                          confirmationContent:
-                                              "Are you sure you want to decline this application?",
-                                          status: "Declined",
-                                          applicationID: applicationID),
-                                      textButton: "Decline",
-                                      splashColor:
-                                          Colors.red[700]!.withOpacity(0.5),
-                                      highlightColor:
-                                          Colors.red[900]!.withOpacity(0.5),
-                                      borderRadius: const BorderRadius.only(
-                                          bottomLeft: Radius.circular(10)),
-                                    )),
-
-                                    // Accept Button
-                                    Expanded(
-                                      child: InkButton(
-                                          backgroundColor: Colors.green[400]!,
-                                          onTap: () =>
-                                              showConfirmationAndUpdateStatus(
-                                                  context: context,
-                                                  confirmationTitle:
-                                                      "Confirm Accept",
-                                                  confirmationContent:
-                                                      "Are you sure you want to accept this application?",
-                                                  status: "Accepted",
-                                                  applicationID: applicationID),
-                                          textButton: "Accept",
-                                          splashColor: Colors.green[700]!
-                                              .withOpacity(0.5),
-                                          highlightColor: Colors.green[900]!
-                                              .withOpacity(0.5)),
-                                    ),
-                                  ])
-                            // ********* Accept and Decline Buttons (End)  *********
-                          ],
-                        ),
-                      ),
+                    return Stack(
+                      children: _buildApplicantData(index, context, applicationData, isAccepted, applicationID, height, width),
                     );
                   });
             } else {
@@ -385,6 +92,344 @@ class _PropertyApplicationsSectionState
               );
             }
           }),
+    );
+  }
+
+  List<Widget> _buildApplicantData(int index, BuildContext context, Map<String, dynamic> applicationData, bool isAccepted, String applicationID, double height, double width) {
+    return [
+      _buildApplicantCard(index, isAccepted, height, width, applicationData, context, applicationID),
+      if (index == 0)
+        Positioned(
+          top: 5,
+          left: 45,
+          child: Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: const Text(
+              "Best choice",
+              style: TextStyle(fontSize: 14, color: Colors.green),
+            ),
+          ),
+        )
+    ];
+  }
+
+  Card _buildApplicantCard(int index, bool isAccepted, double height, double width, Map<String, dynamic> applicationData, BuildContext context, String applicationID) {
+    return Card(
+      margin: const EdgeInsets.all(16),
+      elevation: 4,
+      child: Column(
+        children: [
+          // ********* Profile Picture and Rating Section (Start)  *********
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  top: BorderSide(
+                      width: 0.5,
+                      color: index == 0 ? Colors.green :const Color(0xFF7D7F88)),
+                  left:  BorderSide(
+                      width: 0.5,
+                      color: index == 0 ? Colors.green :const Color(0xFF7D7F88)),
+                  right:  BorderSide(
+                      width: 0.5,
+                      color: index == 0 ? Colors.green :const Color(0xFF7D7F88)),
+                  bottom: isAccepted
+                      ?  BorderSide(
+                          width: 0.5,
+                          color: index == 0 ? Colors.green :const Color(0xFF7D7F88))
+                      : BorderSide.none,
+                ),
+                borderRadius:
+                    BorderRadius.circular(10.0).copyWith(
+                  bottomLeft:
+                      isAccepted ? null : Radius.zero,
+                  bottomRight:
+                      isAccepted ? null : Radius.zero,
+                )),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  15.0, 8.0, 0, 8.0),
+              child: Row(
+                children: [
+                  // ********* Profile Picture and Rating Section (Start)  *********
+                  Column(
+                    children: [
+                      const CircleAvatar(
+                        backgroundImage: NetworkImage(
+                            'https://via.placeholder.com/150'),
+                        radius: 40,
+                      ),
+                      SizedBox(height: height * 0.007),
+                      const StarRating(
+                          rating: 5.0, iconSize: 18),
+                      SizedBox(height: height * 0.007),
+                      const CustomRichText(
+                          text1: "5.0",
+                          text2: " (3 Reviews)")
+                    ],
+                  ),
+                  // ********* Profile Picture and Rating Section (End)  *********
+
+                  SizedBox(width: width * 0.05),
+
+                  // ********* Applicant Details Section (Start)  *********
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                      children: [
+                        // Applicant's Name
+                        Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment
+                                  .spaceBetween,
+                          children: [
+                            Text(
+                                applicationData[
+                                    "applicantName"],
+                                style: const TextStyle(
+                                    fontWeight:
+                                        FontWeight.w600,
+                                    fontSize: 20)),
+
+                            // If the application status is accepted,
+                            // then show the 'Kebab' (three vertical dot) menu
+                            if (isAccepted)
+                              PopupMenuButton<String>(
+                                position:
+                                    PopupMenuPosition
+                                        .under,
+                                color: Colors.white,
+                                onSelected: (String
+                                    result) async {
+                                  // Handle the menu item selected here
+                                  if (result ==
+                                      "Undo Application") {
+                                    showConfirmationAndUpdateStatus(
+                                        context: context,
+                                        confirmationTitle:
+                                            "Confirm Undo",
+                                        confirmationContent:
+                                            "Are you sure you want to undo this application?",
+                                        status: "Pending",
+                                        applicationID:
+                                            applicationID);
+                                  }
+                                  // If the user selects 'Start Tenancy'
+                                  else if (result ==
+                                      "Start Tenancy") {
+                                    showTenancyForm(
+                                        context,
+                                        applicationData[
+                                            "applicantID"]);
+                                  }
+                                },
+                                itemBuilder: (BuildContext
+                                        context) =>
+                                    <PopupMenuEntry<
+                                        String>>[
+                                  // First PopupMenuItem
+                                  const PopupMenuItem<
+                                      String>(
+                                    value:
+                                        'Start Tenancy',
+                                    child: Text(
+                                        'Start Tenancy'),
+                                  ),
+
+                                  // Add divider between PopupMenuItem
+                                  const PopupMenuDivider(),
+
+                                  const PopupMenuItem<
+                                      String>(
+                                    value:
+                                        'Contact Tenant',
+                                    child: Text(
+                                        'Contact Tenant'),
+                                  ),
+
+                                  // Add divider between PopupMenuItem
+                                  const PopupMenuDivider(),
+
+                                  const PopupMenuItem<
+                                      String>(
+                                    value:
+                                        'Undo Application',
+                                    child: Text(
+                                      'Undo Application',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                icon: const Icon(Icons
+                                    .more_vert), // Icon for kebab menu (three vertical dots)
+                              ),
+                          ],
+                        ),
+
+                        SizedBox(height: height * 0.005),
+
+                        // Applicant's Details
+                        Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
+                              children: [
+                                // Occupation
+                                const Text("Occupation:",
+                                    style: TextStyle(
+                                        fontSize: 13)),
+                                Text(
+                                    applicationData[
+                                        "occupation"],
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(
+                                            0xFF7D7F88))),
+
+                                // Profile Type
+                                const Text(
+                                    "Profile type:",
+                                    style: TextStyle(
+                                        fontSize: 13)),
+                                Text(
+                                    applicationData[
+                                        "profileType"],
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(
+                                            0xFF7D7F88))),
+
+                                // Number of Pax
+                                const Text("No. of pax:",
+                                    style: TextStyle(
+                                        fontSize: 13)),
+                                Text(
+                                    "${applicationData["numberOfPax"]} pax",
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(
+                                            0xFF7D7F88))),
+                              ],
+                            ),
+                            SizedBox(width: width * 0.03),
+                            Container(
+                                width: 1,
+                                color: const Color(
+                                    0xFF8568F3),
+                                height: 110),
+                            SizedBox(width: width * 0.03),
+                            Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start,
+                              children: [
+                                // Occupation
+                                const Text("Nationality:",
+                                    style: TextStyle(
+                                        fontSize: 13)),
+                                Text(
+                                    applicationData[
+                                        "nationality"],
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(
+                                            0xFF7D7F88))),
+
+                                // Profile Type
+                                const Text(
+                                    "Move-in date:",
+                                    style: TextStyle(
+                                        fontSize: 13)),
+                                Text(
+                                    "${applicationData["moveInDate"]}",
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(
+                                            0xFF7D7F88))),
+
+                                // Number of Pax
+                                const Text(
+                                    "Tenancy duration:",
+                                    style: TextStyle(
+                                        fontSize: 13)),
+                                Text(
+                                    "${applicationData["tenancyDuration"]} months",
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(
+                                            0xFF7D7F88))),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                  // ********* Applicant Details Section (End)  *********
+                ],
+              ),
+            ),
+          ),
+          // ********* Profile Picture and Rating Section (End)  *********
+
+          // ********* Accept and Decline Buttons (Start)  *********
+          if (!isAccepted)
+            Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.spaceBetween,
+                children: [
+                  // Decline Button
+                  Expanded(
+                      child: InkButton(
+                    backgroundColor: Colors.red[400]!,
+                    onTap: () =>
+                        showConfirmationAndUpdateStatus(
+                            context: context,
+                            confirmationTitle:
+                                "Confirm Decline",
+                            confirmationContent:
+                                "Are you sure you want to decline this application?",
+                            status: "Declined",
+                            applicationID: applicationID),
+                    textButton: "Decline",
+                    splashColor:
+                        Colors.red[700]!.withOpacity(0.5),
+                    highlightColor:
+                        Colors.red[900]!.withOpacity(0.5),
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(10)),
+                  )),
+
+                  // Accept Button
+                  Expanded(
+                    child: InkButton(
+                        backgroundColor:
+                            Colors.green[400]!,
+                        onTap: () =>
+                            showConfirmationAndUpdateStatus(
+                                context: context,
+                                confirmationTitle:
+                                    "Confirm Accept",
+                                confirmationContent:
+                                    "Are you sure you want to accept this application?",
+                                status: "Accepted",
+                                applicationID:
+                                    applicationID),
+                        textButton: "Accept",
+                        splashColor: Colors.green[700]!
+                            .withOpacity(0.5),
+                        highlightColor: Colors.green[900]!
+                            .withOpacity(0.5)),
+                  ),
+                ])
+          // ********* Accept and Decline Buttons (End)  *********
+        ],
+      ),
     );
   }
 
