@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_richtext.dart';
-import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/services/property/application_service.dart';
 import 'package:hrs/services/rental/rental_service.dart';
 import 'package:intl/intl.dart';
@@ -154,21 +154,7 @@ class _PropertyApplicationsSectionState
             children: [
               Row(
                 children: [
-                  // ********* Profile Picture and Rating Section (Start)  *********
-                  Column(
-                    children: [
-                      const CircleAvatar(
-                        backgroundImage:
-                            NetworkImage('https://via.placeholder.com/150'),
-                        radius: 40,
-                      ),
-                      SizedBox(height: height * 0.007),
-                      const StarRating(rating: 5.0, iconSize: 18),
-                      SizedBox(height: height * 0.007),
-                      const CustomRichText(text1: "5.0", text2: " (3 Reviews)")
-                    ],
-                  ),
-                  // ********* Profile Picture and Rating Section (End)  *********
+                  _buildProfileAndRating(height),
 
                   SizedBox(width: width * 0.05),
 
@@ -326,6 +312,21 @@ class _PropertyApplicationsSectionState
           ),
         ),
       ),
+    );
+  }
+
+  Column _buildProfileAndRating(double height) {
+    return Column(
+      children: [
+        const CircleAvatar(
+          backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+          radius: 40,
+        ),
+        SizedBox(height: height * 0.007),
+        const CustomRatingBar(rating: 5.0),
+        SizedBox(height: height * 0.007),
+        const CustomRichText(text1: "5.0", text2: " (3 Reviews)")
+      ],
     );
   }
 
