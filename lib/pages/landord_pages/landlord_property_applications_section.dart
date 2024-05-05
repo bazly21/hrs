@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:hrs/components/ink_button.dart';
 import 'package:hrs/components/my_richtext.dart';
 import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/services/property/application_service.dart';
@@ -25,6 +23,7 @@ class _PropertyApplicationsSectionState
   late Future<List<Map<String, dynamic>>> propertyApplicationsFuture;
   final TextEditingController _tenancyDateController = TextEditingController();
   final RentalService _rentalService = RentalService();
+  bool _isApplicationAccepted = false;
   String? tenancyDuration;
   DateTime? startDate;
   DateTime? endDate;
@@ -140,7 +139,7 @@ class _PropertyApplicationsSectionState
       BuildContext context,
       String applicationID) {
     return Card(
-      margin: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
@@ -322,56 +321,62 @@ class _PropertyApplicationsSectionState
               ),
               const SizedBox(height: 8),
               if (!isAccepted)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          showConfirmationAndUpdateStatus(
-                              context: context,
-                              confirmationTitle: "Confirm Decline",
-                              confirmationContent:
-                                  "Are you sure you want to decline this application?",
-                              status: "Declined",
-                              applicationID: applicationID);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[300],
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                        child: Text("Decline",
-                            style: TextStyle(color: Colors.grey[600])),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          showConfirmationAndUpdateStatus(
-                              context: context,
-                              confirmationTitle: "Confirm Accept",
-                              confirmationContent:
-                                  "Are you sure you want to accept this application?",
-                              status: "Accepted",
-                              applicationID: applicationID);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8568F3),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                        child: const Text("Accept",
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                    )
-                  ],
-                )
+                _buildAcceptDeclineButtons(context, applicationID),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Row _buildAcceptDeclineButtons(BuildContext context, String applicationID) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _isApplicationAccepted
+                ? null
+                : () {
+                    showConfirmationAndUpdateStatus(
+                        context: context,
+                        confirmationTitle: "Confirm Decline",
+                        confirmationContent:
+                            "Are you sure you want to decline this application?",
+                        status: "Declined",
+                        applicationID: applicationID);
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[300],
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text("Decline", style: TextStyle(color: Colors.grey[600])),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: _isApplicationAccepted
+                ? null
+                : () {
+                    showConfirmationAndUpdateStatus(
+                        context: context,
+                        confirmationTitle: "Confirm Accept",
+                        confirmationContent:
+                            "Are you sure you want to accept this application?",
+                        status: "Accepted",
+                        applicationID: applicationID);
+                  },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8568F3),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text("Accept", style: TextStyle(color: Colors.white)),
+          ),
+        )
+      ],
     );
   }
 
@@ -420,6 +425,18 @@ class _PropertyApplicationsSectionState
           .update({
         "status": status,
       }).then((_) {
+        switch (status) {
+          case "Accepted":
+            setState(() {
+              _isApplicationAccepted = true;
+            });
+            break;
+          case "Pending":
+            setState(() {
+              _isApplicationAccepted = false;
+            });
+            break;
+        }
         refreshData();
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
