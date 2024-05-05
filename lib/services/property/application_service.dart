@@ -68,6 +68,8 @@ class ApplicationService {
           .sort((a, b) => b["criteriaScore"].compareTo(a["criteriaScore"]));
     }
 
+    print(applicationDataList);
+
     return applicationDataList;
   }
 

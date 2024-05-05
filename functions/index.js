@@ -55,12 +55,6 @@ exports.calculateTenantCriteriaScore = functions.firestore
       const applicationData = snapshot.data();
       const propertyID = context.params.propertyId;
 
-      // Check if the document contains the propertyID field
-      if (!applicationData.propertyID) {
-        console.error("Document does not contain propertyID field");
-        return;
-      }
-
       // Fetch the property document
       const propertySnapshot = await db
         .collection("properties")
@@ -81,7 +75,7 @@ exports.calculateTenantCriteriaScore = functions.firestore
         const tenantCriteria = propertyData.tenantCriteria;
 
         // Perform operations with tenantCriteria field
-        const criteriaScore = await calculateCriteriaScore(tenantCriteria, applicationData);
+        const criteriaScore = calculateCriteriaScore(tenantCriteria, applicationData);
 
         // Update the document with the calculated criteria score
         await snapshot.ref.update({criteriaScore: criteriaScore});
@@ -108,7 +102,7 @@ exports.calculateTenantCriteriaScore = functions.firestore
  * @param {number} applicationData.tenancyDuration - The tenancy duration of the applicant.
  * @return {number} The calculated criteria score.
  */
-  async function calculateCriteriaScore(tenantCriteria, applicationData) {
+  function calculateCriteriaScore(tenantCriteria, applicationData) {
     let score = 0;
 
     // Calculate score based on profile type
