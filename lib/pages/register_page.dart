@@ -12,22 +12,20 @@
 
 // Import
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hrs/pages/navigation_page.dart';
-import 'package:hrs/pages/otp_confirmation_page.dart';
-import 'package:hrs/components/my_textfield.dart';
-import 'package:hrs/components/my_label.dart';
-import 'package:hrs/components/my_button.dart';
-import 'package:hrs/components/my_appbar.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
-
 // Firebase import
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hrs/components/my_appbar.dart';
+import 'package:hrs/components/my_button.dart';
+import 'package:hrs/components/my_label.dart';
+import 'package:hrs/components/my_textfield.dart';
+import 'package:hrs/pages/navigation_page.dart';
+import 'package:hrs/pages/otp_confirmation_page.dart';
 
 class RegisterPage extends StatefulWidget {
-  final String? statusMessage;
 
-  const RegisterPage({super.key, this.statusMessage});
+  const RegisterPage({super.key});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -35,25 +33,19 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   // Text editing controller
-  final phoneNumberController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-
-    if (widget.statusMessage != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(widget.statusMessage!)),
-        );
-      });
-    }
+  void dispose() {
+    _phoneNumberController.dispose();
+    super.dispose();
   }
 
   // Function to send OTP code
   Future<void> sendOTP(BuildContext context) async {
     // Only support Malaysia phone number format "+60"
-    final phoneNumber = "+6${phoneNumberController.text.trim()}";
+    final phoneNumber = "+6${_phoneNumberController.text.trim()}";
+    print(phoneNumber);
 
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: phoneNumber,
@@ -61,7 +53,11 @@ class _RegisterPageState extends State<RegisterPage> {
         // Auto-retrieval or instant verification completed.
       },
       verificationFailed: (FirebaseAuthException e) {
-        // Handle error.
+        // Show error message if the verification failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? "An error occurred")),
+        );
+        print("Error: ${e.message}");
       },
       codeSent: (String verificationId, int? resendToken) {
         // Navigate to ConfirmationPage and pass verificationId.
@@ -101,7 +97,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
               // Phone Number textfield
               MyTextField(
-                controller: phoneNumberController,
+                controller: _phoneNumberController,
                 hintText: "Enter your phone number",
                 obscureText: false,
                 textInputType: TextInputType.number,

@@ -9,11 +9,12 @@ import 'package:hrs/pages/navigation_page.dart';
 import 'package:hrs/pages/register_page.dart';
 
 class OTPConfirmationPage extends StatelessWidget {
-  OTPConfirmationPage(
-      {super.key,
-      required this.phoneNumber,
-      required this.verificationId,
-      required this.buttonText});
+  OTPConfirmationPage({
+    super.key,
+    required this.phoneNumber,
+    required this.verificationId,
+    required this.buttonText
+  });
 
   final String phoneNumber, verificationId, buttonText;
   final otpController = TextEditingController();
@@ -43,7 +44,8 @@ class OTPConfirmationPage extends StatelessWidget {
         if (context.mounted) {
           // Navigate to the PasswordPage
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => PasswordPage(phoneNumber: phoneNumber)),
+            MaterialPageRoute(
+                builder: (context) => PasswordPage(phoneNumber: phoneNumber)),
             (Route<dynamic> route) =>
                 false, // This predicate will never be true, so it removes all the routes below the new one.
           );
@@ -61,12 +63,11 @@ class OTPConfirmationPage extends StatelessWidget {
         }
       }
     } on FirebaseAuthException {
-        if (context.mounted) {
-          // Display error message if the storing operation is failed
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text(
-                  "Something error happened. Please try again")));
-        }
+      if (context.mounted) {
+        // Display error message if the storing operation is failed
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Something error happened. Please try again")));
+      }
     }
   }
 

@@ -12,6 +12,7 @@ import 'package:hrs/components/my_appbar.dart';
 // Packages import
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 
 // Pages import
 import 'otp_confirmation_page.dart';
@@ -63,11 +64,19 @@ class LoginPage extends StatelessWidget {
     if (querySnapshot.docs.isEmpty) {
       // Phone number not found, navigate to registration page
       if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const RegisterPage(statusMessage: "You are not registered yet. Please complete your registration.",)), // Adjust with your RegistrationPage
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+                "You are not registered yet. Please complete your registration."),
+            duration: const Duration(seconds: 3),
+            action: SnackBarAction(
+              label: 'Register',
+              onPressed: () {
+                NavigationUtils.pushPage(
+                    context, const RegisterPage(), SlideDirection.left);
+              },
+            ),
+          ),
         );
       }
     } else {
@@ -114,7 +123,8 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: 28),
 
               // Log in button
-              MyButton(text: "Login", onPressed: () => checkPhoneNumber(context)),
+              MyButton(
+                  text: "Login", onPressed: () => checkPhoneNumber(context)),
 
               // Add space between elements
               const SizedBox(height: 14),
@@ -124,10 +134,8 @@ class LoginPage extends StatelessWidget {
                   text1: "Do not have an account? ",
                   text2: "Register",
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const RegisterPage()),
-                    );
+                    NavigationUtils.pushPage(
+                        context, const RegisterPage(), SlideDirection.left);
                   }),
             ],
           ),
