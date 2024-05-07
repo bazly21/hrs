@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/user_service.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -173,9 +174,10 @@ class _ProfilePageState extends State<ProfilePage> {
         ProfileMenu(
           text: "Login as Landlord",
           icon: Icons.login,
-          onPressed: () => Navigator.push(
+          onPressed: () => NavigationUtils.pushPage(
             context,
-            MaterialPageRoute(builder: (context) => LandlordLoginPage()),
+            LandlordLoginPage(),
+            SlideDirection.left,
           ),
         ),
       ],

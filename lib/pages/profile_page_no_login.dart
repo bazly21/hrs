@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
 import 'package:hrs/pages/login_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 
 class ProfilePageNoAccount extends StatelessWidget {
   const ProfilePageNoAccount({super.key});
@@ -41,10 +42,8 @@ class ProfilePageNoAccount extends StatelessWidget {
                 ProfileMenu(
                   text: "Login",
                   icon: Icons.login,
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginPage()),
-                  ),
+                  onPressed: () => NavigationUtils.pushPage(
+                      context, LoginPage(), SlideDirection.left),
                 ),
 
                 // Add space between elements
@@ -58,8 +57,8 @@ class ProfilePageNoAccount extends StatelessWidget {
                 ProfileMenu(
                     text: "Login as Landlord",
                     icon: Icons.login,
-                    onPressed: () => Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LandlordLoginPage()))),
+                    onPressed: () => NavigationUtils.pushPage(
+                      context, LandlordLoginPage(), SlideDirection.left)),
               ],
             ),
           ),
