@@ -306,7 +306,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                 landlordID: propertyData["landlordID"],
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const ProfileViewPage()));
+                      builder: (context) => ProfileViewPage(userID: propertyData["landlordID"])));
                 },
               ),
               // ********* Landlord Profile Section (End) *********
