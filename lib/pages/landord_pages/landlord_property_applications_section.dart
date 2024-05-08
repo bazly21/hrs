@@ -21,10 +21,11 @@ class _PropertyApplicationsSectionState
     extends State<PropertyApplicationsSection> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ApplicationService _applicationService = ApplicationService();
-  late Future<List<Map<String, dynamic>>> propertyApplicationsFuture;
+  late Future<Map<String, dynamic>> propertyApplicationsFuture;
   final TextEditingController _tenancyDateController = TextEditingController();
   final RentalService _rentalService = RentalService();
   bool _isApplicationAccepted = false;
+  bool _containAcceptedApplication = false;
   String? tenancyDuration;
   DateTime? startDate;
   DateTime? endDate;
@@ -44,12 +45,9 @@ class _PropertyApplicationsSectionState
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
-    final double width = MediaQuery.of(context).size.width;
-
     return RefreshIndicator(
       onRefresh: refreshData,
-      child: FutureBuilder<List<Map<String, dynamic>>>(
+      child: FutureBuilder<Map<String, dynamic>>(
           future: propertyApplicationsFuture,
           builder: (context, snapshot) {
             // If snapshot contains data
@@ -61,24 +59,19 @@ class _PropertyApplicationsSectionState
             // If there is data and the data is not empty
             else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
               return ListView.builder(
-                  itemCount: snapshot.data!.length,
+                  itemCount: snapshot.data!['applicationList'].length,
                   itemBuilder: (context, index) {
                     final Map<String, dynamic> applicationData =
-                        snapshot.data![index];
-                    final bool isAccepted = applicationData['status'] ==
-                        "Accepted"; // To check if the status of the application wether it is accepted or not
+                        snapshot.data!['applicationList'][index];
                     final String applicationID =
                         applicationData["applicationID"];
+                    _isApplicationAccepted =
+                        applicationData['status'] == "Accepted";
+                    _containAcceptedApplication = snapshot.data!['hasAccepted'];
 
                     return Stack(
-                      children: _buildApplicantData(
-                          index,
-                          context,
-                          applicationData,
-                          isAccepted,
-                          applicationID,
-                          height,
-                          width),
+                      children: _buildApplicantData(index, context,
+                          applicationData, _isApplicationAccepted, applicationID),
                     );
                   });
             } else {
@@ -107,12 +100,10 @@ class _PropertyApplicationsSectionState
       BuildContext context,
       Map<String, dynamic> applicationData,
       bool isAccepted,
-      String applicationID,
-      double height,
-      double width) {
+      String applicationID) {
     return [
-      _buildApplicantCard(index, isAccepted, height, width, applicationData,
-          context, applicationID),
+      _buildApplicantCard(
+          index, isAccepted, applicationData, context, applicationID),
       if (index == 0)
         Positioned(
           top: 5,
@@ -134,8 +125,6 @@ class _PropertyApplicationsSectionState
   Card _buildApplicantCard(
       int index,
       bool isAccepted,
-      double height,
-      double width,
       Map<String, dynamic> applicationData,
       BuildContext context,
       String applicationID) {
@@ -155,9 +144,9 @@ class _PropertyApplicationsSectionState
             children: [
               Row(
                 children: [
-                  _buildProfileAndRating(height),
+                  _buildProfileAndRating(),
 
-                  SizedBox(width: width * 0.05),
+                  const SizedBox(width: 25),
 
                   // ********* Applicant Details Section (Start)  *********
                   Expanded(
@@ -191,8 +180,7 @@ class _PropertyApplicationsSectionState
                                   }
                                   // If the user selects 'Start Tenancy'
                                   else if (result == "Start Tenancy") {
-                                    showTenancyForm(context,
-                                        applicationData["applicantID"]);
+                                    showTenancyForm(context, applicationData);
                                   }
                                 },
                                 itemBuilder: (BuildContext context) =>
@@ -230,7 +218,7 @@ class _PropertyApplicationsSectionState
                           ],
                         ),
 
-                        SizedBox(height: height * 0.005),
+                        const SizedBox(height: 4),
 
                         // Applicant's Details
                         Row(
@@ -263,12 +251,12 @@ class _PropertyApplicationsSectionState
                                         color: Color(0xFF7D7F88))),
                               ],
                             ),
-                            SizedBox(width: width * 0.03),
+                            const SizedBox(width: 14),
                             Container(
                                 width: 1,
                                 color: const Color(0xFF8568F3),
                                 height: 110),
-                            SizedBox(width: width * 0.03),
+                            const SizedBox(width: 14),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -316,17 +304,17 @@ class _PropertyApplicationsSectionState
     );
   }
 
-  Column _buildProfileAndRating(double height) {
-    return Column(
+  Column _buildProfileAndRating() {
+    return const Column(
       children: [
-        const CircleAvatar(
+        CircleAvatar(
           backgroundImage: NetworkImage('https://via.placeholder.com/150'),
           radius: 40,
         ),
-        SizedBox(height: height * 0.007),
-        const CustomRatingBar(rating: 5.0),
-        SizedBox(height: height * 0.007),
-        const CustomRichText(text1: "5.0", text2: " (3 Reviews)")
+        SizedBox(height: 7),
+        CustomRatingBar(rating: 5.0),
+        SizedBox(height: 7),
+        CustomRichText(text1: "5.0", text2: " (3 Reviews)")
       ],
     );
   }
@@ -337,7 +325,7 @@ class _PropertyApplicationsSectionState
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: _isApplicationAccepted
+            onPressed: _containAcceptedApplication
                 ? null
                 : () {
                     showConfirmationAndUpdateStatus(
@@ -355,7 +343,7 @@ class _PropertyApplicationsSectionState
         const SizedBox(width: 10),
         Expanded(
           child: ElevatedButton(
-            onPressed: _isApplicationAccepted
+            onPressed: _containAcceptedApplication
                 ? null
                 : () {
                     showConfirmationAndUpdateStatus(
@@ -419,18 +407,6 @@ class _PropertyApplicationsSectionState
           .update({
         "status": status,
       }).then((_) {
-        switch (status) {
-          case "Accepted":
-            setState(() {
-              _isApplicationAccepted = true;
-            });
-            break;
-          case "Pending":
-            setState(() {
-              _isApplicationAccepted = false;
-            });
-            break;
-        }
         refreshData();
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -441,7 +417,7 @@ class _PropertyApplicationsSectionState
     }
   }
 
-  void showTenancyForm(BuildContext context, String tenantID) {
+  void showTenancyForm(BuildContext context, Map<String, dynamic> tenantData) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -467,7 +443,8 @@ class _PropertyApplicationsSectionState
                 children: [
                   tenancyDurationField(setState, updateEndDate),
                   const SizedBox(height: 20),
-                  _tenancyDateField(context, setState, updateEndDate),
+                  _tenancyDateField(context, setState, updateEndDate,
+                      tenantData["moveInDate"]),
                   const SizedBox(height: 20),
                   // Caluculate the end date based on the start date and tenancy duration
                   if (endDate != null) _tenancyEndDateText(),
@@ -478,8 +455,12 @@ class _PropertyApplicationsSectionState
                     onPressed: () {
                       // Save tenancy information in database
                       _rentalService
-                          .saveTenancyInfo(widget.propertyID, tenantID,
-                              int.parse(tenancyDuration!), startDate!, endDate!)
+                          .saveTenancyInfo(
+                              widget.propertyID,
+                              tenantData["applicantID"],
+                              int.parse(tenancyDuration!),
+                              startDate!,
+                              endDate!)
                           .then((_) => Navigator.pop(context))
                           .catchError(
                         (error) {
@@ -565,7 +546,16 @@ class _PropertyApplicationsSectionState
   }
 
   Column _tenancyDateField(BuildContext context, StateSetter setState,
-      void Function() updateEndDate) {
+      void Function() updateEndDate, String tenancyDate) {
+    DateFormat format = DateFormat('dd/MM/yyyy');
+    DateTime parsedDate = format.parse(tenancyDate);
+
+    // Check if the parsed date is after the current date
+    if (parsedDate.isAfter(DateTime.now())) {
+      _tenancyDateController.text = tenancyDate;
+      startDate = parsedDate;
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

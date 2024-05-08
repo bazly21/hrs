@@ -5,7 +5,7 @@ class UserService {
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
 
   // Get user details
-  Future<DocumentSnapshot> getUserDetails(String userID) async {
+  Future<DocumentSnapshot<Map<String, dynamic>>> getUserDetails(String userID) async {
     return await _fireStore.collection('users').doc(userID).get();
   }
 }
