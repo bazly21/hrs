@@ -4,6 +4,7 @@ import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_richtext.dart';
 import 'package:hrs/services/property/application_service.dart';
 import 'package:hrs/services/rental/rental_service.dart';
+import 'package:hrs/style/app_style.dart';
 import 'package:intl/intl.dart';
 
 class PropertyApplicationsSection extends StatefulWidget {
@@ -347,12 +348,8 @@ class _PropertyApplicationsSectionState
                         status: "Declined",
                         applicationID: applicationID);
                   },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[300],
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            child: Text("Decline", style: TextStyle(color: Colors.grey[600])),
+            style: AppStyles.declineButtonStyle,
+            child: const Text("Decline"),
           ),
         ),
         const SizedBox(width: 10),
@@ -369,12 +366,8 @@ class _PropertyApplicationsSectionState
                         status: "Accepted",
                         applicationID: applicationID);
                   },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF8568F3),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text("Accept", style: TextStyle(color: Colors.white)),
+            style: AppStyles.acceptButtonStyle,
+            child: const Text("Accept"),
           ),
         )
       ],
