@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
+import 'package:hrs/pages/rental_history_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/user_service.dart';
 
@@ -147,7 +148,14 @@ class _ProfilePageState extends State<ProfilePage> {
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
 
-        const ProfileMenu(text: "Rental History", icon: Icons.wallet),
+        ProfileMenu(text: "Rental History", icon: Icons.wallet, onPressed: () {
+          // Navigate to Rental History Page
+          NavigationUtils.pushPage(
+            context,
+            RentalHistoryPage(),
+            SlideDirection.left,
+          );
+        }),
 
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),

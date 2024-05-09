@@ -3,14 +3,14 @@ import 'package:hrs/pages/rating_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/rental/rental_service.dart';
 
-class RatingList extends StatefulWidget {
-  const RatingList({super.key});
+class RentalHistoryList extends StatefulWidget {
+  const RentalHistoryList({super.key});
 
   @override
-  State<RatingList> createState() => _RatingListState();
+  State<RentalHistoryList> createState() => _RentalHistoryListState();
 }
 
-class _RatingListState extends State<RatingList> {
+class _RentalHistoryListState extends State<RentalHistoryList> {
   final RentalService _rentalService = RentalService();
   Future<List<Map<String, dynamic>>?>? _endedTenancies;
 
