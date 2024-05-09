@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/pages/chat_page.dart';
 import 'package:hrs/pages/login_page.dart';
+import 'package:hrs/pages/view_profile_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 
 class UserDetails extends StatelessWidget {
@@ -9,20 +10,19 @@ class UserDetails extends StatelessWidget {
   final String? image;
   final int numReview;
   final double rating;
-  final VoidCallback? onPressed;
 
   final User? user = FirebaseAuth.instance.currentUser;
 
-  UserDetails(
-      {super.key,
-      required this.landlordName,
-      this.position = "Property Owner",
-      required this.rating,
-      required this.numReview,
-      this.image,
-      this.textButton = "Chat with owner",
-      this.onPressed,
-      required this.landlordID});
+  UserDetails({
+    super.key,
+    required this.landlordName,
+    this.position = "Property Owner",
+    required this.rating,
+    required this.numReview,
+    this.image,
+    this.textButton = "Chat with owner",
+    required this.landlordID
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,12 @@ class UserDetails extends StatelessWidget {
       children: [
         // Profile picture **Database Required**
         InkWell(
-          onTap: onPressed ?? () {}, // Go to landlord profile page
+          onTap: () {
+            NavigationUtils.pushPage(
+                context,
+                ProfileViewPage(userID: landlordID),
+                SlideDirection.left);
+          },
           child: ClipOval(
             child: Image.network(
               image ??

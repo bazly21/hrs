@@ -6,7 +6,6 @@ import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
 import 'package:hrs/pages/apply_rental_page.dart';
 import 'package:hrs/pages/login_page.dart';
-import 'package:hrs/pages/view_profile_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
 import 'package:hrs/style/app_style.dart';
@@ -304,10 +303,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                 rating: propertyData["landlordOverallRating"] ?? 0,
                 numReview: propertyData["landlordRatingCount"] ?? 0,
                 landlordID: propertyData["landlordID"],
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ProfileViewPage(userID: propertyData["landlordID"])));
-                },
               ),
               // ********* Landlord Profile Section (End) *********
 
