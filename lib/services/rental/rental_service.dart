@@ -81,7 +81,7 @@ class RentalService {
         'landlordName': landlordData['name'] ?? 'N/A',
         'landlordRatingCount': landlordData['ratingCount'] ?? 0,
         'landlordRatingAverage':
-            landlordData['ratingAverage'] as double? ?? 0.0,
+            landlordData['ratingAverage']?["overallRating"] as double? ?? 0.0,
         'tenancyDuration': tenancyData['duration'],
         'tenancyStartDate': tenancyData['startDate'],
         'tenancyEndDate': tenancyData['endDate'],
@@ -100,16 +100,14 @@ class RentalService {
           .where('status', isEqualTo: 'Ended')
           .get();
 
-      if (tenancySnapshot.docs.isEmpty)
-        return null; // Early return if no tenancy found
+      if (tenancySnapshot.docs.isEmpty) return null; // Early return if no tenancy found
 
       final List<Map<String, dynamic>> expiredTenancies = await Future.wait(
         tenancySnapshot.docs.map((tenancyDoc) async {
           final Map<String, dynamic>? tenancyData =
               tenancyDoc.data() as Map<String, dynamic>?;
 
-          if (tenancyData == null)
-            return null; // Skip iteration if tenancy data is null
+          if (tenancyData == null) return null; // Skip iteration if tenancy data is null
 
           final String propertyID = tenancyData['propertyID'];
 
@@ -118,8 +116,7 @@ class RentalService {
 
           final Map<String, dynamic>? propertyData = propertyDoc.data();
 
-          if (propertyData == null)
-            return null; // Skip iteration if property data is null
+          if (propertyData == null) return null; // Skip iteration if property data is null
 
           final String landlordID = propertyData['landlordID'];
 
@@ -128,8 +125,7 @@ class RentalService {
 
           final Map<String, dynamic>? landlordData = landlordDoc.data();
 
-          if (landlordData == null)
-            return null; // Skip iteration if tenant data is null
+          if (landlordData == null) return null; // Skip iteration if tenant data is null
 
           return {
             'propertyID': propertyID,
