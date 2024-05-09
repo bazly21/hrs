@@ -46,6 +46,7 @@ class RentalService {
       final QuerySnapshot tenancySnapshot = await _fireStore
           .collection('tenancies')
           .where('tenantID', isEqualTo: tenantID)
+          .where('status', isEqualTo: 'Active')
           .limit(1)
           .get();
 
