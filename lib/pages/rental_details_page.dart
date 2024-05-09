@@ -54,33 +54,6 @@ class _RentalDetailsPageState extends State<RentalDetailsPage> {
     );
   }
 
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     body: SafeArea(
-  //       child: Container(
-  //         height: double.infinity,
-  //         child: Stack(
-  //           children: [
-  //             // Image container
-  //             Container(
-  //               height: 337,
-  //               color: Colors.grey[200],
-  //             ),
-  //             Positioned(
-  //               top: 290,
-  //               child: Container(
-  //                 height: 100,
-  //                 width: MediaQuery.of(context).size.width,
-  //                 color: Colors.purple
-  //               ),
-  //             )
-  //           ]
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildTenancyInfo(BuildContext context, Map<String, dynamic> tenancyData) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
