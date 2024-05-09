@@ -151,9 +151,9 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                               rating2:
                                   rating?['maintenanceRating']?.toDouble() ??
                                       0.0,
-                              rating3: rating?['communicationRating']
-                                      ?.toDouble() ??
-                                  0.0,
+                              rating3:
+                                  rating?['communicationRating']?.toDouble() ??
+                                      0.0,
                               spacing: 0.002,
                               fontSize: 16.0,
                               iconSize: 19.0,
@@ -163,7 +163,10 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                             SizedBox(height: screenSize.height * 0.008),
 
                             Text(
-                              rating?['comment'] ?? 'No comment provided.',
+                              rating?['comments'] != "" &&
+                                      rating?['comments'] != null
+                                  ? rating!['comments']
+                                  : 'No comment provided.',
                               style: const TextStyle(fontSize: 16.0),
                             ),
 
