@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_richtext.dart';
@@ -20,12 +21,14 @@ class PropertyApplicationsSection extends StatefulWidget {
 class _PropertyApplicationsSectionState
     extends State<PropertyApplicationsSection> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final ApplicationService _applicationService = ApplicationService();
   late Future<Map<String, dynamic>> propertyApplicationsFuture;
   final TextEditingController _tenancyDateController = TextEditingController();
   final RentalService _rentalService = RentalService();
   bool _isApplicationAccepted = false;
   bool _containAcceptedApplication = false;
+  bool _hasPropertyRented = false;
   String? tenancyDuration;
   DateTime? startDate;
   DateTime? endDate;
@@ -68,10 +71,15 @@ class _PropertyApplicationsSectionState
                     _isApplicationAccepted =
                         applicationData['status'] == "Accepted";
                     _containAcceptedApplication = snapshot.data!['hasAccepted'];
+                    _hasPropertyRented = snapshot.data!['status'] == "Rented";
 
                     return Stack(
-                      children: _buildApplicantData(index, context,
-                          applicationData, _isApplicationAccepted, applicationID),
+                      children: _buildApplicantData(
+                          index,
+                          context,
+                          applicationData,
+                          _isApplicationAccepted,
+                          applicationID),
                     );
                   });
             } else {
@@ -186,31 +194,31 @@ class _PropertyApplicationsSectionState
                                 itemBuilder: (BuildContext context) =>
                                     <PopupMenuEntry<String>>[
                                   // First PopupMenuItem
-                                  const PopupMenuItem<String>(
-                                    value: 'Start Tenancy',
-                                    child: Text('Start Tenancy'),
-                                  ),
-
-                                  // Add divider between PopupMenuItem
-                                  const PopupMenuDivider(),
+                                  if (_hasPropertyRented) ...[
+                                    const PopupMenuItem<String>(
+                                      value: 'Start Tenancy',
+                                      child: Text('Start Tenancy'),
+                                    ),
+                                    const PopupMenuDivider(),
+                                  ],
 
                                   const PopupMenuItem<String>(
                                     value: 'Contact Tenant',
                                     child: Text('Contact Tenant'),
                                   ),
 
-                                  // Add divider between PopupMenuItem
-                                  const PopupMenuDivider(),
-
-                                  const PopupMenuItem<String>(
-                                    value: 'Undo Application',
-                                    child: Text(
-                                      'Undo Application',
-                                      style: TextStyle(
-                                        color: Colors.red,
+                                  if (_hasPropertyRented) ...[
+                                    const PopupMenuDivider(),
+                                    const PopupMenuItem<String>(
+                                      value: 'Undo Application',
+                                      child: Text(
+                                        'Undo Application',
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                        ),
                                       ),
-                                    ),
-                                  ),
+                                    )
+                                  ]
                                 ],
                                 icon: const Icon(Icons
                                     .more_vert), // Icon for kebab menu (three vertical dots)
@@ -456,13 +464,26 @@ class _PropertyApplicationsSectionState
                       // Save tenancy information in database
                       _rentalService
                           .saveTenancyInfo(
-                              widget.propertyID,
-                              tenantData["applicantID"],
-                              int.parse(tenancyDuration!),
-                              startDate!,
-                              endDate!)
-                          .then((_) => Navigator.pop(context))
-                          .catchError(
+                              propertyID: widget.propertyID,
+                              tenantID: tenantData["applicantID"],
+                              landlordID: _auth.currentUser!.uid,
+                              duration: int.parse(tenancyDuration!),
+                              startDate: startDate!,
+                              endDate: endDate!)
+                          .then((_) {
+                        // Close the modal bottom sheet
+                        Navigator.pop(context);
+
+                        // Show success message if the saving operation is successful
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Tenancy information saved successfully.'),
+                          ),
+                        );
+
+                        refreshData();
+                      }).catchError(
                         (error) {
                           // Show error message if the saving operation is failed
                           ScaffoldMessenger.of(context).showSnackBar(

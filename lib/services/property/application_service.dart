@@ -8,6 +8,7 @@ class ApplicationService {
   // Get instance of auth and firestore
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   final UserService _userService = UserService();
+  // final PropertyService _propertyService = PropertyService();
 
   // Get property details
   // Future<List<Map<String, dynamic>>> getPropertyApplication(
@@ -76,6 +77,12 @@ class ApplicationService {
     Map<String, dynamic> applicationMap = {};
     bool hasAccepted = false;
 
+    DocumentSnapshot<Map<String, dynamic>> propertyDoc =
+        await _fireStore.collection('properties').doc(propertyID).get();
+    Map<String, dynamic>? propertyData = propertyDoc.data();
+
+    if (propertyData == null) throw Exception("Property data is not exist");
+
     // Fetch the rental property's applications
     QuerySnapshot applicationSnapshots = await _fireStore
         .collection("properties")
@@ -126,6 +133,7 @@ class ApplicationService {
       applicationMap = {
         "applicationList": applicationList,
         "hasAccepted": hasAccepted,
+        "propertyStatus": propertyData["status"],
       };
     }
 

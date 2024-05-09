@@ -461,7 +461,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         'accessibilities': propertyAccessibilities,
         'landlordID': landlordID,
         'image': FieldValue.arrayUnion(newImageUrls!),
-        'status': "Avaialable"
+        'status': "Available"
       }).then((_) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

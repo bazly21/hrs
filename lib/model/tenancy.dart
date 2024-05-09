@@ -1,6 +1,7 @@
 class Tenancy {
   final String propertyID;
   final String tenantID;
+  final String landlordID;
   final String status;
   final int duration;
   final DateTime startDate;
@@ -9,6 +10,7 @@ class Tenancy {
   Tenancy({
     required this.propertyID,
     required this.tenantID,
+    required this.landlordID,
     required this.status,
     required this.duration,
     required this.startDate,
@@ -20,6 +22,7 @@ class Tenancy {
     return {
       'propertyID': propertyID,
       'tenantID': tenantID,
+      'landlordID': landlordID,
       'status': status,
       'duration': duration,
       'startDate': startDate,
