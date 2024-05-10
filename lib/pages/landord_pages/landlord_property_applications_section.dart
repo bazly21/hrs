@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_richtext.dart';
+import 'package:hrs/pages/view_profile_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/application_service.dart';
 import 'package:hrs/services/rental/rental_service.dart';
 import 'package:hrs/style/app_style.dart';
@@ -152,7 +154,7 @@ class _PropertyApplicationsSectionState
             children: [
               Row(
                 children: [
-                  _buildProfileAndRating(),
+                  _buildProfileAndRating(applicationData["applicantID"]),
 
                   const SizedBox(width: 25),
 
@@ -312,17 +314,23 @@ class _PropertyApplicationsSectionState
     );
   }
 
-  Column _buildProfileAndRating() {
-    return const Column(
+  Column _buildProfileAndRating(String applicantID) {
+    return Column(
       children: [
-        CircleAvatar(
-          backgroundImage: NetworkImage('https://via.placeholder.com/150'),
-          radius: 40,
+        InkWell(
+          onTap: () => NavigationUtils.pushPage(
+            context,
+            ProfileViewPage(userID: applicantID),
+            SlideDirection.left),
+          child: const CircleAvatar(
+            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+            radius: 40,
+          ),
         ),
-        SizedBox(height: 7),
-        CustomRatingBar(rating: 5.0),
-        SizedBox(height: 7),
-        CustomRichText(text1: "5.0", text2: " (3 Reviews)")
+        const SizedBox(height: 7),
+        const CustomRatingBar(rating: 5.0),
+        const SizedBox(height: 7),
+        const CustomRichText(text1: "5.0", text2: " (3 Reviews)")
       ],
     );
   }
