@@ -88,9 +88,9 @@ class ApplicationService {
     });
   }
 
-  Future<bool> checkUserApplication(
+  static Future<bool> checkUserApplication(
       String propertyID, String applicantID) async {
-    QuerySnapshot applicationSnapshots = await _fireStore
+    QuerySnapshot applicationSnapshots = await FirebaseFirestore.instance
         .collection("properties")
         .doc(propertyID)
         .collection("applications")

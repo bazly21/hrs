@@ -4,7 +4,6 @@ import 'package:hrs/services/property/application_service.dart';
 class PropertyService {
   // Get instance of auth and firestore
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
-  final ApplicationService _applicationService = ApplicationService();
 
   // Get property details
   Future<DocumentSnapshot<Map<String, dynamic>>> getPropertyDetails(String propertyID) async {
@@ -37,7 +36,7 @@ class PropertyService {
 
     // Check user application if applicant ID is not null
     if (applicantID != null) {
-      hasApplied = await _applicationService.checkUserApplication(propertyID, applicantID);
+      hasApplied = await ApplicationService.checkUserApplication(propertyID, applicantID);
     }
 
     // Collect all necessary data
