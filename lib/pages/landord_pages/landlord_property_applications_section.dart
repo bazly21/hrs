@@ -25,7 +25,6 @@ class _PropertyApplicationsSectionState
   final ApplicationService _applicationService = ApplicationService();
   late Future<Map<String, dynamic>> propertyApplicationsFuture;
   final TextEditingController _tenancyDateController = TextEditingController();
-  final RentalService _rentalService = RentalService();
   bool _isApplicationAccepted = false;
   bool _containAcceptedApplication = false;
   bool _hasPropertyRented = false;
@@ -61,6 +60,8 @@ class _PropertyApplicationsSectionState
             }
             // If there is data and the data is not empty
             else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+              _hasPropertyRented = snapshot.data!['status'] == "Rented";
+
               return ListView.builder(
                   itemCount: snapshot.data!['applicationList'].length,
                   itemBuilder: (context, index) {
@@ -71,7 +72,6 @@ class _PropertyApplicationsSectionState
                     _isApplicationAccepted =
                         applicationData['status'] == "Accepted";
                     _containAcceptedApplication = snapshot.data!['hasAccepted'];
-                    _hasPropertyRented = snapshot.data!['status'] == "Rented";
 
                     return Stack(
                       children: _buildApplicantData(
@@ -194,7 +194,7 @@ class _PropertyApplicationsSectionState
                                 itemBuilder: (BuildContext context) =>
                                     <PopupMenuEntry<String>>[
                                   // First PopupMenuItem
-                                  if (_hasPropertyRented) ...[
+                                  if (!_hasPropertyRented) ...[
                                     const PopupMenuItem<String>(
                                       value: 'Start Tenancy',
                                       child: Text('Start Tenancy'),
@@ -207,7 +207,7 @@ class _PropertyApplicationsSectionState
                                     child: Text('Contact Tenant'),
                                   ),
 
-                                  if (_hasPropertyRented) ...[
+                                  if (!_hasPropertyRented) ...[
                                     const PopupMenuDivider(),
                                     const PopupMenuItem<String>(
                                       value: 'Undo Application',
@@ -462,8 +462,7 @@ class _PropertyApplicationsSectionState
                     child: const Text('Submit'),
                     onPressed: () {
                       // Save tenancy information in database
-                      _rentalService
-                          .saveTenancyInfo(
+                      RentalService.saveTenancyInfo(
                               propertyID: widget.propertyID,
                               tenantID: tenantData["applicantID"],
                               landlordID: _auth.currentUser!.uid,

@@ -5,7 +5,7 @@ class RentalService {
   // Get instance of auth and firestore
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
 
-  Future<void> saveTenancyInfo({
+  static Future<void> saveTenancyInfo({
     required String propertyID,
     required String tenantID,
     required String landlordID,
@@ -15,10 +15,10 @@ class RentalService {
   }) async {
     // Get a DocumentReference to a new tenancy under the specific property
     final DocumentReference tenancyDocRef =
-        _fireStore.collection('tenancies').doc();
+        FirebaseFirestore.instance.collection('tenancies').doc();
     // Get a DocumentReference to the specific property
     final DocumentReference propertyDocRef =
-        _fireStore.collection('properties').doc(propertyID);
+       FirebaseFirestore.instance.collection('properties').doc(propertyID);
 
     // Create a new tenancy
     Tenancy newTenancy = Tenancy(
@@ -31,9 +31,12 @@ class RentalService {
       endDate: endDate,
     );
 
-    await _fireStore.runTransaction((transaction) async {
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
       // Save tenancy information in database
-      transaction.set(tenancyDocRef, newTenancy.toMap());
+      transaction.set(tenancyDocRef, {
+        ...newTenancy.toMap(),
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
       // Update the property's status to rented
       transaction.update(propertyDocRef, {'status': 'Rented'});

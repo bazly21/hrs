@@ -65,7 +65,7 @@ class ApplicationService {
         num bScore = b?["criteriaScore"] ?? 0;
         return bScore.compareTo(aScore);
       });
-
+      print("propertyStatus: ${propertyData["status"]}");
       applicationMap = {
         "applicationList": applicationList,
         "hasAccepted": hasAccepted,
