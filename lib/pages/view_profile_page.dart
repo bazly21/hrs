@@ -33,22 +33,30 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
-    return Scaffold(
-      appBar: const CustomAppBar(text: "Abdul Hakim's Profile"),
-      body: FutureBuilder<UserRating>(
-        future: _loadProfileFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData && snapshot.data != null) {
-            return _buildProfile(screenSize, snapshot.data!);
-          } else {
-            return const SizedBox();
-          }
-        },
-      ),
+    return FutureBuilder<UserRating>(
+      future: _loadProfileFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          // Show snackbar with error message
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pop(context, "Unable to load profile. Please try again.");
+          });
+        } else if (snapshot.hasData && snapshot.data != null) {
+          return Scaffold(
+            appBar: CustomAppBar(text: "${snapshot.data!.name}'s Profile"),
+            body: _buildProfile(screenSize, snapshot.data!),
+          );
+        }
+
+        return const Scaffold(
+          body: SizedBox(),
+        );
+
+      },
     );
   }
 

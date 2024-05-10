@@ -318,10 +318,21 @@ class _PropertyApplicationsSectionState
     return Column(
       children: [
         InkWell(
-          onTap: () => NavigationUtils.pushPage(
-            context,
-            ProfileViewPage(userID: applicantID),
-            SlideDirection.left),
+          onTap: () {
+            NavigationUtils.pushPage(
+              context,
+              ProfileViewPage(userID: applicantID),
+              SlideDirection.left
+            ).then((message) {
+              if (message != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                  ),
+                );
+              }
+            });
+          },
           child: const CircleAvatar(
             backgroundImage: NetworkImage('https://via.placeholder.com/150'),
             radius: 40,
