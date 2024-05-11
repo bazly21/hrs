@@ -12,44 +12,47 @@ class AuthService with ChangeNotifier {
 
   String get userRole => _userRole;
 
-  Future<void> login({
+  Future<void> authentication({
     required BuildContext context,
     required String phoneNumber,
-    required String role
+    required String role,
+    required String method
   }) async {
     // Get the cleaned phone number
     final String cleanedPhoneNumber = getCleanedPhoneNumber(phoneNumber);
 
     // Check phone number
-    final bool isPhoneNumberRegistered = await checkPhoneNumber(
-      context: context,
-      phoneNumber: cleanedPhoneNumber,
-      role: role
-    );
+    if (method == "Login") {
+      final bool isPhoneNumberRegistered = await checkPhoneNumber(
+        context: context,
+        phoneNumber: cleanedPhoneNumber,
+        role: role
+      );
 
-    // If the phone number is not registered, show error snackbar
-    if (!isPhoneNumberRegistered) {
-      if (context.mounted) {
-        showErrorSnackBar(
-          context: context,
-          errorMessage: "You are not registered yet. Please complete your registration.",
-          showAction: true
-        );
+      // If the phone number is not registered, show error snackbar
+      if (!isPhoneNumberRegistered) {
+        if (context.mounted) {
+          showErrorSnackBar(
+            context: context,
+            errorMessage: "You are not registered yet. Please complete your registration.",
+            showAction: true
+          );
+        }
+        return;
       }
     }
-    // If the phone number is registered, send OTP
-    else {
-      // Send OTP to the phone number
-      if (context.mounted) {
-        await sendOTP(
-          context: context,
-          phoneNumber: cleanedPhoneNumber
-        );
-      }
+
+    // Send OTP to the phone number
+    if (context.mounted) {
+      await sendOTP(
+        context: context,
+        phoneNumber: cleanedPhoneNumber,
+        role: role,
+      );
     }
   }
 
-  void register({
+  void registerProfile({
     required BuildContext context,
     required String profileName,
     required String phoneNumber,
@@ -135,7 +138,7 @@ class AuthService with ChangeNotifier {
         if (context.mounted) {
           NavigationUtils.pushPage(
             context,
-            PasswordPage(phoneNumber: userCredential.user!.phoneNumber!),
+            RegisterProfilePage(phoneNumber: userCredential.user!.phoneNumber!),
             SlideDirection.left
           );
         }
@@ -168,7 +171,8 @@ class AuthService with ChangeNotifier {
 
   Future<void> sendOTP({
     required BuildContext context,
-    required String phoneNumber
+    required String phoneNumber,
+    required String role,
   }) async {
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: phoneNumber,
@@ -190,7 +194,9 @@ class AuthService with ChangeNotifier {
           OTPConfirmationPage(
             verificationId: verificationId,
             phoneNumber: phoneNumber,
-            buttonText: 'Login'),
+            buttonText: 'Confirm',
+            role: role
+          ),
           SlideDirection.left
         );
       },

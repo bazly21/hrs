@@ -68,10 +68,11 @@ class _LoginPageState extends State<LoginPage> {
               // Log in button
               MyButton(
                 text: "Login",
-                onPressed: () => _authService.login(
+                onPressed: () => _authService.authentication(
                     context: context,
                     phoneNumber: _phoneNumberController.text,
-                    role: "Tenant"),
+                    role: "Tenant",
+                    method: "Login"),
               ),
 
               // Add space between elements

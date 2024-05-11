@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class UserProfile {
   final String name;
   final String phoneNumber;
@@ -23,7 +21,7 @@ class UserProfile {
     return {
       'name': name,
       'phoneNumber': phoneNumber,
-      'role': FieldValue.arrayUnion([role])
+      'role': role
     };
   }
 }
