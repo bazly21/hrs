@@ -1,6 +1,4 @@
 // Components import
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 // Packages import
 import 'package:flutter/services.dart';
@@ -9,72 +7,26 @@ import 'package:hrs/components/my_button.dart';
 import 'package:hrs/components/my_label.dart';
 import 'package:hrs/components/my_richtext.dart';
 import 'package:hrs/components/my_textfield.dart';
-import 'package:hrs/pages/landord_pages/landlord_otp_confirmation_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_register_page.dart';
-import 'package:hrs/pages/register_page.dart';
+import 'package:hrs/services/auth/auth_service.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 
-class LandlordLoginPage extends StatelessWidget {
-  LandlordLoginPage({super.key});
+class LandlordLoginPage extends StatefulWidget {
+  const LandlordLoginPage({super.key});
 
+  @override
+  State<LandlordLoginPage> createState() => _LandlordLoginPageState();
+}
+
+class _LandlordLoginPageState extends State<LandlordLoginPage> {
   // Text editing controller
-  final phoneNumberController = TextEditingController();
-  final db = FirebaseFirestore.instance;
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final AuthService _authService = AuthService();
 
-  // Function to send OTP code
-  Future<void> sendOTP(BuildContext context) async {
-    // Only support Malaysia phone number format "+60"
-    final phoneNumber = "+6${phoneNumberController.text.trim()}";
-
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto-retrieval or instant verification completed.
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        // Handle error.
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        // Navigate to ConfirmationPage and pass verificationId.
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => LandlordOTPConfirmationPage(
-                  verificationId: verificationId,
-                  phoneNumber: phoneNumber,
-                  buttonText: 'Login', 
-                  hasRegister: true,)),
-        );
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-  }
-
-  Future<void> checkPhoneNumber(BuildContext context) async {
-    // Only support Malaysia phone number format "+60"
-    final phoneNumber = "+6${phoneNumberController.text.trim()}";
-
-    // Check if the phone number is registered
-    final querySnapshot = await db
-        .collection('users')
-        .where('phoneNumber', isEqualTo: phoneNumber)
-        .where("role", arrayContains: "Landlord")
-        .get();
-
-    if (querySnapshot.docs.isEmpty) {
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const LandlordRegisterPage(
-                  statusMessage:
-                      "You are not registered as landlord yet. Please complete your registration.")),
-        );
-      }
-    } else {
-      if (context.mounted) {
-        sendOTP(context);
-      }
-    }
+  @override
+  void dispose() {
+    _phoneNumberController.dispose();
+    super.dispose();
   }
 
   // This widget is the root of your application.
@@ -101,7 +53,7 @@ class LandlordLoginPage extends StatelessWidget {
 
               // Phone number textfield
               MyTextField(
-                controller: phoneNumberController,
+                controller: _phoneNumberController,
                 hintText: "Enter your phone number",
                 obscureText: false,
                 textInputType: TextInputType.number,
@@ -115,7 +67,12 @@ class LandlordLoginPage extends StatelessWidget {
 
               // Log in button
               MyButton(
-                  text: "Login", onPressed: () => checkPhoneNumber(context)),
+                  text: "Login",
+                  onPressed: () => _authService.authentication(
+                      context: context,
+                      phoneNumber: _phoneNumberController.text,
+                      role: "Landlord",
+                      method: "Login")),
 
               // Add space between elements
               const SizedBox(height: 14),
@@ -125,9 +82,10 @@ class LandlordLoginPage extends StatelessWidget {
                   text1: "Do not have an account? ",
                   text2: "Register",
                   onTap: () {
-                    Navigator.push(
+                    NavigationUtils.pushPage(
                       context,
-                      MaterialPageRoute(builder: (context) => RegisterPage()),
+                      const LandlordRegisterPage(),
+                      SlideDirection.left,
                     );
                   }),
             ],

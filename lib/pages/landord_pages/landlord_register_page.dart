@@ -22,7 +22,7 @@ import 'package:hrs/components/my_button.dart';
 import 'package:hrs/components/my_label.dart';
 import 'package:hrs/components/my_textfield.dart';
 import 'package:hrs/pages/landord_pages/landlord_navigation_page.dart';
-import 'package:hrs/pages/landord_pages/landlord_otp_confirmation_page.dart';
+import 'package:hrs/services/auth/auth_service.dart';
 
 class LandlordRegisterPage extends StatefulWidget {
   final String? statusMessage;
@@ -35,7 +35,8 @@ class LandlordRegisterPage extends StatefulWidget {
 
 class _LandlordRegisterPageState extends State<LandlordRegisterPage> {
   // Text editing controller
-  final phoneNumberController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -50,47 +51,10 @@ class _LandlordRegisterPageState extends State<LandlordRegisterPage> {
     }
   }
 
-  // Function to send OTP code
-  Future<void> sendOTP(BuildContext context) async {
-    // Only support Malaysia phone number format "+60"
-    final phoneNumber = "+6${phoneNumberController.text.trim()}";
-
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto-retrieval or instant verification completed.
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        // Handle error.
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        // Navigate to ConfirmationPage and pass verificationId.
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => LandlordOTPConfirmationPage(
-                    verificationId: verificationId,
-                    phoneNumber: phoneNumber,
-                    buttonText: 'Register',
-                    hasRegister: false,
-                  )),
-        ).then((statusMessageFromPreviousPage) {
-          // If there are status message from previous page
-          if (statusMessageFromPreviousPage != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(statusMessageFromPreviousPage)),
-            );
-          }
-        });
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Register"),
+      appBar: const CustomAppBar(text: "Register as Landlord"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
@@ -110,7 +74,7 @@ class _LandlordRegisterPageState extends State<LandlordRegisterPage> {
 
               // Phone Number textfield
               MyTextField(
-                controller: phoneNumberController,
+                controller: _phoneNumberController,
                 hintText: "Enter your phone number",
                 obscureText: false,
                 textInputType: TextInputType.number,
@@ -125,7 +89,12 @@ class _LandlordRegisterPageState extends State<LandlordRegisterPage> {
               // Next button
               MyButton(
                 text: "Next",
-                onPressed: () => sendOTP(context),
+                onPressed: () => _authService.authentication(
+                  context: context,
+                  phoneNumber: _phoneNumberController.text,
+                  role: "Landlord",
+                  method: "Register",
+                ),
               ),
 
               // Add space between elements
