@@ -13,7 +13,9 @@ import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final String role;
+
+  const LoginPage({super.key, required this.role});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -33,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Login"),
+      appBar: CustomAppBar(text: widget.role == "Tenant" ? "Login" : "Login as Landlord"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
@@ -71,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () => context.read<AuthService>().authentication(
                     context: context,
                     phoneNumber: _phoneNumberController.text,
-                    role: "Tenant",
+                    role: widget.role,
                     method: "Login"),
               ),
 
@@ -84,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                   text2: "Register",
                   onTap: () {
                     NavigationUtils.pushPage(
-                        context, const RegisterPage(), SlideDirection.left);
+                        context, RegisterPage(role: widget.role), SlideDirection.left);
                   }),
             ],
           ),

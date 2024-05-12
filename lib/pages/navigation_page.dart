@@ -66,7 +66,7 @@ class _NavigationPage extends State<NavigationPage> {
         action: SnackBarAction(
         label: 'Login',
         onPressed: () {
-          NavigationUtils.pushPage(context, const LoginPage(), SlideDirection.left);
+          NavigationUtils.pushPage(context, const LoginPage(role: "Tenant"), SlideDirection.left);
         },
         ),
       ),

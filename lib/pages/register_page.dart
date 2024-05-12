@@ -9,8 +9,9 @@ import 'package:hrs/services/auth/auth_service.dart';
 import 'package:provider/provider.dart';
 
 class RegisterPage extends StatefulWidget {
+  final String role;
 
-  const RegisterPage({super.key});
+  const RegisterPage({super.key, required this.role});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -29,7 +30,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Register"),
+      appBar: CustomAppBar(text: widget.role == "Tenant" ? "Register" : "Register as Landlord"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
@@ -67,7 +68,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: () => context.read<AuthService>().authentication(
                     context: context,
                     phoneNumber: _phoneNumberController.text,
-                    role: "Tenant",
+                    role: widget.role,
                     method: "Register"),
               ),
 
@@ -84,10 +85,11 @@ class _RegisterPageState extends State<RegisterPage> {
 class RegisterProfilePage extends StatefulWidget {
   const RegisterProfilePage({
     super.key,
-    required this.phoneNumber
+    required this.phoneNumber, required this.role
   });
 
   final String phoneNumber;
+  final String role;
 
   @override
   State<RegisterProfilePage> createState() => _RegisterProfilePageState();

@@ -1,9 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/pages/chat_page.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
+import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:provider/provider.dart';
 
 class UserDetails extends StatelessWidget {
   final String landlordName, landlordID, position, textButton;
@@ -11,9 +12,7 @@ class UserDetails extends StatelessWidget {
   final int numReview;
   final double rating;
 
-  final User? user = FirebaseAuth.instance.currentUser;
-
-  UserDetails({
+  const UserDetails({
     super.key,
     required this.landlordName,
     this.position = "Property Owner",
@@ -26,6 +25,8 @@ class UserDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String? role = context.watch<AuthService>().userRole;
+
     return Row(
       children: [
         // Profile picture **Database Required**
@@ -89,7 +90,7 @@ class UserDetails extends StatelessWidget {
 
         ElevatedButton(
           onPressed: () {
-            if (user != null) {
+            if (role != null) {
               NavigationUtils.pushPage(
                   context,
                   ChatPage(receiverID: landlordID, receiverName: landlordName),
@@ -97,13 +98,20 @@ class UserDetails extends StatelessWidget {
             }
             else {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Please log in to chat with the owner")),
-              );
-
-              NavigationUtils.pushPage(
-                context,
-                LoginPage(),
-                SlideDirection.left,
+                SnackBar(
+                  content: const Text("Please log in to chat with the owner"),
+                  duration: const Duration(seconds: 3),
+                  action: SnackBarAction(
+                    label: "Log In",
+                    onPressed: () {
+                      NavigationUtils.pushPage(
+                        context,
+                        const LoginPage(role: "Tenant"),
+                        SlideDirection.left,
+                      );
+                    },
+                  ),
+                ),
               );
             }
           },

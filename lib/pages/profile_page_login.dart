@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/components/my_starrating.dart';
-import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
+import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
 import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -157,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
               // Navigate to Rental History Page
               NavigationUtils.pushPage(
                 context,
-                RentalHistoryPage(),
+                const RentalHistoryPage(),
                 SlideDirection.left,
               );
             }),
@@ -189,7 +189,7 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: Icons.login,
           onPressed: () => NavigationUtils.pushPage(
             context,
-            LandlordLoginPage(),
+            const LoginPage(role: "Landlord"),
             SlideDirection.left,
           ),
         ),

@@ -6,9 +6,11 @@ import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
 import 'package:hrs/pages/apply_rental_page.dart';
 import 'package:hrs/pages/login_page.dart';
+import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
 import 'package:hrs/style/app_style.dart';
+import 'package:provider/provider.dart';
 
 class PropertyDetailsPage extends StatefulWidget {
   final String propertyID;
@@ -22,7 +24,6 @@ class PropertyDetailsPage extends StatefulWidget {
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   final PropertyService _propertyService = PropertyService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final User? user = FirebaseAuth.instance.currentUser;
   bool isWishlist = false; // Initial state of the wishlist icon
   bool hasApplied = false;
 
@@ -51,6 +52,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
+    String? role = context.watch<AuthService>().userRole;
+
     return Scaffold(
       body: SafeArea(
         child: RefreshIndicator(
@@ -82,22 +85,22 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           }),
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(),
+      bottomNavigationBar: buildBottomNavigationBar(role),
     );
   }
 
-  FutureBuilder<Map<String, dynamic>> buildBottomNavigationBar() {
+  FutureBuilder<Map<String, dynamic>> buildBottomNavigationBar(String? role) {
     return FutureBuilder(
         future: rentalDetailsFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            return bottomNavigationBarContent(snapshot.data!);
+            return bottomNavigationBarContent(snapshot.data!, role);
           }
           return const SizedBox();
         });
   }
 
-  Container bottomNavigationBarContent(Map<String, dynamic> propertyData) {
+  Container bottomNavigationBarContent(Map<String, dynamic> propertyData, String? role) {
     // Format the rental price to 2 decimal places
     double rentalPrice = propertyData['rent'];
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
@@ -154,7 +157,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             // Apply Button
             StatefulBuilder(builder: (context, setState) {
               return ElevatedButton(
-                onPressed: hasApplied ? null : () => goToPage(setState, context),
+                onPressed:
+                    hasApplied ? null : () => goToPage(setState, context, role),
                 style: AppStyles.elevatedButtonStyle,
                 child: const Text('Apply'),
               );
@@ -343,8 +347,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  void goToPage(StateSetter setState, BuildContext context) {
-    if (user != null) {
+  void goToPage(StateSetter setState, BuildContext context, String? role) {
+    if (role != null) {
       NavigationUtils.pushPage(
         context,
         ApplyRentalPage(
@@ -364,13 +368,20 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     } else {
       // User is not logged in, navigate to LoginPage
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please log in first before applying.")),
-      );
-
-      NavigationUtils.pushPage(
-        context,
-        LoginPage(),
-        SlideDirection.left,
+        SnackBar(
+          content: const Text("Please log in first before applying."),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: "Login",
+            onPressed: () {
+              NavigationUtils.pushPage(
+                context,
+                const LoginPage(role: "Tenant"),
+                SlideDirection.left,
+              );
+            },
+          ),
+        ),
       );
     }
   }
