@@ -5,6 +5,7 @@ import 'package:hrs/components/my_button.dart';
 import 'package:hrs/components/my_label.dart';
 import 'package:hrs/components/my_textfield.dart';
 import 'package:hrs/services/auth/auth_service.dart';
+import 'package:provider/provider.dart';
 
 class OTPConfirmationPage extends StatefulWidget {
   final String phoneNumber;
@@ -27,7 +28,6 @@ class OTPConfirmationPage extends StatefulWidget {
 
 class _OTPConfirmationPageState extends State<OTPConfirmationPage> {
   final _otpController = TextEditingController();
-  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class _OTPConfirmationPageState extends State<OTPConfirmationPage> {
               const SizedBox(height: 28),
 
               // Next button
-              MyButton(text: widget.buttonText, onPressed: () => _authService.verifyOTP(
+              MyButton(text: widget.buttonText, onPressed: () => context.read<AuthService>().verifyOTP(
                 context: context,
                 verificationId: widget.verificationId,
                 otpCode: _otpController.text,

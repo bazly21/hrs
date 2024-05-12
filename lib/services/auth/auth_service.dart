@@ -10,9 +10,9 @@ import 'package:hrs/pages/register_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 
 class AuthService with ChangeNotifier {
-  String _userRole = '';
+  String? _userRole;
 
-  String get userRole => _userRole;
+  String? get userRole => _userRole;
 
   Future<void> authentication(
       {required BuildContext context,
@@ -20,12 +20,13 @@ class AuthService with ChangeNotifier {
       required String role,
       required String method}) async {
     // Get the cleaned phone number
-    final String cleanedPhoneNumber = getCleanedPhoneNumber(phoneNumber);
+    phoneNumber = formatPhoneNum(phoneNumber);
+    phoneNumber = formatInput(phoneNumber);
 
     // Check phone number
     if (method == "Login") {
       final bool isPhoneNumberRegistered = await checkPhoneNumber(
-          context: context, phoneNumber: cleanedPhoneNumber, role: role);
+          context: context, phoneNumber: phoneNumber, role: role);
 
       // If the phone number is not registered, show error snackbar
       if (!isPhoneNumberRegistered) {
@@ -46,7 +47,7 @@ class AuthService with ChangeNotifier {
     if (context.mounted) {
       await sendOTP(
         context: context,
-        phoneNumber: cleanedPhoneNumber,
+        phoneNumber: phoneNumber,
         role: role,
       );
     }
@@ -99,6 +100,12 @@ class AuthService with ChangeNotifier {
         ),
       );
     }
+  }
+
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
+    _userRole = null;
+    notifyListeners();
   }
 
   Future<void> registerRole(String role, String userID) async {
@@ -164,7 +171,7 @@ class AuthService with ChangeNotifier {
       required String otpCode,
       required String verificationId,
       required String role}) async {
-    otpCode = getCleanedOTP(otpCode);
+    otpCode = formatInput(otpCode);
 
     // Create a PhoneAuthCredential with the code
     final PhoneAuthCredential credential = PhoneAuthProvider.credential(
@@ -275,11 +282,14 @@ class AuthService with ChangeNotifier {
             : null));
   }
 
-  String getCleanedPhoneNumber(String phoneNumber) {
-    return "+6${phoneNumber.trim()}";
+  String formatPhoneNum(String phoneNumber) {
+    if (!phoneNumber.contains("+6")){
+      phoneNumber = "+6$phoneNumber";
+    }
+    return phoneNumber;
   }
 
-  String getCleanedOTP(String otp) {
-    return otp.trim();
+  String formatInput(String input) {
+    return input.trim();
   }
 }

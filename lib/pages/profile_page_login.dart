@@ -5,8 +5,10 @@ import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/pages/landord_pages/landlord_login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
+import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/user_service.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -65,7 +67,8 @@ class _ProfilePageState extends State<ProfilePage> {
     Map<String, dynamic>? profileData = profile.data() as Map<String, dynamic>?;
     String name = profileData?['name'] ?? 'N/A';
     int ratingCount = profileData?['ratingCount'] ?? 0;
-    double ratingAverage = profileData?['ratingAverage']?['overallRating'] ?? 0.0;
+    double ratingAverage =
+        profileData?['ratingAverage']?['overallRating'] ?? 0.0;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -118,8 +121,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
 
         // Add space between elements
-        if (ratingCount != 0)
-          const SizedBox(height: 3.0),
+        if (ratingCount != 0) const SizedBox(height: 3.0),
 
         // Number of Reviews
         Text(
@@ -148,14 +150,17 @@ class _ProfilePageState extends State<ProfilePage> {
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
 
-        ProfileMenu(text: "Rental History", icon: Icons.wallet, onPressed: () {
-          // Navigate to Rental History Page
-          NavigationUtils.pushPage(
-            context,
-            RentalHistoryPage(),
-            SlideDirection.left,
-          );
-        }),
+        ProfileMenu(
+            text: "Rental History",
+            icon: Icons.wallet,
+            onPressed: () {
+              // Navigate to Rental History Page
+              NavigationUtils.pushPage(
+                context,
+                RentalHistoryPage(),
+                SlideDirection.left,
+              );
+            }),
 
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
@@ -211,9 +216,13 @@ class _ProfilePageState extends State<ProfilePage> {
             TextButton(
               onPressed: () {
                 // Perform the logout operation
-                FirebaseAuth.instance.signOut().then((value) {
-                  Navigator.of(context).pop(); // Dismiss the dialog
-                });
+                // FirebaseAuth.instance.signOut().then((value) {
+                //   Navigator.of(context).pop(); // Dismiss the dialog
+                // });
+                context
+                    .read<AuthService>()
+                    .signOut()
+                    .then((_) => Navigator.of(context).pop());
               },
               child: const Text("Logout"),
             ),

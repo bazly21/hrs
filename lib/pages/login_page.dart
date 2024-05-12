@@ -10,6 +10,7 @@ import 'package:hrs/components/my_textfield.dart';
 import 'package:hrs/pages/register_page.dart';
 import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,7 +22,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   // Text editing controller
   final _phoneNumberController = TextEditingController();
-  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -68,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
               // Log in button
               MyButton(
                 text: "Login",
-                onPressed: () => _authService.authentication(
+                onPressed: () => context.read<AuthService>().authentication(
                     context: context,
                     phoneNumber: _phoneNumberController.text,
                     role: "Tenant",
