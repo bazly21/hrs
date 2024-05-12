@@ -14,18 +14,8 @@ class AuthService with ChangeNotifier {
   String? get userRole => _userRole;
 
   AuthService() {
-    // Listen to auth state changes
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user == null) {
-        // User is not logged in
-        _userRole = null;
-        removeRole();
-        notifyListeners();
-      } else {
-        // User is logged in
-        loadRole();
-      }
-    });
+    // User is logged in
+    loadRole();
   }
 
   Future<void> authentication(
