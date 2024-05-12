@@ -31,7 +31,7 @@ class _LandlordNavigationPageState extends State<LandlordNavigationPage> {
 
           // If user is logged in
           if (user != null) {
-            
+
             final List<Widget> pages = [
               const LandlordPropertyListPage(),
               const ChatListPage(),
@@ -40,8 +40,8 @@ class _LandlordNavigationPageState extends State<LandlordNavigationPage> {
               const NotificationPage(),
               const ProfilePage(),
             ];
-            
-            return Scaffold(  
+
+            return Scaffold(
               body: IndexedStack(
                 index: _selectedIndex,
                 children: pages,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_bottomnavigationbar.dart';
 import 'package:hrs/pages/chat_list_page.dart';
+import 'package:hrs/pages/landord_pages/landlord_property_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/notification_page.dart';
 import 'package:hrs/pages/profile_page_login.dart';
@@ -25,28 +26,51 @@ class _NavigationPage extends State<NavigationPage> {
   Widget build(BuildContext context) {
     String? role = context.watch<AuthService>().userRole;
 
+    final List<Widget> pages = role == 'Landlord'
+        ? [
+            const LandlordPropertyListPage(),
+            const ChatListPage(),
+            // Placeholder for AddPropertyPage
+            Container(),
+            const NotificationPage(),
+            const ProfilePage(),
+          ]
+        : [
+            const RentalListPage(),
+            role == 'Tenant' ? const ChatListPage() : Container(),
+            role == 'Tenant' ? const RentalDetailsPage() : Container(),
+            const NotificationPage(),
+            role != null ? const ProfilePage() : const ProfilePageNoAccount(),
+          ];
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: [
-          const RentalListPage(),
-          role == 'Tenant' ? const ChatListPage() : Container(),
-          role == 'Tenant' ? const RentalDetailsPage() : Container(),
-          const NotificationPage(),
-          role != null ? const ProfilePage() : const ProfilePageNoAccount(),
-        ],
+        children: pages,
       ),
       bottomNavigationBar: MyBottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) => _handleNavigationTap(index, role),
+        role: role,
+        onTap: (index) => _handleNavigationTap(index, role, context),
       ),
     );
   }
 
   // Handle navigation tap
-  void _handleNavigationTap(int index, String? role) {
+  void _handleNavigationTap(int index, String? role, BuildContext context) {
     if ((index == 1 || index == 2) && role == null) {
-      NavigationUtils.pushPage(context, const LoginPage(), SlideDirection.up);
+      ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Please login to access this feature'),
+        duration: const Duration(seconds: 3),
+        action: SnackBarAction(
+        label: 'Login',
+        onPressed: () {
+          NavigationUtils.pushPage(context, const LoginPage(), SlideDirection.left);
+        },
+        ),
+      ),
+      );
     } else {
       setState(() => _selectedIndex = index);
     }

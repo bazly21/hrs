@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/model/user/user.dart';
-import 'package:hrs/pages/landord_pages/landlord_navigation_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_register_page.dart';
 import 'package:hrs/pages/navigation_page.dart';
 import 'package:hrs/pages/otp_confirmation_page.dart';
@@ -82,7 +81,7 @@ class AuthService with ChangeNotifier {
             _userRole = role;
             notifyListeners();
 
-            goToNavigationPage(role, context);
+            goToNavigationPage(context);
           }
         } catch (e) {
           if (context.mounted) {
@@ -117,20 +116,12 @@ class AuthService with ChangeNotifier {
   }
 
 
-  void goToNavigationPage(String role, BuildContext context) {
-    if (role == "Tenant") {
+  void goToNavigationPage(BuildContext context) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const NavigationPage()),
         (Route<dynamic> route) =>
             false, // This predicate will never be true, so it removes all the routes below the new one.
       );
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LandlordNavigationPage()),
-        (Route<dynamic> route) =>
-            false, // This predicate will never be true, so it removes all the routes below the new one.
-      );
-    }
   }
 
   Future<void> sendOTP({
@@ -212,7 +203,7 @@ class AuthService with ChangeNotifier {
           _userRole = role;
           notifyListeners();
 
-          goToNavigationPage(role, context);
+          goToNavigationPage(context);
         }
       }
     } catch (e) {

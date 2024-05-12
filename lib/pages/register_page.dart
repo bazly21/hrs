@@ -6,6 +6,7 @@ import 'package:hrs/components/my_button.dart';
 import 'package:hrs/components/my_label.dart';
 import 'package:hrs/components/my_textfield.dart';
 import 'package:hrs/services/auth/auth_service.dart';
+import 'package:provider/provider.dart';
 
 class RegisterPage extends StatefulWidget {
 
@@ -18,7 +19,6 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   // Text editing controller
   final _phoneNumberController = TextEditingController();
-  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -64,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
               // Next button
               MyButton(
                 text: "Next",
-                onPressed: () => _authService.authentication(
+                onPressed: () => context.read<AuthService>().authentication(
                     context: context,
                     phoneNumber: _phoneNumberController.text,
                     role: "Tenant",
@@ -96,7 +96,6 @@ class RegisterProfilePage extends StatefulWidget {
 class _RegisterProfilePageState extends State<RegisterProfilePage> {
   // Text editing controller
   final TextEditingController _nameController = TextEditingController();
-  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -138,7 +137,7 @@ class _RegisterProfilePageState extends State<RegisterProfilePage> {
               // Next button
               MyButton(
                   text: "Create Account",
-                  onPressed: () => _authService.registerProfile(
+                  onPressed: () => context.read<AuthService>().registerProfile(
                       context: context,
                       phoneNumber: widget.phoneNumber,
                       profileName: _nameController.text,
