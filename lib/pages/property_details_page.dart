@@ -24,6 +24,7 @@ class PropertyDetailsPage extends StatefulWidget {
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   final PropertyService _propertyService = PropertyService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? role;
   bool isWishlist = false; // Initial state of the wishlist icon
   bool hasApplied = false;
 
@@ -52,7 +53,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    String? role = context.watch<AuthService>().userRole;
+    role = context.watch<AuthService>().userRole;
 
     return Scaffold(
       body: SafeArea(
@@ -85,22 +86,22 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           }),
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(role),
+      bottomNavigationBar: buildBottomNavigationBar(),
     );
   }
 
-  FutureBuilder<Map<String, dynamic>> buildBottomNavigationBar(String? role) {
+  FutureBuilder<Map<String, dynamic>> buildBottomNavigationBar() {
     return FutureBuilder(
         future: rentalDetailsFuture,
         builder: (context, snapshot) {
           if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            return bottomNavigationBarContent(snapshot.data!, role);
+            return bottomNavigationBarContent(snapshot.data!);
           }
           return const SizedBox();
         });
   }
 
-  Container bottomNavigationBarContent(Map<String, dynamic> propertyData, String? role) {
+  Container bottomNavigationBarContent(Map<String, dynamic> propertyData) {
     // Format the rental price to 2 decimal places
     double rentalPrice = propertyData['rent'];
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
@@ -158,7 +159,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             StatefulBuilder(builder: (context, setState) {
               return ElevatedButton(
                 onPressed:
-                    hasApplied ? null : () => goToPage(setState, context, role),
+                    hasApplied ? null : () => goToPage(setState, context),
                 style: AppStyles.elevatedButtonStyle,
                 child: const Text('Apply'),
               );
@@ -347,7 +348,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  void goToPage(StateSetter setState, BuildContext context, String? role) {
+  void goToPage(StateSetter setState, BuildContext context) {
     if (role != null) {
       NavigationUtils.pushPage(
         context,
