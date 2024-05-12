@@ -6,11 +6,27 @@ import 'package:hrs/pages/navigation_page.dart';
 import 'package:hrs/pages/otp_confirmation_page.dart';
 import 'package:hrs/pages/register_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService with ChangeNotifier {
   String? _userRole;
 
   String? get userRole => _userRole;
+
+  AuthService() {
+    // Listen to auth state changes
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        // User is not logged in
+        _userRole = null;
+        removeRole();
+        notifyListeners();
+      } else {
+        // User is logged in
+        loadRole();
+      }
+    });
+  }
 
   Future<void> authentication(
       {required BuildContext context,
@@ -78,6 +94,7 @@ class AuthService with ChangeNotifier {
           // Check if the widget is still mounted before navigating
           if (context.mounted) {
             _userRole = role;
+            saveRole(role);
             notifyListeners();
 
             goToNavigationPage(context);
@@ -103,6 +120,7 @@ class AuthService with ChangeNotifier {
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
     _userRole = null;
+    removeRole();
     notifyListeners();
   }
 
@@ -200,6 +218,7 @@ class AuthService with ChangeNotifier {
 
         if (context.mounted) {
           _userRole = role;
+          saveRole(role);
           notifyListeners();
 
           goToNavigationPage(context);
@@ -276,5 +295,21 @@ class AuthService with ChangeNotifier {
 
   String formatInput(String input) {
     return input.trim();
+  }
+
+  Future<void> saveRole(String role) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('role', role);
+  }
+
+  Future<void> loadRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _userRole = prefs.getString('role');
+    notifyListeners();
+  }
+
+  Future<void> removeRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('role');
   }
 }
