@@ -12,6 +12,7 @@ exports.updateTenancyAndPropertyStatus = functions.pubsub
       // Query tenancies where endDate is before or equal to the current date
       const tenanciesSnapshot = await db
         .collection("tenancies")
+        .where("status", "==", "Active")
         .where("endDate", "<=", currentDate)
         .get();
 
@@ -28,7 +29,10 @@ exports.updateTenancyAndPropertyStatus = functions.pubsub
         const tenancyRef = db.collection("tenancies").doc(doc.id);
         tenancyBatch.update(tenancyRef, {
           status: "Ended",
-          isRated: false,
+          isRated: {
+            rateLandlord: false,
+            rateTenant: false,
+          },
         });
       });
 
