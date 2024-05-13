@@ -1,6 +1,7 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:collection/collection.dart";
 import "package:hrs/model/rating/landlord_rating.dart";
+import "package:hrs/model/rating/tenant_rating.dart";
 import "package:hrs/model/rating/user_rating.dart";
 
 class RatingService {
@@ -80,6 +81,83 @@ class RatingService {
         "ratingCount": ratingCount + 1,
         "ratingAverage": {
           "supportRating": averageSupportRating,
+          "communicationRating": averageCommunicationRating,
+          "maintenanceRating": averageMaintenanceRating,
+          "overallRating": overallRating,
+        }
+      });
+    });
+  }
+
+  static Future<void> submitTenantRating(
+      TenantRating tenantRating, String tenantID, String tenancyDocID) async {
+    final DocumentReference ratingDocRef = FirebaseFirestore.instance
+        .collection("users")
+        .doc(tenantID)
+        .collection("ratings")
+        .doc();
+
+    final DocumentReference tenantDocRef =
+        FirebaseFirestore.instance.collection("users").doc(tenantID);
+    final DocumentReference tenancyDocRef =
+        FirebaseFirestore.instance.collection("tenancies").doc(tenancyDocID);
+
+    // Perform all operations within a single transaction
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      // Set operation: Save rating information in the database
+      DocumentSnapshot tenantSnapshot = await transaction.get(tenantDocRef);
+
+      // Convert the tenant data to a map
+      Map<String, dynamic>? tenantData =
+          tenantSnapshot.data() as Map<String, dynamic>?;
+
+      if(tenantData == null) throw Exception("Landlord does not exist");
+
+      // Calculate the average ratings
+      double totalPaymentRating = 0.0;
+      double totalCommunicationRating = 0.0;
+      double totalMaintenanceRating = 0.0;
+      int ratingCount = tenantData["ratingCount"] ?? 0;
+
+      // Get the total ratings
+      totalPaymentRating =
+          ((tenantData["ratingAverage"]?["paymentRating"] ?? 0.0) *
+              ratingCount);
+      totalCommunicationRating =
+          ((tenantData["ratingAverage"]?["communicationRating"] ?? 0.0) *
+              ratingCount);
+      totalMaintenanceRating =
+          ((tenantData["ratingAverage"]?["maintenanceRating"] ?? 0.0) *
+              ratingCount);
+
+      // Get new total ratings
+      totalPaymentRating += tenantRating.paymentRating;
+      totalCommunicationRating += tenantRating.communicationRating;
+      totalMaintenanceRating += tenantRating.maintenanceRating;
+
+      // Calculate the average ratings
+      double averagePaymentRating = double.parse(
+          (totalPaymentRating / (ratingCount + 1)).toStringAsFixed(2));
+      double averageCommunicationRating = double.parse(
+          (totalCommunicationRating / (ratingCount + 1)).toStringAsFixed(2));
+      double averageMaintenanceRating = double.parse(
+          (totalMaintenanceRating / (ratingCount + 1)).toStringAsFixed(2));
+      double overallRating = double.parse(((averagePaymentRating +
+                  averageCommunicationRating +
+                  averageMaintenanceRating) /
+              3)
+          .toStringAsFixed(2));
+
+      transaction.set(ratingDocRef, tenantRating.toMap());
+
+      transaction.update(tenancyDocRef, {
+        "isRated.rateTenant": true
+      });
+
+      transaction.update(tenantDocRef, {
+        "ratingCount": ratingCount + 1,
+        "ratingAverage": {
+          "paymentRating": averagePaymentRating,
           "communicationRating": averageCommunicationRating,
           "maintenanceRating": averageMaintenanceRating,
           "overallRating": overallRating,
