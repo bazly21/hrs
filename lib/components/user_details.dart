@@ -34,7 +34,7 @@ class UserDetails extends StatelessWidget {
           onTap: () {
             NavigationUtils.pushPage(
                 context,
-                ProfileViewPage(userID: landlordID),
+                ProfileViewPage(userID: landlordID, role: "Landlord"),
                 SlideDirection.left);
           },
           child: ClipOval(

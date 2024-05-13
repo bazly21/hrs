@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/services/property/application_service.dart';
 import 'package:hrs/services/property/tenancy_service.dart';
 
@@ -13,7 +14,7 @@ class PropertyService {
   }
 
   // Get property full details including landlord details
-  Future<Map<String, dynamic>> getPropertyFullDetails(
+  Future<PropertyFullDetails> getPropertyFullDetails(
       String propertyID, String? applicantID) async {
     Map<String, dynamic> propertyFullDetails = {};
     bool hasApplication = false;
@@ -53,12 +54,14 @@ class PropertyService {
     propertyFullDetails = {
       ...propertyData,
       "landlordName": landlordData["name"],
-      "landlordRatingCount": landlordData["ratingCount"],
-      "landlordOverallRating": landlordData["ratingAverage"]?["overallRating"],
+      "landlordRatingCount": landlordData["ratingCount"]?["landlord"],
+      "landlordOverallRating": landlordData["ratingAverage"]?["landlord"]?["overallRating"],
       "hasApplied": hasApplied,
     };
 
-    return propertyFullDetails;
+    PropertyFullDetails propertyDetails = PropertyFullDetails.fromMap(propertyFullDetails);
+
+    return propertyDetails;
   }
 
   // Convert property data into a map

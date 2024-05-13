@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hrs/model/tenancy.dart';
 
 class RentalService {
@@ -91,75 +92,6 @@ class RentalService {
         'tenancyEndDate': tenancyData['endDate'],
       };
     } catch (e) {
-      return null; // Return null in case of any errors
-    }
-  }
-
-  // Fetch tenancies with status 'Ended'
-  Future<List<Map<String, dynamic>>?> fetchEndedTenancies() async {
-    try {
-      // Get a QuerySnapshot of tenancies with status 'Ended'
-      final QuerySnapshot tenancySnapshot = await _fireStore
-          .collection('tenancies')
-          .where('status', isEqualTo: 'Ended')
-          .get();
-
-      if (tenancySnapshot.docs.isEmpty) return null; // Early return if no tenancy found
-
-      final List<Map<String, dynamic>> expiredTenancies = await Future.wait(
-        tenancySnapshot.docs.map((tenancyDoc) async {
-          final Map<String, dynamic>? tenancyData =
-              tenancyDoc.data() as Map<String, dynamic>?;
-
-          if (tenancyData == null) return null; // Skip iteration if tenancy data is null
-
-          final String propertyID = tenancyData['propertyID'];
-
-          final DocumentSnapshot<Map<String, dynamic>> propertyDoc =
-              await _fireStore.collection('properties').doc(propertyID).get();
-
-          final Map<String, dynamic>? propertyData = propertyDoc.data();
-
-          if (propertyData == null) return null; // Skip iteration if property data is null
-
-          final String landlordID = propertyData['landlordID'];
-
-          final DocumentSnapshot<Map<String, dynamic>> landlordDoc =
-              await _fireStore.collection('users').doc(landlordID).get();
-
-          final Map<String, dynamic>? landlordData = landlordDoc.data();
-
-          if (landlordData == null) return null; // Skip iteration if tenant data is null
-
-          return {
-            'propertyID': propertyID,
-            'propertyName': propertyData['name'] ?? 'N/A',
-            'propertyAddress': propertyData['address'] ?? 'N/A',
-            'rentalPrice': propertyData['rent'] ?? 0.0,
-            'propertyImageURL':
-                propertyData['image'][0] ?? 'https://via.placeholder.com/150',
-            'landlordID': landlordID,
-            'landlordImageURL': (landlordData['image'] != null &&
-                    landlordData['image'].isNotEmpty)
-                ? landlordData['image'][0]
-                : 'https://via.placeholder.com/150',
-            'landlordRatingCount': landlordData['ratingCount'] ?? 0,
-            'landlordRatingAverage':
-                landlordData['ratingAverage']?['overallRating'] as double? ??
-                    0.0,
-            'tenancyDocID': tenancyDoc.id,
-            'tenancyStatus': tenancyData['status'] ?? 'Unknown',
-            'isRated': tenancyData['isRated']?["rateLandlord"] ?? false,
-          };
-        }).toList(),
-      ).then((list) => list
-          .where((element) => element != null)
-          .toList()
-          .cast<Map<String, dynamic>>());
-
-      return expiredTenancies;
-    } catch (e) {
-      print(e);
       return null; // Return null in case of any errors
     }
   }

@@ -321,7 +321,7 @@ class _PropertyApplicationsSectionState
           onTap: () {
             NavigationUtils.pushPage(
               context,
-              ProfileViewPage(userID: applicantID),
+              ProfileViewPage(userID: applicantID, role: "Tenant"),
               SlideDirection.left
             ).then((message) {
               if (message != null) {

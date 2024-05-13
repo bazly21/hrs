@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/model/tenancy/tenant_ended_tenancy.dart';
 import 'package:hrs/pages/rating_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
-import 'package:hrs/services/rental/rental_service.dart';
+import 'package:hrs/services/property/tenancy_service.dart';
 
 class RentalHistoryList extends StatefulWidget {
   const RentalHistoryList({super.key});
@@ -11,13 +12,12 @@ class RentalHistoryList extends StatefulWidget {
 }
 
 class _RentalHistoryListState extends State<RentalHistoryList> {
-  final RentalService _rentalService = RentalService();
-  Future<List<Map<String, dynamic>>?>? _endedTenancies;
+  late Future<List<TenantEndedTenancy>> _endedTenancies;
 
   @override
   void initState() {
     super.initState();
-    _endedTenancies = _rentalService.fetchEndedTenancies();
+    _endedTenancies = TenancyService.fetchTenantEndedTenancies();
   }
 
   @override
@@ -26,7 +26,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
         body: SafeArea(
       child: RefreshIndicator(
         onRefresh: _refreshEndedTenancies,
-        child: FutureBuilder<List<Map<String, dynamic>>?>(
+        child: FutureBuilder<List<TenantEndedTenancy>>(
             future: _endedTenancies,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -39,7 +39,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                 );
               } else if (snapshot.hasData &&
                   (snapshot.data!.isNotEmpty || snapshot.data != null)) {
-                final List<Map<String, dynamic>> tenancies = snapshot.data!;
+                final List<TenantEndedTenancy> tenancies = snapshot.data!;
                 return ListView.builder(
                   itemCount: tenancies.length,
                   itemBuilder: (context, index) {
@@ -55,7 +55,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
     ));
   }
 
-  Container _buildRentalItem(Map<String, dynamic> tenancyData) {
+  Container _buildRentalItem(TenantEndedTenancy tenancyData) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -76,42 +76,42 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            tenancyData['propertyName'],
+            tenancyData.propertyName,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           Text(
-            tenancyData['propertyAddress'],
+            tenancyData.propertyAddress,
             style: const TextStyle(fontSize: 16),
           ),
           Text(
-            tenancyData['landlordRatingAverage'] == 0.0
+            tenancyData.landlordRatingAverage == 0.0
                 ? 'No rating yet'
-                : '${tenancyData['landlordRatingAverage']}',
+                : '${tenancyData.landlordRatingAverage}',
             style: const TextStyle(fontSize: 16),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                tenancyData['rentalPrice'] == 0.0
+                tenancyData.rentalPrice== 0.0
                     ? 'N/A'
-                    : 'RM ${tenancyData['rentalPrice'].toStringAsFixed(2)}',
+                    : 'RM ${tenancyData.rentalPrice.toStringAsFixed(2)}',
                 style: const TextStyle(fontSize: 16),
               ),
               Text(
-                '${tenancyData['tenancyStatus']}',
+                tenancyData.tenancyStatus,
                 style: const TextStyle(fontSize: 16),
               ),
             ],
           ),
           ElevatedButton(
-            onPressed: tenancyData['isRated']
+            onPressed: tenancyData.isRated
                 ? null
                 : () => NavigationUtils.pushPage(
                         context,
                         RatingPage(
-                          landlordID: tenancyData['landlordID'],
-                          tenancyDocID: tenancyData['tenancyDocID'],
+                          landlordID: tenancyData.landlordID,
+                          tenancyDocID: tenancyData.tenancyDocID,
                         ),
                         SlideDirection.left).then((message) {
                       if (message != null) {
@@ -123,7 +123,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                         _refreshEndedTenancies();
                       }
                     }),
-            child: Text(tenancyData['isRated'] ? 'Rated' : 'Rate'),
+            child: Text(tenancyData.isRated ? 'Rated' : 'Rate'),
           ),
         ],
       ),
@@ -131,7 +131,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
   }
 
   Future<void> _refreshEndedTenancies() async {
-    await _rentalService.fetchEndedTenancies().then((newData) {
+    await TenancyService.fetchTenantEndedTenancies().then((newData) {
       setState(() {
         _endedTenancies =
             Future.value(newData); // Use the new data for the future

@@ -23,7 +23,6 @@ class _RatingPageState extends State<RatingPage> {
   double _communicationRating = 0;
   final TextEditingController _commentsController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final RatingService _ratingService = RatingService();
 
   void _setRating(String category, double rating) {
     setState(() {
@@ -153,7 +152,6 @@ class _RatingPageState extends State<RatingPage> {
 
     final LandlordRating newRating = LandlordRating(
       reviewerID: _auth.currentUser!.uid,
-      landlordID: widget.landlordID,
       supportRating: _supportRating,
       maintenanceRating: _maintenanceRating,
       communicationRating: _communicationRating,
@@ -161,7 +159,7 @@ class _RatingPageState extends State<RatingPage> {
     );
 
     try {
-      await _ratingService.submitLandlordRating(newRating, widget.tenancyDocID);
+      await RatingService.submitLandlordRating(newRating, widget.landlordID, widget.tenancyDocID);
 
       // Go back to the previous page
       if (context.mounted) {

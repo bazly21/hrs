@@ -1,6 +1,5 @@
 class LandlordRating {
   final String reviewerID;
-  final String landlordID;
   final double supportRating;
   final double maintenanceRating;
   final double communicationRating;
@@ -8,7 +7,6 @@ class LandlordRating {
 
   LandlordRating({
     required this.reviewerID,
-    required this.landlordID,
     required this.supportRating,
     required this.maintenanceRating,
     required this.communicationRating,
@@ -19,7 +17,7 @@ class LandlordRating {
   Map<String, dynamic> toMap() {
     return {
       'reviewerID': reviewerID,
-      'landlordID': landlordID,
+      'ratedAs': "Landlord",
       'supportRating': supportRating,
       'maintenanceRating': maintenanceRating,
       'communicationRating': communicationRating,

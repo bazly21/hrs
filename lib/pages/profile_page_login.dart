@@ -70,9 +70,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Column _buildProfile(BuildContext context, DocumentSnapshot profile) {
     Map<String, dynamic>? profileData = profile.data() as Map<String, dynamic>?;
     String name = profileData?['name'] ?? 'N/A';
-    int ratingCount = profileData?['ratingCount'] ?? 0;
+    int ratingCount = profileData?['ratingCount']?[_role!.toLowerCase()] ?? 0;
     double ratingAverage =
-        profileData?['ratingAverage']?['overallRating'] ?? 0.0;
+        profileData?['ratingAverage']?[_role!.toLowerCase()]?['overallRating'] ?? 0.0;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

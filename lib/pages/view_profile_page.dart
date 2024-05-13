@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_rating.dart';
 import 'package:hrs/components/my_appbar.dart';
-import 'package:hrs/model/rating/user_rating.dart';
 import 'package:hrs/services/rating/rating_service.dart';
 
 class ProfileViewPage extends StatefulWidget {
   final String userID;
+  final String role;
 
-  const ProfileViewPage({super.key, required this.userID});
+  const ProfileViewPage({super.key, required this.userID, required this.role});
 
   @override
   State<ProfileViewPage> createState() => _ProfileViewPageState();
 }
 
 class _ProfileViewPageState extends State<ProfileViewPage> {
-  final RatingService _ratingService = RatingService();
-  late Future<UserRating> _loadProfileFuture;
+  late Future _loadProfileFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadProfileFuture = _ratingService.getUserRatings(widget.userID);
+    _loadProfileFuture = RatingService.getUserRatings(widget.userID, widget.role);
   }
 
   Future<void> _loadProfile() async {
@@ -33,7 +32,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
-    return FutureBuilder<UserRating>(
+    return FutureBuilder(
       future: _loadProfileFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -60,7 +59,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
     );
   }
 
-  RefreshIndicator _buildProfile(Size screenSize, UserRating userRating) {
+  RefreshIndicator _buildProfile(Size screenSize, dynamic userRating) {
     return RefreshIndicator(
       onRefresh: _loadProfile,
       child: SingleChildScrollView(
@@ -99,13 +98,23 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             // Add space between elements
             SizedBox(height: screenSize.height * 0.02),
 
-            CustomRating(
-              numReview: userRating.ratingCount,
-              rating1: userRating.overallSupportRating,
-              rating2: userRating.overallMaintenanceRating,
-              rating3: userRating.overallCommunicationRating,
-              hasTitle: true,
-            ),
+            if(widget.role == "Landlord")
+              CustomRating(
+                numReview: userRating.ratingCount,
+                rating1: userRating.overallSupportRating,
+                rating2: userRating.overallMaintenanceRating,
+                rating3: userRating.overallCommunicationRating,
+                hasTitle: true,
+              ),
+
+            if(widget.role == "Tenant")
+              CustomRating(
+                numReview: userRating.ratingCount,
+                rating1: userRating.overallPaymentRating,
+                rating2: userRating.overallMaintenanceRating,
+                rating3: userRating.overallCommunicationRating,
+                hasTitle: true,
+              ),
 
             // Add space between elements
             SizedBox(height: screenSize.height * 0.02),

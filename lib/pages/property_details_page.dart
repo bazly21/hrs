@@ -4,6 +4,7 @@ import 'package:hrs/components/my_circulariconbutton.dart';
 import 'package:hrs/components/my_propertydescription.dart';
 import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/user_details.dart';
+import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/pages/apply_rental_page.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/services/auth/auth_service.dart';
@@ -28,7 +29,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   bool isWishlist = false; // Initial state of the wishlist icon
   bool hasApplied = false;
 
-  late Future<Map<String, dynamic>> rentalDetailsFuture;
+  late Future<PropertyFullDetails> rentalDetailsFuture;
 
   // Initialize state
   // Execute fetchRentalDetails function and store it
@@ -76,7 +77,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                         Navigator.pop(
                             context, 'Something went wrong. Please try again.');
                       });
-                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    } else if (snapshot.hasData && snapshot.data != null) {
                       return buildContent(snapshot.data!, context);
                     }
                     // Act as a placeholder
@@ -90,24 +91,24 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  FutureBuilder<Map<String, dynamic>> buildBottomNavigationBar() {
+  FutureBuilder<PropertyFullDetails> buildBottomNavigationBar() {
     return FutureBuilder(
         future: rentalDetailsFuture,
         builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+          if (snapshot.hasData && snapshot.data != null) {
             return bottomNavigationBarContent(snapshot.data!);
           }
           return const SizedBox();
         });
   }
 
-  Container bottomNavigationBarContent(Map<String, dynamic> propertyData) {
+  Container bottomNavigationBarContent(PropertyFullDetails propertyData) {
     // Format the rental price to 2 decimal places
-    double rentalPrice = propertyData['rent'];
+    double rentalPrice = propertyData.rentalPrice;
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
         ? rentalPrice.toStringAsFixed(2)
         : rentalPrice.toStringAsFixed(0);
-    hasApplied = propertyData["hasApplied"];
+    hasApplied = propertyData.hasApplied;
 
     return Container(
       height: 80,
@@ -170,7 +171,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  Column buildContent(Map<String, dynamic> propertyData, BuildContext context) {
+  Column buildContent(PropertyFullDetails propertyData, BuildContext context) {
     return Column(
       children: [
         // ********* App Bar and Image Container (Start)  *********
@@ -178,7 +179,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           height: 303,
           decoration: BoxDecoration(
               image: DecorationImage(
-            image: NetworkImage(propertyData["image"][0]),
+            image: NetworkImage(propertyData.image[0]),
             fit: BoxFit.cover,
           )),
           child: Padding(
@@ -212,8 +213,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               const SizedBox(height: 10.0),
 
               PropertyDetails(
-                propertyName: propertyData["name"],
-                propertyLocation: propertyData["address"],
+                propertyName: propertyData.propertyName,
+                propertyLocation: propertyData.address,
                 isFavorite: isWishlist, // or false, based on your state
                 showIcon: true, // Set this to false to hide the icon button
                 onIconPressed: () {
@@ -241,7 +242,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
                   // Propery's Size Text **Database Required**
                   Text(
-                    "${propertyData["bedrooms"]} Rooms",
+                    "${propertyData.bedrooms} Rooms",
                     style: const TextStyle(
                         fontSize: 14.0, color: Color(0xFF7D7F88)),
                   ),
@@ -263,7 +264,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
                   // Property Size Text **Database Required**
                   Text(
-                    "${propertyData["size"]} m\u00B2",
+                    "${propertyData.size} m\u00B2",
                     style:
                         const TextStyle(fontSize: 14, color: Color(0xFF7D7F88)),
                   ),
@@ -285,7 +286,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
                   // Number of Bathroom Text **Database Required**
                   Text(
-                    "${propertyData["bathrooms"]} Bathrooms",
+                    "${propertyData.bathrooms} Bathrooms",
                     style:
                         const TextStyle(fontSize: 14, color: Color(0xFF7D7F88)),
                   ),
@@ -304,10 +305,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
               // ********* Landlord Profile Section (Start) *********
               UserDetails(
-                landlordName: propertyData["landlordName"] ?? "N/A",
-                rating: propertyData["landlordOverallRating"] ?? 0,
-                numReview: propertyData["landlordRatingCount"] ?? 0,
-                landlordID: propertyData["landlordID"],
+                landlordName: propertyData.landlordName,
+                rating: propertyData.landlordOverallRating,
+                numReview: propertyData.landlordRatingCount,
+                landlordID: propertyData.landlordID,
               ),
               // ********* Landlord Profile Section (End) *********
 
@@ -317,20 +318,20 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               // ********* Property Description Section (Start) *********
               // Property Description Label
               PropertyDescription(
-                  title: "Description", content: propertyData["description"]),
+                  title: "Description", content: propertyData.description),
 
               // Furnishing Description Label
               PropertyDescription(
-                  title: "Furnishing", content: propertyData["furnishing"]),
+                  title: "Furnishing", content: propertyData.furnishing),
 
               // Facilities Description Label
               PropertyDescription(
-                  title: "Facilities", content: propertyData["facilities"]),
+                  title: "Facilities", content: propertyData.facilities),
 
               // Accessibility Description Label
               PropertyDescription(
                   title: "Accessibility",
-                  content: propertyData["accessibilities"]),
+                  content: propertyData.accessibilities),
 
               // Location Label
               const Text(
