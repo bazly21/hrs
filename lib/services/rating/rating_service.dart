@@ -71,9 +71,11 @@ class RatingService {
           .toStringAsFixed(2));
 
       transaction.set(ratingDocRef, landlordRating.toMap());
+
       transaction.update(tenancyDocRef, {
-        "isRated": true,
+        "isRated.rateLandlord": true
       });
+
       transaction.update(landlordDocRef, {
         "ratingCount": ratingCount + 1,
         "ratingAverage": {

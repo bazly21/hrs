@@ -164,7 +164,7 @@ class _RatingPageState extends State<RatingPage> {
       await _ratingService.submitLandlordRating(newRating, widget.tenancyDocID);
 
       // Go back to the previous page
-      if (mounted) {
+      if (context.mounted) {
         Navigator.pop(context, 'Rating submitted successfully');
       }
 
