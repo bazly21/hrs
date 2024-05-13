@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_bottomnavigationbar.dart';
 import 'package:hrs/pages/chat_list_page.dart';
+import 'package:hrs/pages/landord_pages/landlord_add_property_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/notification_page.dart';
@@ -60,17 +61,21 @@ class _NavigationPage extends State<NavigationPage> {
   void _handleNavigationTap(int index, String? role, BuildContext context) {
     if ((index == 1 || index == 2) && role == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Please login to access this feature'),
-        duration: const Duration(seconds: 3),
-        action: SnackBarAction(
-        label: 'Login',
-        onPressed: () {
-          NavigationUtils.pushPage(context, const LoginPage(role: "Tenant"), SlideDirection.left);
-        },
+        SnackBar(
+          content: const Text('Please login to access this feature'),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'Login',
+            onPressed: () {
+              NavigationUtils.pushPage(context, const LoginPage(role: "Tenant"),
+                  SlideDirection.left);
+            },
+          ),
         ),
-      ),
       );
+    } else if (index == 2 && role == 'Landlord') {
+      NavigationUtils.pushPage(
+          context, const AddPropertyPage(), SlideDirection.up);
     } else {
       setState(() => _selectedIndex = index);
     }
