@@ -56,53 +56,37 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   Widget build(BuildContext context) {
     role = context.watch<AuthService>().userRole;
 
-    return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: handleRefresh,
-          child: LayoutBuilder(builder: (context, constraints) {
-            return SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: FutureBuilder(
-                  future: rentalDetailsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minHeight: constraints.maxHeight),
-                          child:
-                              const Center(child: CircularProgressIndicator()));
-                    } else if (snapshot.hasError) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        Navigator.pop(
-                            context, 'Something went wrong. Please try again.');
-                      });
-                    } else if (snapshot.hasData && snapshot.data != null) {
-                      return buildContent(snapshot.data!, context);
-                    }
-                    // Act as a placeholder
-                    return const SizedBox();
-                  }),
-            );
-          }),
-        ),
-      ),
-      bottomNavigationBar: buildBottomNavigationBar(),
-    );
-  }
-
-  FutureBuilder<PropertyFullDetails> buildBottomNavigationBar() {
     return FutureBuilder(
         future: rentalDetailsFuture,
         builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data != null) {
-            return bottomNavigationBarContent(snapshot.data!);
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: SafeArea(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.pop(context, 'Something went wrong. Please try again.');
+            });
+          } else if (snapshot.hasData && snapshot.data != null) {
+            return Scaffold(
+              body: SafeArea(
+                child: RefreshIndicator(
+                    onRefresh: handleRefresh,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: _buildContent(snapshot.data!, context),
+                    )),
+              ),
+              bottomNavigationBar: _buildBottomNavigationBar(snapshot.data!),
+            );
           }
           return const SizedBox();
         });
   }
 
-  Container bottomNavigationBarContent(PropertyFullDetails propertyData) {
+  Container _buildBottomNavigationBar(PropertyFullDetails propertyData) {
     // Format the rental price to 2 decimal places
     num rentalPrice = propertyData.rentalPrice!;
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
@@ -161,7 +145,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             StatefulBuilder(builder: (context, setState) {
               return ElevatedButton(
                 onPressed:
-                    hasApplied ? null : () => goToPage(setState, context),
+                    hasApplied ? null : () => _goToPage(setState, context),
                 style: AppStyles.elevatedButtonStyle,
                 child: const Text('Apply'),
               );
@@ -172,7 +156,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  Column buildContent(PropertyFullDetails propertyData, BuildContext context) {
+  Column _buildContent(PropertyFullDetails propertyData, BuildContext context) {
     return Column(
       children: [
         // ********* App Bar and Image Container (Start)  *********
@@ -350,7 +334,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  void goToPage(StateSetter setState, BuildContext context) {
+  void _goToPage(StateSetter setState, BuildContext context) {
     if (role != null) {
       NavigationUtils.pushPage(
         context,
