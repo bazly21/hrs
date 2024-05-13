@@ -84,9 +84,9 @@ class TenancyService {
               (tenantData['image'] != null && tenantData['image'].isNotEmpty)
                   ? tenantData['image'][0]
                   : 'https://via.placeholder.com/150',
-          'tenantRatingCount': tenantData['ratingCount'] ?? 0,
+          'tenantRatingCount': tenantData['ratingCount']?["tenant"] ?? 0,
           'tenantRatingAverage':
-              tenantData['ratingAverage']?['overallRating'] as double? ?? 0.0,
+              tenantData['ratingAverage']?["tenant"]?['overallRating'] as double? ?? 0.0,
           'tenancyDocID': tenancyDoc.id,
           'tenancyStatus': tenancyData['status'] ?? 'Unknown',
           'isRated': tenancyData['isRated']?["rateTenant"] ?? false,

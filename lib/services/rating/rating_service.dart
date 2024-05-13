@@ -117,17 +117,17 @@ class RatingService {
       double totalPaymentRating = 0.0;
       double totalCommunicationRating = 0.0;
       double totalMaintenanceRating = 0.0;
-      int ratingCount = tenantData["ratingCount"] ?? 0;
+      int ratingCount = tenantData["ratingCount"]?["Tenant"] ?? 0;
 
       // Get the total ratings
       totalPaymentRating =
-          ((tenantData["ratingAverage"]?["paymentRating"] ?? 0.0) *
+          ((tenantData["ratingAverage"]?["Tenant"]?["paymentRating"] ?? 0.0) *
               ratingCount);
       totalCommunicationRating =
-          ((tenantData["ratingAverage"]?["communicationRating"] ?? 0.0) *
+          ((tenantData["ratingAverage"]?["Tenant"]?["communicationRating"] ?? 0.0) *
               ratingCount);
       totalMaintenanceRating =
-          ((tenantData["ratingAverage"]?["maintenanceRating"] ?? 0.0) *
+          ((tenantData["ratingAverage"]?["Tenant"]?["maintenanceRating"] ?? 0.0) *
               ratingCount);
 
       // Get new total ratings
@@ -155,8 +155,8 @@ class RatingService {
       });
 
       transaction.update(tenantDocRef, {
-        "ratingCount": ratingCount + 1,
-        "ratingAverage": {
+        "ratingCount.tenant": ratingCount + 1,
+        "ratingAverage.tenant": {
           "paymentRating": averagePaymentRating,
           "communicationRating": averageCommunicationRating,
           "maintenanceRating": averageMaintenanceRating,
