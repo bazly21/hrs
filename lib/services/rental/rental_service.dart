@@ -149,7 +149,7 @@ class RentalService {
                     0.0,
             'tenancyDocID': tenancyDoc.id,
             'tenancyStatus': tenancyData['status'] ?? 'Unknown',
-            'isRated': tenancyData['isRated'] ?? false,
+            'isRated': tenancyData['isRated']?["rateLandlord"] ?? false,
           };
         }).toList(),
       ).then((list) => list
