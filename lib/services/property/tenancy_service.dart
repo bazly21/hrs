@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hrs/model/tenancy/landlord_ended_tenancy.dart';
 
 class TenancyService {
@@ -27,8 +28,8 @@ class TenancyService {
   }
 
   // Get landlord ended tenancies
-  static Future<List<LandlordEndedTenancy>> fetchLandlordEndedTenancies(
-      String landlordID) async {
+  static Future<List<LandlordEndedTenancy>> fetchLandlordEndedTenancies() async {
+    final String landlordID = FirebaseAuth.instance.currentUser!.uid;
 
     QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
         .collection("tenancies")
