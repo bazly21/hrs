@@ -104,11 +104,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
   Container bottomNavigationBarContent(PropertyFullDetails propertyData) {
     // Format the rental price to 2 decimal places
-    double rentalPrice = propertyData.rentalPrice;
+    num rentalPrice = propertyData.rentalPrice!;
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
         ? rentalPrice.toStringAsFixed(2)
         : rentalPrice.toStringAsFixed(0);
-    hasApplied = propertyData.hasApplied;
+
+    hasApplied = propertyData.hasApplied!;
 
     return Container(
       height: 80,
@@ -179,7 +180,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           height: 303,
           decoration: BoxDecoration(
               image: DecorationImage(
-            image: NetworkImage(propertyData.image[0]),
+            image: NetworkImage(propertyData.image![0]),
             fit: BoxFit.cover,
           )),
           child: Padding(
@@ -213,8 +214,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               const SizedBox(height: 10.0),
 
               PropertyDetails(
-                propertyName: propertyData.propertyName,
-                propertyLocation: propertyData.address,
+                propertyName: propertyData.propertyName!,
+                propertyLocation: propertyData.address!,
                 isFavorite: isWishlist, // or false, based on your state
                 showIcon: true, // Set this to false to hide the icon button
                 onIconPressed: () {
@@ -305,10 +306,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
               // ********* Landlord Profile Section (Start) *********
               UserDetails(
-                landlordName: propertyData.landlordName,
-                rating: propertyData.landlordOverallRating,
-                numReview: propertyData.landlordRatingCount,
-                landlordID: propertyData.landlordID,
+                landlordName: propertyData.landlordName!,
+                rating: propertyData.landlordOverallRating!,
+                numReview: propertyData.landlordRatingCount!,
+                landlordID: propertyData.landlordID!,
               ),
               // ********* Landlord Profile Section (End) *********
 
@@ -318,20 +319,20 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               // ********* Property Description Section (Start) *********
               // Property Description Label
               PropertyDescription(
-                  title: "Description", content: propertyData.description),
+                  title: "Description", content: propertyData.description!),
 
               // Furnishing Description Label
               PropertyDescription(
-                  title: "Furnishing", content: propertyData.furnishing),
+                  title: "Furnishing", content: propertyData.furnishing!),
 
               // Facilities Description Label
               PropertyDescription(
-                  title: "Facilities", content: propertyData.facilities),
+                  title: "Facilities", content: propertyData.facilities!),
 
               // Accessibility Description Label
               PropertyDescription(
                   title: "Accessibility",
-                  content: propertyData.accessibilities),
+                  content: propertyData.accessibilities!),
 
               // Location Label
               const Text(

@@ -59,7 +59,7 @@ class PropertyService {
       "hasApplied": hasApplied,
     };
 
-    PropertyFullDetails propertyDetails = PropertyFullDetails.fromMap(propertyFullDetails);
+    PropertyFullDetails propertyDetails = PropertyFullDetails.fromMapFullDetails(propertyFullDetails);
 
     return propertyDetails;
   }
