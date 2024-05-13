@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/components/my_starrating.dart';
+import 'package:hrs/pages/landord_pages/landlord_rental_history_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
 import 'package:hrs/services/auth/auth_service.dart';
@@ -20,6 +21,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final UserService _userService = UserService();
   late Future<DocumentSnapshot> _userDetails;
+  String? _role;
 
   @override
   void initState() {
@@ -30,6 +32,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    _role = context.read<AuthService>().userRole;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -155,11 +159,21 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: Icons.wallet,
             onPressed: () {
               // Navigate to Rental History Page
-              NavigationUtils.pushPage(
-                context,
-                const RentalHistoryPage(),
-                SlideDirection.left,
-              );
+              if (_role == "Tenant") {
+                NavigationUtils.pushPage(
+                  context,
+                  const RentalHistoryPage(),
+                  SlideDirection.left,
+                );
+              }
+              else if (_role == "Landlord") {
+                // Navigate to Landlord Rental History Page
+                NavigationUtils.pushPage(
+                  context,
+                  const LandlordRentalHistoryList(),
+                  SlideDirection.left,
+                );
+              }
             }),
 
         // Add space between elements

@@ -60,7 +60,7 @@ class TenancyService {
 
         if (propertyData == null) return null;
 
-        final String tenantID = propertyData['tenantID'];
+        final String tenantID = tenancyData['tenantID'];
 
         final DocumentSnapshot tenantDoc = await FirebaseFirestore.instance
             .collection('users')
@@ -89,7 +89,7 @@ class TenancyService {
               tenantData['ratingAverage']?['overallRating'] as double? ?? 0.0,
           'tenancyDocID': tenancyDoc.id,
           'tenancyStatus': tenancyData['status'] ?? 'Unknown',
-          'isRated': tenancyData['isRated'] ?? false,
+          'isRated': tenancyData['isRated']?["rateTenant"] ?? false,
         };
 
         final LandlordEndedTenancy landlordEndedTenancy =

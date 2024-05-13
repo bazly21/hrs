@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/components/appbar_shadow.dart';
 import 'package:hrs/model/tenancy/landlord_ended_tenancy.dart';
 import 'package:hrs/pages/landord_pages/landlord_rating_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -8,7 +9,8 @@ class LandlordRentalHistoryList extends StatefulWidget {
   const LandlordRentalHistoryList({super.key});
 
   @override
-  State<LandlordRentalHistoryList> createState() => _LandlordRentalHistoryListState();
+  State<LandlordRentalHistoryList> createState() =>
+      _LandlordRentalHistoryListState();
 }
 
 class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
@@ -23,36 +25,50 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: AppBar(
+          title: const Text('Rental History',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 20.0,
+              )),
+          centerTitle: true,
+          toolbarHeight: 70.0,
+          flexibleSpace: const AppBarShadow(),
+        ),
         body: SafeArea(
-      child: RefreshIndicator(
-        onRefresh: _refreshEndedTenancies,
-        child: FutureBuilder<List<LandlordEndedTenancy>>(
-            future: _endedTenancies,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else if (snapshot.hasData &&
-                  (snapshot.data!.isNotEmpty || snapshot.data != null)) {
-                final List<LandlordEndedTenancy> tenancies = snapshot.data!;
-                return ListView.builder(
-                  itemCount: tenancies.length,
-                  itemBuilder: (context, index) {
-                    return _buildRentalItem(tenancies[index]);
-                  },
-                );
-              }
-              return const Center(
-                child: Text('No tenancies found'),
-              );
-            }),
-      ),
-    ));
+          child: RefreshIndicator(
+            onRefresh: _refreshEndedTenancies,
+            child: FutureBuilder<List<LandlordEndedTenancy>>(
+                future: _endedTenancies,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Error: ${snapshot.error}"),
+                        ),
+                      );
+                    });
+                  } else if (snapshot.hasData &&
+                      (snapshot.data!.isNotEmpty || snapshot.data != null)) {
+                    final List<LandlordEndedTenancy> tenancies = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: tenancies.length,
+                      itemBuilder: (context, index) {
+                        return _buildRentalItem(tenancies[index]);
+                      },
+                    );
+                  }
+                  return const Center(
+                    child: Text('No tenancies found'),
+                  );
+                }),
+          ),
+        ));
   }
 
   Container _buildRentalItem(LandlordEndedTenancy tenancyData) {
@@ -108,12 +124,13 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
             onPressed: tenancyData.isRated
                 ? null
                 : () => NavigationUtils.pushPage(
-                        context,
-                        LandlordRatingPage(
-                          tenantID: tenancyData.tenantID,
-                          tenancyDocID: tenancyData.tenancyDocID,
-                        ),
-                        SlideDirection.left).then((message) {
+                            context,
+                            LandlordRatingPage(
+                              tenantID: tenancyData.tenantID,
+                              tenancyDocID: tenancyData.tenancyDocID,
+                            ),
+                            SlideDirection.left)
+                        .then((message) {
                       if (message != null) {
                         // Show success message
                         ScaffoldMessenger.of(context)
@@ -123,7 +140,7 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
                         _refreshEndedTenancies();
                       }
                     }),
-            child: Text(tenancyData.isRated? 'Rated' : 'Rate'),
+            child: Text(tenancyData.isRated ? 'Rated' : 'Rate'),
           ),
         ],
       ),
@@ -138,5 +155,4 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
       });
     });
   }
-
 }

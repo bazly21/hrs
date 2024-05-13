@@ -17,7 +17,7 @@ class TenantRating {
   Map<String, dynamic> toMap() {
     return {
       "reviewerID": reviewerID,
-      "reviewedAs": "Tenant",
+      "ratedAs": "Tenant",
       "paymentRating": paymentRating,
       "maintenanceRating": maintenanceRating,
       "communicationRating": communicationRating,
