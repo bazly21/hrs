@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
-import 'package:hrs/components/my_richtext.dart';
+import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/pages/view_profile_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/application_service.dart';
@@ -341,7 +341,7 @@ class _PropertyApplicationsSectionState
         const SizedBox(height: 7),
         const CustomRatingBar(rating: 5.0),
         const SizedBox(height: 7),
-        const CustomRichText(text1: "5.0", text2: " (3 Reviews)")
+        const CustomRichText(mainText: "5.0", subText: " (3 Reviews)")
       ],
     );
   }

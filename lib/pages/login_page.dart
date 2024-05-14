@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/components/my_button.dart';
 import 'package:hrs/components/my_label.dart';
-import 'package:hrs/components/my_richtext.dart';
+import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/components/my_textfield.dart';
 import 'package:hrs/pages/register_page.dart';
 import 'package:hrs/services/auth/auth_service.dart';
