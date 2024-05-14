@@ -169,7 +169,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               options: CarouselOptions(
                 height: 303,
                 viewportFraction: 1.0,
-                enlargeCenterPage: false,
+                enableInfiniteScroll: propertyData.image!.length > 1 ? true : false,
                 autoPlay: false,
                 onPageChanged: (index, _) {
                   setState(() {
@@ -204,23 +204,24 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                 onPressed: () {},
               ),
             ),
-            Positioned(
-              bottom: 16.0,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: CarouselIndicator(
-                  count: propertyData.image!.length,
-                  index: _currentIndex,
-                  color: Colors.white,
-                  activeColor: const Color(0xFF8568F3),
-                  space: 8.0,
-                  width: 12.0,
-                  height: 12.0,
-                  cornerRadius: 12.0,
+            if(propertyData.image!.length >1)
+              Positioned(
+                bottom: 16.0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: CarouselIndicator(
+                    count: propertyData.image!.length,
+                    index: _currentIndex,
+                    color: Colors.white,
+                    activeColor: const Color(0xFF8568F3),
+                    space: 6.0,
+                    width: 11.0,
+                    height: 11.0,
+                    cornerRadius: 6.0,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
         // ********* App Bar and Image Container (End)  *********
