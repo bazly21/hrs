@@ -47,7 +47,7 @@ class PropertyService {
     if (applicantID != null) {
       hasApplication = await ApplicationService.checkUserApplication(
           propertyID, applicantID);
-      hasTenancy = hasApplication &&
+      hasTenancy = hasApplication ||
           await TenancyService.checkUserTenancy(propertyID, applicantID);
       hasApplied = hasTenancy;
     }

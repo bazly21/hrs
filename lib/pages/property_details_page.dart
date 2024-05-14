@@ -45,16 +45,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         widget.propertyID, _auth.currentUser?.uid);
   }
 
-  Future<void> handleRefresh() async {
-    await _propertyService
-        .getPropertyFullDetails(widget.propertyID, _auth.currentUser!.uid)
-        .then((newData) {
-      setState(() {
-        rentalDetailsFuture = Future.value(newData);
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     role = context.watch<AuthService>().userRole;
@@ -76,7 +66,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             return Scaffold(
               body: SafeArea(
                 child: RefreshIndicator(
-                    onRefresh: handleRefresh,
+                    onRefresh: refreshData,
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       child: _buildContent(snapshot.data!, context),
@@ -145,14 +135,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ),
 
             // Apply Button
-            StatefulBuilder(builder: (context, setState) {
-              return ElevatedButton(
-                onPressed:
-                    hasApplied ? null : () => _goToPage(setState, context),
-                style: AppStyles.elevatedButtonStyle,
-                child: const Text('Apply'),
-              );
-            }),
+            ElevatedButton(
+              onPressed:
+                  propertyData.hasApplied! ? null : () => _goToPage(context),
+              style: AppStyles.elevatedButtonStyle,
+              child: Text(propertyData.hasApplied! ? "Applied" : "Apply"),
+            )
           ],
         ),
       ),
@@ -169,7 +157,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               options: CarouselOptions(
                 height: 303,
                 viewportFraction: 1.0,
-                enableInfiniteScroll: propertyData.image!.length > 1 ? true : false,
+                enableInfiniteScroll:
+                    propertyData.image!.length > 1 ? true : false,
                 autoPlay: false,
                 onPageChanged: (index, _) {
                   setState(() {
@@ -204,7 +193,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                 onPressed: () {},
               ),
             ),
-            if(propertyData.image!.length >1)
+            if (propertyData.image!.length > 1)
               Positioned(
                 bottom: 16.0,
                 left: 0,
@@ -372,7 +361,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  void _goToPage(StateSetter setState, BuildContext context) {
+  void _goToPage(BuildContext context) {
     if (role != null) {
       NavigationUtils.pushPage(
         context,
@@ -380,14 +369,13 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           propertyID: widget.propertyID,
         ),
         SlideDirection.left,
-      ).then((result) {
-        if (result != null) {
+      ).then((message) {
+        if (message != null) {
+          refreshData();
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result["message"])),
+            SnackBar(content: Text(message)),
           );
-          setState(() {
-            hasApplied = result["hasApplied"];
-          });
         }
       });
     } else {
@@ -409,5 +397,15 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         ),
       );
     }
+  }
+
+  Future<void> refreshData() async {
+    await _propertyService
+        .getPropertyFullDetails(widget.propertyID, _auth.currentUser!.uid)
+        .then((newData) {
+      setState(() {
+        rentalDetailsFuture = Future.value(newData);
+      });
+    });
   }
 }
