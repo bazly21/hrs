@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/pages/property_details_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -112,10 +113,10 @@ class _RentalListPageState extends State<RentalListPage> {
       child: InkWell(
         onTap: () {
           NavigationUtils.pushPage(
-            context,
-            PropertyDetailsPage(propertyID: propertyID),
-            SlideDirection.left)
-          .then((errorMessage) {
+                  context,
+                  PropertyDetailsPage(propertyID: propertyID),
+                  SlideDirection.left)
+              .then((errorMessage) {
             // Show an error message if there's an error
             if (errorMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -296,26 +297,9 @@ class _RentalListPageState extends State<RentalListPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             // Rental price
-                            RichText(
-                                text: TextSpan(
-                                    // Default text style
-                                    style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-
-                                    // Text
-                                    children: [
-                                  TextSpan(
-                                    text: "RM$formattedRentalPrice",
-                                  ),
-                                  const TextSpan(
-                                      text: " / month",
-                                      style: TextStyle(
-                                          color: Color(0xFF7D7F88),
-                                          fontWeight: FontWeight.normal,
-                                          fontSize: 14.0))
-                                ])),
+                            CustomRichText(
+                                mainText: "RM$formattedRentalPrice",
+                                subText: " /month"),
 
                             // Wishlist Icon
                             const Icon(

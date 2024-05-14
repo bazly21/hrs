@@ -57,7 +57,10 @@ class CustomRichText extends StatelessWidget {
           TextSpan(text: mainText),
           TextSpan(
             text: subText,
-            style: const TextStyle(color: Colors.grey, fontSize: 14),
+            style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+                fontWeight: FontWeight.normal),
           ),
         ],
       ),
