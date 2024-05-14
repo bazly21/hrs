@@ -36,13 +36,18 @@ class CustomRichText extends StatelessWidget {
   final String subText;
   final double mainFontSize;
   final double subFontSize;
+  final FontWeight mainFontWeight;
+  final FontWeight subFontWeight;
 
-  const CustomRichText(
-      {super.key,
-      required this.mainText,
-      required this.subText,
-      this.mainFontSize = 18,
-      this.subFontSize = 14});
+  const CustomRichText({
+    super.key,
+    required this.mainText,
+    required this.subText,
+    this.mainFontSize = 18,
+    this.subFontSize = 14,
+    this.mainFontWeight = FontWeight.bold,
+    this.subFontWeight = FontWeight.normal,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,15 +57,15 @@ class CustomRichText extends StatelessWidget {
         style: TextStyle(
             color: Colors.black,
             fontSize: mainFontSize,
-            fontWeight: FontWeight.bold),
+            fontWeight: mainFontWeight),
         children: [
           TextSpan(text: mainText),
           TextSpan(
             text: subText,
-            style: const TextStyle(
+            style: TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
-                fontWeight: FontWeight.normal),
+                fontWeight: subFontWeight),
           ),
         ],
       ),
