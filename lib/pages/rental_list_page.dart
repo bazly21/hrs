@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/pages/property_details_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:hrs/services/property/property_service.dart';
 
 class RentalListPage extends StatefulWidget {
   const RentalListPage({super.key});
@@ -12,7 +13,7 @@ class RentalListPage extends StatefulWidget {
 }
 
 class _RentalListPageState extends State<RentalListPage> {
-  Future<QuerySnapshot?>? rentalListFuture;
+  late Future<QuerySnapshot> rentalListFuture;
 
   // Initialize state
   // Execute fetchRentalDetails function and store it
@@ -21,7 +22,7 @@ class _RentalListPageState extends State<RentalListPage> {
   @override
   void initState() {
     super.initState();
-    rentalListFuture = fetchRentalList();
+    rentalListFuture = PropertyService.fetchAvailableProperties();
   }
 
   @override
@@ -337,16 +338,8 @@ class _RentalListPageState extends State<RentalListPage> {
     );
   }
 
-  Future<QuerySnapshot?> fetchRentalList() async {
-    // Fetch all the data inside properties collection
-    QuerySnapshot propertiesSnapshot =
-        await FirebaseFirestore.instance.collection('properties').get();
-
-    return propertiesSnapshot;
-  }
-
   Future<void> handleRefresh() async {
-    await fetchRentalList().then((newData) {
+    await PropertyService.fetchAvailableProperties().then((newData) {
       setState(() {
         rentalListFuture =
             Future.value(newData); // Use the new data for the future
