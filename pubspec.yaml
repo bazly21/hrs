@@ -49,6 +49,8 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   num: ^1.0.0
   shared_preferences: ^2.2.3
+  carousel_slider: ^4.2.1
+  carousel_indicator: ^1.0.6
 
 dev_dependencies:
   flutter_test:

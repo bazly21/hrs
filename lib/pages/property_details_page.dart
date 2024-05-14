@@ -1,3 +1,5 @@
+import 'package:carousel_indicator/carousel_indicator.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_circulariconbutton.dart';
@@ -28,6 +30,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   String? role;
   bool isWishlist = false; // Initial state of the wishlist icon
   bool hasApplied = false;
+  int _currentIndex = 0;
 
   late Future<PropertyFullDetails> rentalDetailsFuture;
 
@@ -160,31 +163,65 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     return Column(
       children: [
         // ********* App Bar and Image Container (Start)  *********
-        Container(
-          height: 303,
-          decoration: BoxDecoration(
-              image: DecorationImage(
-            image: NetworkImage(propertyData.image![0]),
-            fit: BoxFit.cover,
-          )),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween, // Space between items
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Back Button
-                CircularIconButton(
-                    iconData: Icons.arrow_back,
-                    onPressed: () => Navigator.of(context).pop()),
-
-                // Share Button (Dummy)
-                CircularIconButton(iconData: Icons.share, onPressed: () {}),
-              ],
+        Stack(
+          children: [
+            CarouselSlider(
+              options: CarouselOptions(
+                height: 303,
+                viewportFraction: 1.0,
+                enlargeCenterPage: false,
+                autoPlay: false,
+                onPageChanged: (index, _) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+              ),
+              items: propertyData.image!
+                  .map((item) => Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(item),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ))
+                  .toList(),
             ),
-          ),
+            Positioned(
+              top: 12.0,
+              left: 16.0,
+              child: CircularIconButton(
+                iconData: Icons.arrow_back,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            Positioned(
+              top: 12.0,
+              right: 16.0,
+              child: CircularIconButton(
+                iconData: Icons.share,
+                onPressed: () {},
+              ),
+            ),
+            Positioned(
+              bottom: 16.0,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: CarouselIndicator(
+                  count: propertyData.image!.length,
+                  index: _currentIndex,
+                  color: Colors.white,
+                  activeColor: const Color(0xFF8568F3),
+                  space: 8.0,
+                  width: 12.0,
+                  height: 12.0,
+                  cornerRadius: 12.0,
+                ),
+              ),
+            ),
+          ],
         ),
         // ********* App Bar and Image Container (End)  *********
 
