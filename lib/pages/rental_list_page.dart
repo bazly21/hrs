@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/components/my_appbar.dart';
+import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/pages/property_details_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
@@ -14,7 +14,7 @@ class RentalListPage extends StatefulWidget {
 }
 
 class _RentalListPageState extends State<RentalListPage> {
-  late Future<QuerySnapshot> rentalListFuture;
+  late Future<List<PropertyFullDetails>?> rentalListFuture;
 
   // Initialize state
   // Execute fetchRentalDetails function and store it
@@ -35,14 +35,12 @@ class _RentalListPageState extends State<RentalListPage> {
       ),
       body: RefreshIndicator(
         onRefresh: handleRefresh,
-        child: FutureBuilder<QuerySnapshot?>(
+        child: FutureBuilder<List<PropertyFullDetails>?>(
             future: rentalListFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 // Show a loading indicator while waiting for the data
-                return SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: const Center(child: CircularProgressIndicator()));
+                return const Center(child: CircularProgressIndicator());
               }
               // If there's an error fetching the data
               else if (snapshot.hasError) {
@@ -54,28 +52,19 @@ class _RentalListPageState extends State<RentalListPage> {
                 });
               }
               // If there is data and the data is empty
-              else if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                int propertyCount = snapshot.data!.docs.length;
+              else if (snapshot.hasData && snapshot.data != null) {
+                int propertyCount = snapshot.data!.length;
 
-                return LayoutBuilder(builder: (context, constraints) {
-                  return ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: constraints.maxHeight),
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: propertyCount,
-                      shrinkWrap: true,
-                      itemBuilder: (context, index) {
-                        DocumentSnapshot propertyData =
-                            snapshot.data!.docs[index];
+                return ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: propertyCount,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
 
-                        // Return the rental list
-                        return rentalList(
-                            context, propertyData, index, propertyCount);
-                      },
-                    ),
-                  );
-                });
+                    // Return the rental list
+                    return rentalList(context, snapshot.data![index], index, propertyCount);
+                  },
+                );
               }
 
               // When there is no data
@@ -101,14 +90,14 @@ class _RentalListPageState extends State<RentalListPage> {
     );
   }
 
-  Widget rentalList(BuildContext context, DocumentSnapshot propertyData,
+  Widget rentalList(BuildContext context, PropertyFullDetails propertyData,
       int index, int totalCount) {
     // Format the rental price to 2 decimal places
-    double rentalPrice = propertyData['rent'];
+    num rentalPrice = propertyData.rentalPrice!;
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
         ? rentalPrice.toStringAsFixed(2)
         : rentalPrice.toStringAsFixed(0);
-    String propertyID = propertyData.id;
+    String propertyID = propertyData.propertyID!;
 
     return Container(
       margin: EdgeInsets.only(
@@ -155,7 +144,7 @@ class _RentalListPageState extends State<RentalListPage> {
                         topLeft: Radius.circular(10),
                         bottomLeft: Radius.circular(10)),
                     image: DecorationImage(
-                        image: NetworkImage(propertyData["image"][0]),
+                        image: NetworkImage(propertyData.image![0]),
                         fit: BoxFit.cover)),
               ),
               Expanded(
@@ -171,7 +160,7 @@ class _RentalListPageState extends State<RentalListPage> {
                         children: <Widget>[
                           //////// Property Name Section (Start) //////
                           Text(
-                            propertyData["name"],
+                            propertyData.propertyName!,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -181,7 +170,7 @@ class _RentalListPageState extends State<RentalListPage> {
 
                           //////// Property Location Section (Start) //////
                           Text(
-                            propertyData["address"],
+                            propertyData.address!,
                             style: const TextStyle(fontSize: 15),
                           ),
                           //////// Property Location Section (End) //////
@@ -218,9 +207,9 @@ class _RentalListPageState extends State<RentalListPage> {
                               const SizedBox(width: 2),
 
                               // Rating value
-                              const CustomRichText(
-                                  mainText: "5.0",
-                                  subText: " (1)",
+                               CustomRichText(
+                                  mainText: propertyData.landlordOverallRating!.toString(),
+                                  subText: " (${propertyData.landlordRatingCount})",
                                   mainFontSize: 14,
                                   mainFontWeight: FontWeight.normal)
                             ],
@@ -245,7 +234,7 @@ class _RentalListPageState extends State<RentalListPage> {
                               const SizedBox(width: 4),
 
                               Text(
-                                "${propertyData["bedrooms"]} Rooms",
+                                "${propertyData.bathrooms!} Rooms",
                                 style: const TextStyle(
                                     fontSize: 14, color: Color(0xFF7D7F88)),
                               ),
@@ -265,7 +254,7 @@ class _RentalListPageState extends State<RentalListPage> {
                               const SizedBox(width: 4),
 
                               Text(
-                                "${propertyData["size"]} m\u00B2",
+                                "${propertyData.size!} m\u00B2",
                                 style: const TextStyle(
                                     fontSize: 14, color: Color(0xFF7D7F88)),
                               )

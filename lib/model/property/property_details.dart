@@ -9,6 +9,7 @@ class PropertyFullDetails {
   final num? rentalPrice;
   final int? bedrooms;
   final num? size;
+  final String? propertyID;
   final String? propertyName;
   final String? facilities;
   final String? landlordName;
@@ -17,22 +18,23 @@ class PropertyFullDetails {
   final bool? hasApplied;
 
   PropertyFullDetails({
-    required this.furnishing,
-    required this.image,
-    required this.address,
-    required this.description,
-    required this.landlordID,
-    required this.accessibilities,
-    required this.bathrooms,
-    required this.rentalPrice,
-    required this.bedrooms,
-    required this.size,
-    required this.propertyName,
-    required this.facilities,
-    required this.landlordName,
-    required this.landlordRatingCount,
-    required this.landlordOverallRating,
-    required this.hasApplied,
+    this.furnishing,
+    this.image,
+    this.address,
+    this.description,
+    this.landlordID,
+    this.accessibilities,
+    this.bathrooms,
+    this.rentalPrice,
+    this.bedrooms,
+    this.size,
+    this.propertyID,
+    this.propertyName,
+    this.facilities,
+    this.landlordName,
+    this.landlordRatingCount,
+    this.landlordOverallRating,
+    this.hasApplied,
   });
 
   factory PropertyFullDetails.fromMapFullDetails(Map<String, dynamic> data) {
@@ -49,10 +51,27 @@ class PropertyFullDetails {
       size: data['size'] ?? 0.0,
       propertyName: data['name'] ?? 'N/A',
       facilities: data['facilities'],
-      landlordName: data['landlordName'],
+      landlordName: data['landlordName'] ?? 'N/A',
       landlordRatingCount: data['landlordRatingCount'] ?? 0,
       landlordOverallRating: data['landlordOverallRating'] ?? 0.0,
       hasApplied: data['hasApplied'] ?? false,
+    );
+  }
+
+  factory PropertyFullDetails.fromMapHalfDetails(Map<String, dynamic> data) {
+    return PropertyFullDetails(
+      propertyID: data['propertyID'],
+      propertyName: data['name'] ?? 'N/A',
+      address: data['address'] ?? 'N/A',
+      rentalPrice: data['rent'] ?? 0.0,
+      bathrooms: data['bathrooms'] ?? 0,
+      bedrooms: data['bedrooms'] ?? 0,
+      size: data['size'] ?? 0.0,
+      image: List<String>.from(data['image']),
+      landlordID: data['landlordID'],
+      landlordName: data['landlordName'] ?? 'N/A',
+      landlordRatingCount: data['landlordRatingCount'] ?? 0,
+      landlordOverallRating: data['landlordOverallRating'] ?? 0.0,
     );
   }
 }

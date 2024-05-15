@@ -73,13 +73,51 @@ class PropertyService {
     return propertyData.data() as Map<String, dynamic>;
   }
 
-  static Future<QuerySnapshot> fetchAvailableProperties() async {
+  static Future<List<PropertyFullDetails>?> fetchAvailableProperties() async {
     // Fetch all the data inside properties collection
     QuerySnapshot propertiesSnapshot = await FirebaseFirestore.instance
-      .collection("properties")
-      .where("status", isEqualTo: "Available")
-      .get();
+        .collection("properties")
+        .where("status", isEqualTo: "Available")
+        .get();
 
-    return propertiesSnapshot;
+    if (propertiesSnapshot.docs.isEmpty) return null;
+
+    List<PropertyFullDetails> propertiesDetailsList =
+        await Future.wait(propertiesSnapshot.docs.map((propertyDoc) async {
+      Map<String, dynamic>? propertyData =
+          propertyDoc.data() as Map<String, dynamic>?;
+
+      if (propertyData == null) return null;
+
+      if (propertyData["landlordID"] == null) return null;
+
+      String landlordID = propertyData["landlordID"];
+
+      DocumentSnapshot landlordDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(landlordID)
+          .get();
+
+      Map<String, dynamic>? landlordData =
+          landlordDoc.data() as Map<String, dynamic>?;
+
+      if (landlordData == null) return null;
+
+      Map<String, dynamic> propertyMap = {
+        ...propertyData,
+        "propertyID": propertyDoc.id,
+        "landlordName": landlordData["name"],
+        "landlordRatingCount": landlordData["ratingCount"]?["landlord"],
+        "landlordOverallRating": landlordData["ratingAverage"]?["landlord"]
+            ?["overallRating"],
+      };
+
+      return PropertyFullDetails.fromMapHalfDetails(propertyMap);
+    })).then((noob) => noob
+            .where((element) => element != null)
+            .toList()
+            .cast<PropertyFullDetails>());
+
+    return propertiesDetailsList;
   }
 }
