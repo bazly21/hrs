@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_details.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 
 class LandlordPropertyListPage extends StatefulWidget {
   
@@ -86,13 +87,15 @@ class _LandlordPropertyListPageState extends State<LandlordPropertyListPage> {
       child: InkWell(
       onTap: () {
         // Navigate to RentalPropertyDetailsPage and pass the snapshotId
-        Navigator.push(
+        NavigationUtils.pushPage(
           context,
-          MaterialPageRoute(
-            builder: (context) =>
-                LandlordPropertyDetailsPage(propertyID: propertyID),
-          ),
-        );
+          LandlordPropertyDetailsPage(propertyID: propertyID),
+          SlideDirection.left,
+        ).then((result) {
+          if (result != null && result == 'success') {
+            refreshRentalList();
+          }
+        });
       },
       child: Container(
         padding: const EdgeInsets.all(10.0),

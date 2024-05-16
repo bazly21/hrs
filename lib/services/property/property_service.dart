@@ -120,4 +120,12 @@ class PropertyService {
 
     return propertiesDetailsList;
   }
+
+  // Function to delete property
+  static Future<void> deleteProperty(String propertyID) async {
+    await FirebaseFirestore.instance
+        .collection("properties")
+        .doc(propertyID)
+        .delete();
+  }
 }
