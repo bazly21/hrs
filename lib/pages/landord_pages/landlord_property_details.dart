@@ -46,7 +46,7 @@ class _LandlordPropertyDetailsPageState
           actions: [
             PopupMenuButton<String>(
               icon: const Icon(Icons.settings),
-              offset: const Offset(0, 45),
+              position: PopupMenuPosition.under,
               onSelected: (String result) async {
                 if (result == 'Set tenant criteria') {
                   // Navigate to the tenant criteria setting page
