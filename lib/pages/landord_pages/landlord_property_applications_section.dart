@@ -27,7 +27,6 @@ class _PropertyApplicationsSectionState
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late Future<Map<String, dynamic>> propertyApplicationsFuture;
   final TextEditingController _tenancyDateController = TextEditingController();
-  bool _isAccepted = false;
   bool _containAcceptedApplication = false;
   bool _hasPropertyRented = false;
   bool _hasTenantCriteria = false;
@@ -71,7 +70,6 @@ class _PropertyApplicationsSectionState
                   itemBuilder: (context, index) {
                     final Application applicationData =
                         snapshot.data!['applicationList'][index];
-                    _isAccepted = applicationData.status == "Accepted";
                     _hasTenantCriteria = snapshot.data!['hasTenantCriteria'];
 
                     return Stack(
@@ -154,7 +152,7 @@ class _PropertyApplicationsSectionState
                 ],
               ),
               const SizedBox(height: 8),
-              if (!_isAccepted)
+              if (applicationData.status != "Accepted")
                 _buildAcceptDeclineButtons(
                     context, applicationData.applicationID!),
             ],
@@ -243,7 +241,9 @@ class _PropertyApplicationsSectionState
 
   PopupMenuButton<String> _buildKebabMenu(
       BuildContext context, Application applicationData) {
-        bool isNotRentedAndAccepted = !_hasPropertyRented && _isAccepted;
+    bool isPropertyAvailableAndAccepted =
+        !_hasPropertyRented && applicationData.status == "Accepted";
+
     return PopupMenuButton<String>(
       position: PopupMenuPosition.under,
       color: Colors.white,
@@ -265,7 +265,7 @@ class _PropertyApplicationsSectionState
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
         // First PopupMenuItem
-        if (isNotRentedAndAccepted) ...[
+        if (isPropertyAvailableAndAccepted) ...[
           const PopupMenuItem<String>(
             value: 'Start Tenancy',
             child: Text('Start Tenancy'),
@@ -278,7 +278,7 @@ class _PropertyApplicationsSectionState
           child: Text('Contact Tenant'),
         ),
 
-        if (isNotRentedAndAccepted) ...[
+        if (isPropertyAvailableAndAccepted) ...[
           const PopupMenuDivider(),
           const PopupMenuItem<String>(
             value: 'Undo Application',
@@ -560,18 +560,20 @@ class _PropertyApplicationsSectionState
               .map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: Text('$value months',
-                  style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.black)),
+              child: Text(
+                '$value months',
+                style: const TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
+              ),
             );
           }).toList(),
           onChanged: (newValue) {
             setState(() {
               tenancyDuration = newValue;
             });
-
             updateEndDate();
           },
         ),
