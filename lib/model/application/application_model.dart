@@ -2,28 +2,55 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Application {
   final String? applicantID;
+  final int? criteriaScore;
   final String? occupation;
   final String? profileType;
   final int? numberOfPax;
   final String? nationality;
   final DateTime? moveInDate;
   final int? tenancyDuration;
-  final double? overallRating;
-  final int? totalReviews;
+  final String? applicationID;
+  final String? applicantName;
+  final String? applicantProfilePic;
+  final double? applicantOverallRating;
+  final int? applicantRatingCount;
   final String status;
 
   Application({
     this.applicantID,
+    this.criteriaScore,
     this.occupation,
     this.profileType,
     this.numberOfPax,
     this.nationality,
     this.moveInDate,
     this.tenancyDuration,
-    this.overallRating,
-    this.totalReviews,
+    this.applicationID,
+    this.applicantName,
+    this.applicantProfilePic,
+    this.applicantOverallRating,
+    this.applicantRatingCount,
     this.status = "Pending",
   });
+
+  factory Application.fromMap(Map<String, dynamic> applicationMap) {
+    return Application(
+      applicantID: applicationMap["applicantID"],
+      criteriaScore: applicationMap["criteriaScore"] ?? 0,
+      moveInDate: applicationMap["moveInDate"],
+      nationality: applicationMap["nationality"],
+      numberOfPax: applicationMap["numberOfPax"],
+      occupation: applicationMap["occupation"],
+      profileType: applicationMap["profileType"],
+      status: applicationMap["status"] ?? "Pending",
+      tenancyDuration: applicationMap["tenancyDuration"],
+      applicationID: applicationMap["applicationID"],
+      applicantName: applicationMap["applicantName"] ?? "N/A",
+      applicantProfilePic: applicationMap["applicantProfilePic"] ?? "https://via.placeholder.com/150",
+      applicantOverallRating: applicationMap["applicantOverallRating"] ?? 0.0,
+      applicantRatingCount: applicationMap["applicantRatingCount"] ?? 0,
+    );
+  }
 
   // Convert a message object into a map
   Map<String, dynamic> toMap() {

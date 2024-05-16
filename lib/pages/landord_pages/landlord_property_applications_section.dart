@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/custom_richtext.dart';
+import 'package:hrs/model/application/application_model.dart';
 import 'package:hrs/pages/view_profile_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/application_service.dart';
@@ -24,12 +25,12 @@ class _PropertyApplicationsSectionState
     extends State<PropertyApplicationsSection> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final ApplicationService _applicationService = ApplicationService();
   late Future<Map<String, dynamic>> propertyApplicationsFuture;
   final TextEditingController _tenancyDateController = TextEditingController();
-  bool _isApplicationAccepted = false;
+  bool _isAccepted = false;
   bool _containAcceptedApplication = false;
   bool _hasPropertyRented = false;
+  bool _hasTenantCriteria = false;
   String? tenancyDuration;
   DateTime? startDate;
   DateTime? endDate;
@@ -38,7 +39,7 @@ class _PropertyApplicationsSectionState
   void initState() {
     super.initState();
     propertyApplicationsFuture =
-        _applicationService.getPropertyApplication(widget.propertyID);
+        ApplicationService.getPropertyApplication(widget.propertyID);
   }
 
   @override
@@ -63,25 +64,19 @@ class _PropertyApplicationsSectionState
             // If there is data and the data is not empty
             else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
               _hasPropertyRented = snapshot.data!['status'] == "Rented";
+              _containAcceptedApplication = snapshot.data!['hasAccepted'];
 
               return ListView.builder(
                   itemCount: snapshot.data!['applicationList'].length,
                   itemBuilder: (context, index) {
-                    final Map<String, dynamic> applicationData =
+                    final Application applicationData =
                         snapshot.data!['applicationList'][index];
-                    final String applicationID =
-                        applicationData["applicationID"];
-                    _isApplicationAccepted =
-                        applicationData['status'] == "Accepted";
-                    _containAcceptedApplication = snapshot.data!['hasAccepted'];
+                    _isAccepted = applicationData.status == "Accepted";
+                    _hasTenantCriteria = snapshot.data!['hasTenantCriteria'];
 
                     return Stack(
-                      children: _buildApplicantData(
-                          index,
-                          context,
-                          applicationData,
-                          _isApplicationAccepted,
-                          applicationID),
+                      children:
+                          _buildApplicantData(index, context, applicationData),
                     );
                   });
             } else {
@@ -106,15 +101,13 @@ class _PropertyApplicationsSectionState
   }
 
   List<Widget> _buildApplicantData(
-      int index,
-      BuildContext context,
-      Map<String, dynamic> applicationData,
-      bool isAccepted,
-      String applicationID) {
+      int index, BuildContext context, Application applicationData) {
     return [
-      _buildApplicantCard(
-          index, isAccepted, applicationData, context, applicationID),
-      if (index == 0)
+      _buildApplicantCard(index, applicationData, context),
+
+      // Only show the 'Best Match' label for the first applicant
+      // and if there is tenant criteria
+      if (index == 0 && _hasTenantCriteria)
         Positioned(
           top: 5,
           left: 45,
@@ -133,11 +126,10 @@ class _PropertyApplicationsSectionState
   }
 
   Card _buildApplicantCard(
-      int index,
-      bool isAccepted,
-      Map<String, dynamic> applicationData,
-      BuildContext context,
-      String applicationID) {
+      int index, Application applicationData, BuildContext context) {
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+    String tenancyDate = dateFormat.format(applicationData.moveInDate!);
+
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Container(
@@ -145,168 +137,26 @@ class _PropertyApplicationsSectionState
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: index == 0 ? const Color(0xFF8568F3) : Colors.grey[300]!,
+            color: index == 0 && _hasTenantCriteria
+                ? const Color(0xFF8568F3)
+                : Colors.grey[300]!,
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+          padding: const EdgeInsets.all(10),
           child: Column(
             children: [
               Row(
                 children: [
-                  _buildProfileAndRating(applicationData["applicantID"]),
-
+                  _buildProfileAndRating(applicationData),
                   const SizedBox(width: 25),
-
-                  // ********* Applicant Details Section (Start)  *********
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Applicant's Name
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(applicationData["applicantName"],
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 20)),
-
-                            // If the application status is accepted,
-                            // then show the 'Kebab' (three vertical dot) menu
-                            if (isAccepted)
-                              PopupMenuButton<String>(
-                                position: PopupMenuPosition.under,
-                                color: Colors.white,
-                                onSelected: (String result) async {
-                                  // Handle the menu item selected here
-                                  if (result == "Undo Application") {
-                                    showConfirmationAndUpdateStatus(
-                                        context: context,
-                                        confirmationTitle: "Confirm Undo",
-                                        confirmationContent:
-                                            "Are you sure you want to undo this application?",
-                                        status: "Pending",
-                                        applicationID: applicationID);
-                                  }
-                                  // If the user selects 'Start Tenancy'
-                                  else if (result == "Start Tenancy") {
-                                    showTenancyForm(context, applicationData);
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) =>
-                                    <PopupMenuEntry<String>>[
-                                  // First PopupMenuItem
-                                  if (!_hasPropertyRented) ...[
-                                    const PopupMenuItem<String>(
-                                      value: 'Start Tenancy',
-                                      child: Text('Start Tenancy'),
-                                    ),
-                                    const PopupMenuDivider(),
-                                  ],
-
-                                  const PopupMenuItem<String>(
-                                    value: 'Contact Tenant',
-                                    child: Text('Contact Tenant'),
-                                  ),
-
-                                  if (!_hasPropertyRented) ...[
-                                    const PopupMenuDivider(),
-                                    const PopupMenuItem<String>(
-                                      value: 'Undo Application',
-                                      child: Text(
-                                        'Undo Application',
-                                        style: TextStyle(
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    )
-                                  ]
-                                ],
-                                icon: const Icon(Icons
-                                    .more_vert), // Icon for kebab menu (three vertical dots)
-                              ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 4),
-
-                        // Applicant's Details
-                        Row(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Occupation
-                                const Text("Occupation:",
-                                    style: TextStyle(fontSize: 13)),
-                                Text(applicationData["occupation"],
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF7D7F88))),
-
-                                // Profile Type
-                                const Text("Profile type:",
-                                    style: TextStyle(fontSize: 13)),
-                                Text(applicationData["profileType"],
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF7D7F88))),
-
-                                // Number of Pax
-                                const Text("No. of pax:",
-                                    style: TextStyle(fontSize: 13)),
-                                Text("${applicationData["numberOfPax"]} pax",
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF7D7F88))),
-                              ],
-                            ),
-                            const SizedBox(width: 14),
-                            Container(
-                                width: 1,
-                                color: const Color(0xFF8568F3),
-                                height: 110),
-                            const SizedBox(width: 14),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Occupation
-                                const Text("Nationality:",
-                                    style: TextStyle(fontSize: 13)),
-                                Text(applicationData["nationality"],
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF7D7F88))),
-
-                                // Profile Type
-                                const Text("Move-in date:",
-                                    style: TextStyle(fontSize: 13)),
-                                Text("${applicationData["moveInDate"]}",
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF7D7F88))),
-
-                                // Number of Pax
-                                const Text("Tenancy duration:",
-                                    style: TextStyle(fontSize: 13)),
-                                Text(
-                                    "${applicationData["tenancyDuration"]} months",
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF7D7F88))),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                  // ********* Applicant Details Section (End)  *********
+                  _buildApplicantInfo(applicationData, context, tenancyDate)
                 ],
               ),
               const SizedBox(height: 8),
-              if (!isAccepted)
-                _buildAcceptDeclineButtons(context, applicationID),
+              if (!_isAccepted)
+                _buildAcceptDeclineButtons(
+                    context, applicationData.applicationID!),
             ],
           ),
         ),
@@ -314,16 +164,151 @@ class _PropertyApplicationsSectionState
     );
   }
 
-  Column _buildProfileAndRating(String applicantID) {
+  Expanded _buildApplicantInfo(
+      Application applicationData, BuildContext context, String tenancyDate) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Applicant's Name
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(applicationData.applicantName!,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 20)),
+
+              // If the application status is accepted,
+              // then show the 'Kebab' (three vertical dot) menu
+              _buildKebabMenu(context, applicationData),
+            ],
+          ),
+
+          const SizedBox(height: 4),
+
+          // Applicant's Details
+          _buildApplicantDetails(applicationData, tenancyDate),
+        ],
+      ),
+    );
+  }
+
+  Row _buildApplicantDetails(Application applicationData, String tenancyDate) {
+    return Row(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Occupation
+            const Text("Occupation:", style: TextStyle(fontSize: 13)),
+            Text(applicationData.occupation!,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+
+            // Profile Type
+            const Text("Profile type:", style: TextStyle(fontSize: 13)),
+            Text(applicationData.profileType!,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+
+            // Number of Pax
+            const Text("No. of pax:", style: TextStyle(fontSize: 13)),
+            Text("${applicationData.numberOfPax} pax",
+                style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+          ],
+        ),
+        const SizedBox(width: 14),
+        Container(width: 1, color: const Color(0xFF8568F3), height: 110),
+        const SizedBox(width: 14),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Occupation
+            const Text("Nationality:", style: TextStyle(fontSize: 13)),
+            Text(applicationData.nationality!,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+
+            // Profile Type
+            const Text("Move-in date:", style: TextStyle(fontSize: 13)),
+            Text(tenancyDate,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+
+            // Number of Pax
+            const Text("Tenancy duration:", style: TextStyle(fontSize: 13)),
+            Text("${applicationData.tenancyDuration!} months",
+                style: const TextStyle(fontSize: 13, color: Color(0xFF7D7F88))),
+          ],
+        ),
+      ],
+    );
+  }
+
+  PopupMenuButton<String> _buildKebabMenu(
+      BuildContext context, Application applicationData) {
+        bool isNotRentedAndAccepted = !_hasPropertyRented && _isAccepted;
+    return PopupMenuButton<String>(
+      position: PopupMenuPosition.under,
+      color: Colors.white,
+      onSelected: (String result) async {
+        // Handle the menu item selected here
+        if (result == "Undo Application") {
+          showConfirmationAndUpdateStatus(
+              context: context,
+              confirmationTitle: "Confirm Undo",
+              confirmationContent:
+                  "Are you sure you want to undo this application?",
+              status: "Pending",
+              applicationID: applicationData.applicationID!);
+        }
+        // If the user selects 'Start Tenancy'
+        else if (result == "Start Tenancy") {
+          showTenancyForm(context, applicationData);
+        }
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        // First PopupMenuItem
+        if (isNotRentedAndAccepted) ...[
+          const PopupMenuItem<String>(
+            value: 'Start Tenancy',
+            child: Text('Start Tenancy'),
+          ),
+          const PopupMenuDivider(),
+        ],
+
+        const PopupMenuItem<String>(
+          value: 'Contact Tenant',
+          child: Text('Contact Tenant'),
+        ),
+
+        if (isNotRentedAndAccepted) ...[
+          const PopupMenuDivider(),
+          const PopupMenuItem<String>(
+            value: 'Undo Application',
+            child: Text(
+              'Undo Application',
+              style: TextStyle(
+                color: Colors.red,
+              ),
+            ),
+          )
+        ]
+      ],
+      child: const Icon(Icons.more_vert),
+    );
+  }
+
+  Column _buildProfileAndRating(Application applicationData) {
+    bool hasRating = applicationData.applicantOverallRating! > 0 &&
+        applicationData.applicantRatingCount! > 0;
+
     return Column(
       children: [
         InkWell(
           onTap: () {
             NavigationUtils.pushPage(
-              context,
-              ProfileViewPage(userID: applicantID, role: "Tenant"),
-              SlideDirection.left
-            ).then((message) {
+                    context,
+                    ProfileViewPage(
+                        userID: applicationData.applicantID!, role: "Tenant"),
+                    SlideDirection.left)
+                .then((message) {
               if (message != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -339,9 +324,20 @@ class _PropertyApplicationsSectionState
           ),
         ),
         const SizedBox(height: 7),
-        const CustomRatingBar(rating: 5.0),
-        const SizedBox(height: 7),
-        const CustomRichText(mainText: "5.0", subText: " (3 Reviews)", mainFontSize: 14, mainFontWeight: FontWeight.normal)
+        if (hasRating) ...[
+          CustomRatingBar(rating: applicationData.applicantOverallRating!),
+          const SizedBox(height: 7)
+        ],
+        CustomRichText(
+            mainText: hasRating
+                ? "${applicationData.applicantOverallRating!}"
+                : "No rating yet",
+            subText: hasRating
+                ? " (${applicationData.applicantRatingCount!} Reviews)"
+                : "",
+            mainFontSize: 14,
+            mainFontWeight: FontWeight.normal,
+            mainFontColor: hasRating ? Colors.black : Colors.black54)
       ],
     );
   }
@@ -390,8 +386,7 @@ class _PropertyApplicationsSectionState
   }
 
   Future<void> refreshData() async {
-    await _applicationService
-        .getPropertyApplication(widget.propertyID)
+    await ApplicationService.getPropertyApplication(widget.propertyID)
         .then((newData) {
       setState(() {
         propertyApplicationsFuture = Future.value(newData);
@@ -444,7 +439,7 @@ class _PropertyApplicationsSectionState
     }
   }
 
-  void showTenancyForm(BuildContext context, Map<String, dynamic> tenantData) {
+  void showTenancyForm(BuildContext context, Application tenantData) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -470,8 +465,8 @@ class _PropertyApplicationsSectionState
                 children: [
                   tenancyDurationField(setState, updateEndDate),
                   const SizedBox(height: 20),
-                  _tenancyDateField(context, setState, updateEndDate,
-                      tenantData["moveInDate"]),
+                  _tenancyDateField(
+                      context, setState, updateEndDate, tenantData.moveInDate!),
                   const SizedBox(height: 20),
                   // Caluculate the end date based on the start date and tenancy duration
                   if (endDate != null) _tenancyEndDateText(),
@@ -483,7 +478,7 @@ class _PropertyApplicationsSectionState
                       // Save tenancy information in database
                       RentalService.saveTenancyInfo(
                               propertyID: widget.propertyID,
-                              tenantID: tenantData["applicantID"],
+                              tenantID: tenantData.applicantID!,
                               landlordID: _auth.currentUser!.uid,
                               duration: int.parse(tenancyDuration!),
                               startDate: startDate!,
@@ -585,13 +580,16 @@ class _PropertyApplicationsSectionState
   }
 
   Column _tenancyDateField(BuildContext context, StateSetter setState,
-      void Function() updateEndDate, String tenancyDate) {
+      void Function() updateEndDate, DateTime tenancyDate) {
     DateFormat format = DateFormat('dd/MM/yyyy');
-    DateTime parsedDate = format.parse(tenancyDate);
+    String tenancyDateString =
+        format.format(tenancyDate); // Convert DateTime to String
+
+    DateTime parsedDate = format.parse(tenancyDateString);
 
     // Check if the parsed date is after the current date
     if (parsedDate.isAfter(DateTime.now())) {
-      _tenancyDateController.text = tenancyDate;
+      _tenancyDateController.text = tenancyDateString;
       startDate = parsedDate;
     }
 

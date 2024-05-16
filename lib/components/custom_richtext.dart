@@ -38,6 +38,7 @@ class CustomRichText extends StatelessWidget {
   final double subFontSize;
   final FontWeight mainFontWeight;
   final FontWeight subFontWeight;
+  final Color mainFontColor;
 
   const CustomRichText({
     super.key,
@@ -47,6 +48,7 @@ class CustomRichText extends StatelessWidget {
     this.subFontSize = 14,
     this.mainFontWeight = FontWeight.bold,
     this.subFontWeight = FontWeight.normal,
+    this.mainFontColor = Colors.black,
   });
 
   @override
@@ -55,7 +57,7 @@ class CustomRichText extends StatelessWidget {
       text: TextSpan(
         // Default text style
         style: TextStyle(
-            color: Colors.black,
+            color: mainFontColor,
             fontSize: mainFontSize,
             fontWeight: mainFontWeight),
         children: [
