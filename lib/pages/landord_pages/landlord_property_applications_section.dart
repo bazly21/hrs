@@ -341,7 +341,7 @@ class _PropertyApplicationsSectionState
         const SizedBox(height: 7),
         const CustomRatingBar(rating: 5.0),
         const SizedBox(height: 7),
-        const CustomRichText(mainText: "5.0", subText: " (3 Reviews)")
+        const CustomRichText(mainText: "5.0", subText: " (3 Reviews)", mainFontSize: 14, mainFontWeight: FontWeight.normal)
       ],
     );
   }
