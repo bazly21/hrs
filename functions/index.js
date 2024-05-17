@@ -3,49 +3,51 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 exports.updateTenancyAndPropertyStatus = functions.pubsub
-  .schedule("0 0 * * *") // Runs daily at midnight
+  .schedule("0 0 *")
+  .timeZone("Asia/Kuala_Lumpur")
   .onRun(async (context) => {
     try {
       const db = admin.firestore();
       const currentDate = new Date();
 
       // Query tenancies where endDate is before or equal to the current date
-      const tenanciesSnapshot = await db
-        .collection("tenancies")
+      const expiredTenanciesSnapshot = await db
+        .collectionGroup("tenancies")
         .where("status", "==", "Active")
         .where("endDate", "<=", currentDate)
         .get();
 
-      // Get the expired tenancy documents and propertyIDs
-      const expiredTenancies = tenanciesSnapshot.docs;
-      const propertyIds = expiredTenancies.map((doc) => doc.data().propertyID);
+      // Get the expired tenancy documents
+      const expiredTenancies = expiredTenanciesSnapshot.docs;
 
-      // Create batch writes for updating tenancies and properties
-      const tenancyBatch = db.batch();
-      const propertyBatch = db.batch();
+      if (expiredTenancies.length > 0) {
+        // Create batch writes for updating tenancies and properties
+        const tenancyBatch = db.batch();
+        const propertyBatch = db.batch();
 
-      // Update the status of the expired tenancies to "Ended"
-      expiredTenancies.forEach((doc) => {
-        const tenancyRef = db.collection("tenancies").doc(doc.id);
-        tenancyBatch.update(tenancyRef, {
-          status: "Ended",
-          isRated: {
-            rateLandlord: false,
-            rateTenant: false,
-          },
+        // Update the status of the expired tenancies to "Ended"
+        expiredTenancies.forEach((doc) => {
+          const tenancyRef = doc.ref;
+          tenancyBatch.update(tenancyRef, {
+            status: "Ended",
+            isRated: {
+              rateLandlord: false,
+              rateTenant: false,
+            },
+          });
+
+          // Get the propertyID from the parent document path
+          const propertyID = doc.ref.parent.parent.id;
+          const propertyRef = db.collection("properties").doc(propertyID);
+          propertyBatch.update(propertyRef, {status: "Available"});
         });
-      });
 
-      // Update the status of the corresponding properties to "Available"
-      propertyIds.forEach((propertyID) => {
-        const propertyRef = db.collection("properties").doc(propertyID);
-        propertyBatch.update(propertyRef, {status: "Available"});
-      });
-
-      // Commit the batch writes
-      await Promise.all([tenancyBatch.commit(), propertyBatch.commit()]);
-
-      console.log("Tenancy and property status updated successfully");
+        // Commit the batch writes
+        await Promise.all([tenancyBatch.commit(), propertyBatch.commit()]);
+        console.log("Tenancy and property status updated successfully");
+      } else {
+        console.log("No expired tenancies found");
+      }
     } catch (error) {
       console.error("Error updating tenancy and property status:", error);
     }
