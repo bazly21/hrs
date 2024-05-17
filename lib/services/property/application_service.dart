@@ -8,7 +8,7 @@ class ApplicationService {
 
   static Future<Map<String, dynamic>> getPropertyApplication(String propertyID) async {
     Map<String, dynamic> applicationMap = {};
-    bool hasAccepted = false;
+    bool containsAcceptedApplication = false;
     bool hasTenantCriteria = false;
 
     DocumentSnapshot<Map<String, dynamic>> propertyDoc =
@@ -65,7 +65,7 @@ class ApplicationService {
         }),
       ).then((list) => list.whereType<Application>().toList());
 
-      hasAccepted = applicationList
+      containsAcceptedApplication = applicationList
           .any((application) => application!.status == 'Accepted');
 
       hasTenantCriteria = propertyData.containsKey("tenantCriteria");
@@ -77,11 +77,11 @@ class ApplicationService {
           return bScore.compareTo(aScore);
         });
       }
-      
+
       applicationMap = {
         "applicationList": applicationList,
         "hasTenantCriteria": hasTenantCriteria,
-        "hasAccepted": hasAccepted,
+        "containsAcceptedApplication": containsAcceptedApplication,
         "propertyStatus": propertyData["status"],
       };
     }

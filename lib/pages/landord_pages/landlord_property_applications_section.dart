@@ -62,8 +62,8 @@ class _PropertyApplicationsSectionState
             }
             // If there is data and the data is not empty
             else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-              _hasPropertyRented = snapshot.data!['status'] == "Rented";
-              _containAcceptedApplication = snapshot.data!['hasAccepted'];
+              _hasPropertyRented = snapshot.data!['propertyStatus'] == "Rented";
+              _containAcceptedApplication = snapshot.data!['containsAcceptedApplication'];
 
               return ListView.builder(
                   itemCount: snapshot.data!['applicationList'].length,
