@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hrs/model/tenancy/tenant_ended_tenancy.dart';
 import 'package:hrs/pages/rating_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -35,11 +34,11 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                   child: CircularProgressIndicator(),
                 );
               } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('Error: ${snapshot.error}'),
-                );
-              } else if (snapshot.hasData &&
-                  (snapshot.data!.isNotEmpty || snapshot.data != null)) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(snapshot.error.toString())));
+                });
+              } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 final List<TenantEndedTenancy> tenancies = snapshot.data!;
                 return ListView.builder(
                   itemCount: tenancies.length,
@@ -154,14 +153,18 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                                 children: const [
                                   TextSpan(
                                     text: ' /month',
-                                    style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.normal),
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.normal),
                                   ),
                                 ],
                               ),
                             ),
                             Text(
                               tenancyData.tenancyStatus,
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),

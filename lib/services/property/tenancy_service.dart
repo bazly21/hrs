@@ -34,13 +34,13 @@ class TenancyService {
     final String landlordID = FirebaseAuth.instance.currentUser!.uid;
 
     QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
-        .collection("tenancies")
+        .collectionGroup("tenancies")
         .where("landlordID", isEqualTo: landlordID)
         .where("status", isEqualTo: "Ended")
         .orderBy("createdAt", descending: true)
         .get();
 
-    if (tenancySnapshot.docs.isEmpty) throw Exception("No tenancies found");
+    if (tenancySnapshot.docs.isEmpty) return [];
 
     final List<LandlordEndedTenancy> expiredTenancies = await Future.wait(
       tenancySnapshot.docs.map((tenancyDoc) async {
@@ -50,7 +50,7 @@ class TenancyService {
         // Skip iteration if tenancy data is null
         if (tenancyData == null) return null;
 
-        final String propertyID = tenancyData['propertyID'];
+        final String propertyID = tenancyDoc.reference.parent.parent!.id;
 
         final DocumentSnapshot propertyDoc = await FirebaseFirestore.instance
             .collection('properties')
@@ -111,13 +111,13 @@ class TenancyService {
     final String tenantID = FirebaseAuth.instance.currentUser!.uid;
 
     QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
-        .collection("tenancies")
-        .where("tenantID", isEqualTo: tenantID)
-        .where("status", isEqualTo: "Ended")
-        .orderBy("createdAt", descending: true)
-        .get();
+      .collectionGroup("tenancies")
+      .where("tenantID", isEqualTo: tenantID)
+      .where("status", isEqualTo: "Ended")
+      .orderBy("createdAt", descending: true)
+      .get();
 
-    if (tenancySnapshot.docs.isEmpty) throw Exception("No tenancies found");
+    if (tenancySnapshot.docs.isEmpty) return [];
 
     final List<TenantEndedTenancy> expiredTenancies = await Future.wait(
       tenancySnapshot.docs.map((tenancyDoc) async {
@@ -127,7 +127,7 @@ class TenancyService {
         // Skip iteration if tenancy data is null
         if (tenancyData == null) return null;
 
-        final String propertyID = tenancyData['propertyID'];
+        final String propertyID = tenancyDoc.reference.parent.parent!.id;
 
         final DocumentSnapshot propertyDoc = await FirebaseFirestore.instance
             .collection('properties')
