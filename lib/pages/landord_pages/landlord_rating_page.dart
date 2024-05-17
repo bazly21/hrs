@@ -9,11 +9,13 @@ import "package:hrs/style/app_style.dart";
 class LandlordRatingPage extends StatefulWidget {
   final String tenantID;
   final String tenancyDocID;
+  final String propertyID;
 
   const LandlordRatingPage({
     super.key,
     required this.tenantID,
-    required this.tenancyDocID
+    required this.tenancyDocID,
+    required this.propertyID,
   });
 
   @override
@@ -56,8 +58,7 @@ class _LandlordRatingPageState extends State<LandlordRatingPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              _buildRatingBar(
-                  "Payment History", _paymentRating, "payment"),
+              _buildRatingBar("Payment History", _paymentRating, "payment"),
               const SizedBox(height: 10),
               _buildRatingBar("Maintenance", _maintenanceRating, "maintenance"),
               const SizedBox(height: 10),
@@ -162,13 +163,16 @@ class _LandlordRatingPageState extends State<LandlordRatingPage> {
     );
 
     try {
-      await RatingService.submitTenantRating(newRating, widget.tenantID, widget.tenancyDocID);
+      await RatingService.submitTenantRating(
+          tenantRating: newRating,
+          tenantID: widget.tenantID,
+          tenancyDocID: widget.tenancyDocID,
+          propertyID: widget.propertyID);
 
       // Go back to the previous page
       if (context.mounted) {
         Navigator.pop(context, "Rating submitted successfully");
       }
-
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text("Error submitting rating: ${e.toString()}")),

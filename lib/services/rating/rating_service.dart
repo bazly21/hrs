@@ -7,12 +7,11 @@ import "package:hrs/model/user/tenant_profile.dart";
 
 class RatingService {
   // Submit rating to database
-  static Future<void> submitLandlordRating({
-    required LandlordRating landlordRating,
-    required String landlordID,
-    required String tenancyDocID,
-    required String propertyID
-  }) async {
+  static Future<void> submitLandlordRating(
+      {required LandlordRating landlordRating,
+      required String landlordID,
+      required String tenancyDocID,
+      required String propertyID}) async {
     final DocumentReference ratingDocRef = FirebaseFirestore.instance
         .collection("users")
         .doc(landlordID)
@@ -96,7 +95,10 @@ class RatingService {
   }
 
   static Future<void> submitTenantRating(
-      TenantRating tenantRating, String tenantID, String tenancyDocID) async {
+      {required TenantRating tenantRating,
+      required String tenantID,
+      required String tenancyDocID,
+      required String propertyID}) async {
     final DocumentReference ratingDocRef = FirebaseFirestore.instance
         .collection("users")
         .doc(tenantID)
@@ -105,8 +107,11 @@ class RatingService {
 
     final DocumentReference tenantDocRef =
         FirebaseFirestore.instance.collection("users").doc(tenantID);
-    final DocumentReference tenancyDocRef =
-        FirebaseFirestore.instance.collection("tenancies").doc(tenancyDocID);
+    final DocumentReference tenancyDocRef = FirebaseFirestore.instance
+        .collection("properties")
+        .doc(propertyID)
+        .collection("tenancies")
+        .doc(tenancyDocID);
 
     // Perform all operations within a single transaction
     await FirebaseFirestore.instance.runTransaction((transaction) async {

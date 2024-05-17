@@ -30,7 +30,8 @@ class TenancyService {
   }
 
   // Get landlord ended tenancies
-  static Future<List<LandlordEndedTenancy>> fetchLandlordEndedTenancies() async {
+  static Future<List<LandlordEndedTenancy>>
+      fetchLandlordEndedTenancies() async {
     final String landlordID = FirebaseAuth.instance.currentUser!.uid;
 
     QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
@@ -42,67 +43,60 @@ class TenancyService {
 
     if (tenancySnapshot.docs.isEmpty) return [];
 
-    final List<LandlordEndedTenancy> expiredTenancies = await Future.wait(
-      tenancySnapshot.docs.map((tenancyDoc) async {
-        final Map<String, dynamic>? tenancyData =
-            tenancyDoc.data() as Map<String, dynamic>?;
+    final List<LandlordEndedTenancy> expiredTenancies =
+        await Future.wait(tenancySnapshot.docs.map((tenancyDoc) async {
+      final Map<String, dynamic>? tenancyData =
+          tenancyDoc.data() as Map<String, dynamic>?;
 
-        // Skip iteration if tenancy data is null
-        if (tenancyData == null) return null;
+      // Skip iteration if tenancy data is null
+      if (tenancyData == null) return null;
 
-        final String propertyID = tenancyDoc.reference.parent.parent!.id;
+      final String propertyID = tenancyDoc.reference.parent.parent!.id;
+      final DocumentSnapshot propertyDoc = await FirebaseFirestore.instance
+          .collection('properties')
+          .doc(propertyID)
+          .get();
+      final Map<String, dynamic>? propertyData =
+          propertyDoc.data() as Map<String, dynamic>?;
 
-        final DocumentSnapshot propertyDoc = await FirebaseFirestore.instance
-            .collection('properties')
-            .doc(propertyID)
-            .get();
+      if (propertyData == null) return null;
 
-        final Map<String, dynamic>? propertyData =
-            propertyDoc.data() as Map<String, dynamic>?;
+      final String tenantID = tenancyData['tenantID'];
+      final DocumentSnapshot tenantDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(tenantID)
+          .get();
+      final Map<String, dynamic>? tenantData =
+          tenantDoc.data() as Map<String, dynamic>?;
 
-        if (propertyData == null) return null;
+      if (tenantData == null) return null;
 
-        final String tenantID = tenancyData['tenantID'];
+      final Map<String, dynamic> data = {
+        'propertyID': propertyID,
+        'propertyName': propertyData['name'] ?? 'N/A',
+        'propertyAddress': propertyData['address'] ?? 'N/A',
+        'rentalPrice': propertyData['rent'] ?? 0.0,
+        'propertyImageURL':
+            propertyData['image']?[0] ?? 'https://via.placeholder.com/150',
+        'tenantID': tenantID,
+        'tenantImageURL':
+            (tenantData['image'] != null && tenantData['image'].isNotEmpty)
+                ? tenantData['image'][0]
+                : 'https://via.placeholder.com/150',
+        'tenantRatingCount': tenantData['ratingCount']?["tenant"] ?? 0,
+        'tenantRatingAverage': tenantData['ratingAverage']?["tenant"]
+                ?['overallRating'] as double? ??
+            0.0,
+        'tenancyDocID': tenancyDoc.id,
+        'tenancyStatus': tenancyData['status'] ?? 'Unknown',
+        'isRated': tenancyData['isRated']?["rateTenant"] ?? false,
+      };
 
-        final DocumentSnapshot tenantDoc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(tenantID)
-            .get();
+      final LandlordEndedTenancy landlordEndedTenancy =
+          LandlordEndedTenancy.fromMap(data);
 
-        final Map<String, dynamic>? tenantData =
-            tenantDoc.data() as Map<String, dynamic>?;
-
-        if (tenantData == null) return null;
-
-        final Map<String, dynamic> data = {
-          'propertyID': propertyID,
-          'propertyName': propertyData['name'] ?? 'N/A',
-          'propertyAddress': propertyData['address'] ?? 'N/A',
-          'rentalPrice': propertyData['rent'] ?? 0.0,
-          'propertyImageURL':
-              propertyData['image'][0] ?? 'https://via.placeholder.com/150',
-          'tenantID': tenantID,
-          'tenantImageURL':
-              (tenantData['image'] != null && tenantData['image'].isNotEmpty)
-                  ? tenantData['image'][0]
-                  : 'https://via.placeholder.com/150',
-          'tenantRatingCount': tenantData['ratingCount']?["tenant"] ?? 0,
-          'tenantRatingAverage':
-              tenantData['ratingAverage']?["tenant"]?['overallRating'] as double? ?? 0.0,
-          'tenancyDocID': tenancyDoc.id,
-          'tenancyStatus': tenancyData['status'] ?? 'Unknown',
-          'isRated': tenancyData['isRated']?["rateTenant"] ?? false,
-        };
-
-        final LandlordEndedTenancy landlordEndedTenancy =
-            LandlordEndedTenancy.fromMap(data);
-
-        return landlordEndedTenancy;
-      }).toList(),
-    ).then((list) => list
-        .where((element) => element != null)
-        .toList()
-        .cast<LandlordEndedTenancy>());
+      return landlordEndedTenancy;
+    })).then((list) => list.whereType<LandlordEndedTenancy>().toList());
 
     return expiredTenancies;
   }
@@ -111,11 +105,11 @@ class TenancyService {
     final String tenantID = FirebaseAuth.instance.currentUser!.uid;
 
     QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
-      .collectionGroup("tenancies")
-      .where("tenantID", isEqualTo: tenantID)
-      .where("status", isEqualTo: "Ended")
-      .orderBy("createdAt", descending: true)
-      .get();
+        .collectionGroup("tenancies")
+        .where("tenantID", isEqualTo: tenantID)
+        .where("status", isEqualTo: "Ended")
+        .orderBy("createdAt", descending: true)
+        .get();
 
     if (tenancySnapshot.docs.isEmpty) return [];
 
@@ -159,13 +153,14 @@ class TenancyService {
           'propertyImageURL':
               propertyData['image'][0] ?? 'https://via.placeholder.com/150',
           'landlordID': landlordID,
-          'landlordImageURL':
-              (landlordData['image'] != null && landlordData['image'].isNotEmpty)
-                  ? landlordData['image'][0]
-                  : 'https://via.placeholder.com/150',
+          'landlordImageURL': (landlordData['image'] != null &&
+                  landlordData['image'].isNotEmpty)
+              ? landlordData['image'][0]
+              : 'https://via.placeholder.com/150',
           'landlordRatingCount': landlordData['ratingCount']?["landlord"] ?? 0,
-          'landlordRatingAverage':
-              landlordData['ratingAverage']?["landlord"]?['overallRating'] as double? ?? 0.0,
+          'landlordRatingAverage': landlordData['ratingAverage']?["landlord"]
+                  ?['overallRating'] as double? ??
+              0.0,
           'tenancyDocID': tenancyDoc.id,
           'tenancyStatus': tenancyData['status'] ?? 'Unknown',
           'isRated': tenancyData['isRated']?["rateLandlord"] ?? false,
@@ -176,10 +171,7 @@ class TenancyService {
 
         return tenantEndedTenancy;
       }).toList(),
-    ).then((list) => list
-        .where((element) => element != null)
-        .toList()
-        .cast<TenantEndedTenancy>());
+    ).then((list) => list.whereType<TenantEndedTenancy>().toList());
 
     return expiredTenancies;
   }
