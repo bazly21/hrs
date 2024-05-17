@@ -21,7 +21,6 @@ class RentalService {
 
     // Create a new tenancy
     Tenancy newTenancy = Tenancy(
-      propertyID: propertyID,
       tenantID: tenantID,
       landlordID: landlordID,
       status: 'Active',
