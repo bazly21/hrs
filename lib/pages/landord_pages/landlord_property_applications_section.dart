@@ -480,6 +480,7 @@ class _PropertyApplicationsSectionState
                               propertyID: widget.propertyID,
                               tenantID: tenantData.applicantID!,
                               landlordID: _auth.currentUser!.uid,
+                              applicationID: tenantData.applicationID!,
                               duration: int.parse(tenancyDuration!),
                               startDate: startDate!,
                               endDate: endDate!)

@@ -9,6 +9,7 @@ class RentalService {
       {required String propertyID,
       required String tenantID,
       required String landlordID,
+      required String applicationID,
       required int duration,
       required DateTime startDate,
       required DateTime endDate}) async {
@@ -23,6 +24,7 @@ class RentalService {
     Tenancy newTenancy = Tenancy(
       tenantID: tenantID,
       landlordID: landlordID,
+      applicationID: applicationID,
       status: 'Active',
       duration: duration,
       startDate: startDate,

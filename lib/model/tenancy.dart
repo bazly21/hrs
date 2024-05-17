@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Tenancy {
   final String tenantID;
   final String landlordID;
+  final String applicationID;
   final String status;
   final int duration;
   final DateTime startDate;
@@ -11,6 +12,7 @@ class Tenancy {
   Tenancy({
     required this.tenantID,
     required this.landlordID,
+    required this.applicationID,
     required this.status,
     required this.duration,
     required this.startDate,
