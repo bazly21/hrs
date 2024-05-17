@@ -9,9 +9,13 @@ import 'package:hrs/style/app_style.dart';
 class RatingPage extends StatefulWidget {
   final String landlordID;
   final String tenancyDocID;
+  final String propertyID;
 
   const RatingPage(
-      {super.key, required this.landlordID, required this.tenancyDocID});
+      {super.key,
+      required this.landlordID,
+      required this.tenancyDocID,
+      required this.propertyID});
 
   @override
   State<RatingPage> createState() => _RatingPageState();
@@ -159,13 +163,16 @@ class _RatingPageState extends State<RatingPage> {
     );
 
     try {
-      await RatingService.submitLandlordRating(newRating, widget.landlordID, widget.tenancyDocID);
+      await RatingService.submitLandlordRating(
+          landlordRating: newRating,
+          landlordID: widget.landlordID,
+          tenancyDocID: widget.tenancyDocID,
+          propertyID: widget.propertyID);
 
       // Go back to the previous page
       if (context.mounted) {
         Navigator.pop(context, 'Rating submitted successfully');
       }
-
     } catch (e) {
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Error submitting rating: ${e.toString()}')),

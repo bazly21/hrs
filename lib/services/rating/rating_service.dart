@@ -7,8 +7,12 @@ import "package:hrs/model/user/tenant_profile.dart";
 
 class RatingService {
   // Submit rating to database
-  static Future<void> submitLandlordRating(
-      LandlordRating landlordRating, String landlordID, String tenancyDocID) async {
+  static Future<void> submitLandlordRating({
+    required LandlordRating landlordRating,
+    required String landlordID,
+    required String tenancyDocID,
+    required String propertyID
+  }) async {
     final DocumentReference ratingDocRef = FirebaseFirestore.instance
         .collection("users")
         .doc(landlordID)
@@ -17,8 +21,11 @@ class RatingService {
 
     final DocumentReference landlordDocRef =
         FirebaseFirestore.instance.collection("users").doc(landlordID);
-    final DocumentReference tenancyDocRef =
-        FirebaseFirestore.instance.collection("tenancies").doc(tenancyDocID);
+    final DocumentReference tenancyDocRef = FirebaseFirestore.instance
+        .collection("properties")
+        .doc(propertyID)
+        .collection("tenancies")
+        .doc(tenancyDocID);
 
     // Perform all operations within a single transaction
     await FirebaseFirestore.instance.runTransaction((transaction) async {
@@ -41,15 +48,18 @@ class RatingService {
       int ratingCount = landlordData["ratingCount"]?["landlord"] ?? 0;
 
       // Get the total ratings
-      totalSupportRating =
-          ((landlordData["ratingAverage"]?["landlord"]?["supportRating"] ?? 0.0) *
-              ratingCount);
-      totalCommunicationRating =
-          ((landlordData["ratingAverage"]?["landlord"]?["communicationRating"] ?? 0.0) *
-              ratingCount);
-      totalMaintenanceRating =
-          ((landlordData["ratingAverage"]?["landlord"]?["maintenanceRating"] ?? 0.0) *
-              ratingCount);
+      totalSupportRating = ((landlordData["ratingAverage"]?["landlord"]
+                  ?["supportRating"] ??
+              0.0) *
+          ratingCount);
+      totalCommunicationRating = ((landlordData["ratingAverage"]?["landlord"]
+                  ?["communicationRating"] ??
+              0.0) *
+          ratingCount);
+      totalMaintenanceRating = ((landlordData["ratingAverage"]?["landlord"]
+                  ?["maintenanceRating"] ??
+              0.0) *
+          ratingCount);
 
       // Get new total ratings
       totalSupportRating += landlordRating.supportRating;
@@ -71,9 +81,7 @@ class RatingService {
 
       transaction.set(ratingDocRef, landlordRating.toMap());
 
-      transaction.update(tenancyDocRef, {
-        "isRated.rateLandlord": true
-      });
+      transaction.update(tenancyDocRef, {"isRated.rateLandlord": true});
 
       transaction.update(landlordDocRef, {
         "ratingCount.landlord": ratingCount + 1,
@@ -109,7 +117,7 @@ class RatingService {
       Map<String, dynamic>? tenantData =
           tenantSnapshot.data() as Map<String, dynamic>?;
 
-      if(tenantData == null) throw Exception("Landlord does not exist");
+      if (tenantData == null) throw Exception("Landlord does not exist");
 
       // Calculate the average ratings
       double totalPaymentRating = 0.0;
@@ -121,12 +129,14 @@ class RatingService {
       totalPaymentRating =
           ((tenantData["ratingAverage"]?["Tenant"]?["paymentRating"] ?? 0.0) *
               ratingCount);
-      totalCommunicationRating =
-          ((tenantData["ratingAverage"]?["Tenant"]?["communicationRating"] ?? 0.0) *
-              ratingCount);
-      totalMaintenanceRating =
-          ((tenantData["ratingAverage"]?["Tenant"]?["maintenanceRating"] ?? 0.0) *
-              ratingCount);
+      totalCommunicationRating = ((tenantData["ratingAverage"]?["Tenant"]
+                  ?["communicationRating"] ??
+              0.0) *
+          ratingCount);
+      totalMaintenanceRating = ((tenantData["ratingAverage"]?["Tenant"]
+                  ?["maintenanceRating"] ??
+              0.0) *
+          ratingCount);
 
       // Get new total ratings
       totalPaymentRating += tenantRating.paymentRating;
@@ -148,9 +158,7 @@ class RatingService {
 
       transaction.set(ratingDocRef, tenantRating.toMap());
 
-      transaction.update(tenancyDocRef, {
-        "isRated.rateTenant": true
-      });
+      transaction.update(tenancyDocRef, {"isRated.rateTenant": true});
 
       transaction.update(tenantDocRef, {
         "ratingCount.tenant": ratingCount + 1,
@@ -167,7 +175,8 @@ class RatingService {
   static Future getUserRatings(String userID, String role) async {
     final DocumentSnapshot userSnapshot =
         await FirebaseFirestore.instance.collection("users").doc(userID).get();
-    final Map<String, dynamic>? userData = userSnapshot.data() as Map<String, dynamic>?;
+    final Map<String, dynamic>? userData =
+        userSnapshot.data() as Map<String, dynamic>?;
 
     // Early return if user data is not exist
     if (userData == null) throw Exception("User does not exist");
@@ -191,12 +200,13 @@ class RatingService {
             if (!ratingData.containsKey("reviewerID") ||
                 ratingData["reviewerID"].isEmpty) return null;
 
-            final DocumentSnapshot reviewerSnapshot =
-                await FirebaseFirestore.instance
-                    .collection("users")
-                    .doc(ratingData["reviewerID"])
-                    .get();
-            final Map<String, dynamic>? reviewerData = reviewerSnapshot.data() as Map<String, dynamic>?;
+            final DocumentSnapshot reviewerSnapshot = await FirebaseFirestore
+                .instance
+                .collection("users")
+                .doc(ratingData["reviewerID"])
+                .get();
+            final Map<String, dynamic>? reviewerData =
+                reviewerSnapshot.data() as Map<String, dynamic>?;
 
             if (reviewerData == null) return null;
 
@@ -225,8 +235,7 @@ class RatingService {
     if (role == "Landlord") {
       LandlordProfile userRating = LandlordProfile.fromMap(userData, ratings);
       return userRating;
-    }
-    else {
+    } else {
       TenantProfile userRating = TenantProfile.fromMap(userData, ratings);
       return userRating;
     }

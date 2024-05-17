@@ -196,6 +196,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                                           landlordID: tenancyData.landlordID,
                                           tenancyDocID:
                                               tenancyData.tenancyDocID,
+                                          propertyID: tenancyData.propertyID,
                                         ),
                                         SlideDirection.left)
                                     .then((message) {
