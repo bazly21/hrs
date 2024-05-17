@@ -25,11 +25,9 @@ class PropertyDetailsPage extends StatefulWidget {
 }
 
 class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
-  final PropertyService _propertyService = PropertyService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? role;
   bool isWishlist = false; // Initial state of the wishlist icon
-  bool hasApplied = false;
   int _currentIndex = 0;
 
   late Future<PropertyFullDetails> rentalDetailsFuture;
@@ -41,7 +39,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   @override
   void initState() {
     super.initState();
-    rentalDetailsFuture = _propertyService.getPropertyFullDetails(
+    rentalDetailsFuture = PropertyService.getPropertyFullDetails(
         widget.propertyID, _auth.currentUser?.uid);
   }
 
@@ -85,8 +83,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
         ? rentalPrice.toStringAsFixed(2)
         : rentalPrice.toStringAsFixed(0);
-
-    hasApplied = propertyData.hasApplied!;
 
     return Container(
       height: 80,
@@ -137,9 +133,9 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             // Apply Button
             ElevatedButton(
               onPressed:
-                  propertyData.hasApplied! ? null : () => _goToPage(context),
+                  !propertyData.enableApplyButton! ? null : () => _goToPage(context),
               style: AppStyles.elevatedButtonStyle,
-              child: Text(propertyData.hasApplied! ? "Applied" : "Apply"),
+              child: Text(!propertyData.enableApplyButton! ? "Applied" : "Apply"),
             )
           ],
         ),
@@ -400,8 +396,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Future<void> refreshData() async {
-    await _propertyService
-        .getPropertyFullDetails(widget.propertyID, _auth.currentUser!.uid)
+    await PropertyService
+        .getPropertyFullDetails(widget.propertyID, _auth.currentUser?.uid)
         .then((newData) {
       setState(() {
         rentalDetailsFuture = Future.value(newData);

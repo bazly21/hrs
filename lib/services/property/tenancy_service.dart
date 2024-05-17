@@ -7,9 +7,10 @@ class TenancyService {
   static Future<bool> checkUserTenancy(
       String propertyID, String applicantID) async {
     QuerySnapshot tenancySnapshots = await FirebaseFirestore.instance
+        .collection("properties")
+        .doc(propertyID)
         .collection("tenancies")
         .where("tenantID", isEqualTo: applicantID)
-        .where("propertyID", isEqualTo: propertyID)
         .orderBy("createdAt", descending: true)
         .limit(1)
         .get();

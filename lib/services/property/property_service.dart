@@ -14,42 +14,59 @@ class PropertyService {
   }
 
   // Get property full details including landlord details
-  Future<PropertyFullDetails> getPropertyFullDetails(
+  static Future<PropertyFullDetails> getPropertyFullDetails(
       String propertyID, String? applicantID) async {
     Map<String, dynamic> propertyFullDetails = {};
-    bool hasApplication = false;
-    bool hasTenancy = false;
+    bool enableApplyButton = true;
     bool hasApplied = false;
 
-    DocumentSnapshot<Map<String, dynamic>> propertyDoc =
-        await getPropertyDetails(propertyID);
-    Map<String, dynamic>? propertyData = propertyDoc.data();
+    DocumentSnapshot propertyDoc = await FirebaseFirestore.instance
+        .collection('properties')
+        .doc(propertyID)
+        .get();
+
+    Map<String, dynamic>? propertyData =
+        propertyDoc.data() as Map<String, dynamic>?;
 
     // Early return if property data is not exist
-    if (propertyData == null) throw ("Property data is not exist");
+    if (propertyData == null) throw Exception("Property data is not exist");
 
     // Early return if landlord ID is not exist
     if (!propertyData.containsKey("landlordID") ||
         propertyData["landlordID"] == null) {
-      throw ("Landlord ID does not exist");
+      throw Exception("Landlord ID does not exist");
     }
 
     // Get landlord details
     final String landlordID = propertyData["landlordID"];
-    DocumentSnapshot<Map<String, dynamic>> landlordDoc =
-        await _fireStore.collection("users").doc(landlordID).get();
-    Map<String, dynamic>? landlordData = landlordDoc.data();
+    DocumentSnapshot landlordDoc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(landlordID)
+        .get();
+
+    Map<String, dynamic>? landlordData =
+        landlordDoc.data() as Map<String, dynamic>?;
 
     // Early return if landlord data is not exist
     if (landlordData == null) throw ("Landlord data is not exist");
 
     // Check user application if applicant ID is not null
     if (applicantID != null) {
-      hasApplication = await ApplicationService.checkUserApplication(
-          propertyID, applicantID);
-      hasTenancy = hasApplication ||
-          await TenancyService.checkUserTenancy(propertyID, applicantID);
-      hasApplied = hasTenancy;
+      if (propertyData["status"] == "Rented") {
+        enableApplyButton = false;
+      }
+      else {
+        // First, check if the user already applied for the property
+        hasApplied = await ApplicationService.checkUserApplication(
+            propertyID, applicantID);
+
+        // Then, if the user has applied, check tenancy status
+        if(hasApplied) {
+          enableApplyButton = await TenancyService.checkUserTenancy(propertyID, applicantID);
+        } else {
+          enableApplyButton = true;
+        }
+      }
     }
 
     // Collect all necessary data
@@ -59,7 +76,7 @@ class PropertyService {
       "landlordRatingCount": landlordData["ratingCount"]?["landlord"],
       "landlordOverallRating": landlordData["ratingAverage"]?["landlord"]
           ?["overallRating"],
-      "hasApplied": hasApplied,
+      "enableApplyButton": enableApplyButton,
     };
 
     PropertyFullDetails propertyDetails =

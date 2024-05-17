@@ -108,9 +108,24 @@ class ApplicationService {
         .doc(propertyID)
         .collection("applications")
         .where("applicantID", isEqualTo: applicantID)
+        .orderBy("submittedAt", descending: true)
         .get();
 
-    return applicationSnapshots.docs.isNotEmpty;
+    // If no application found (not apply), return false
+    if (applicationSnapshots.docs.isEmpty) return false;
+
+    // Take the first application
+    DocumentSnapshot applicationDoc = applicationSnapshots.docs.first;
+    Map<String, dynamic>? applicationData =
+        applicationDoc.data() as Map<String, dynamic>?;
+
+    // If application data is null, return false
+    if (applicationData == null) return false;
+
+    // If application status is not Declined, return true
+    if (applicationData["status"] != "Declined") return true;
+
+    return false;
   }
 
   // Save application

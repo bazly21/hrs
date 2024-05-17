@@ -15,7 +15,7 @@ class PropertyFullDetails {
   final String? landlordName;
   final int? landlordRatingCount;
   final double? landlordOverallRating;
-  final bool? hasApplied;
+  final bool? enableApplyButton;
 
   PropertyFullDetails({
     this.furnishing,
@@ -34,7 +34,7 @@ class PropertyFullDetails {
     this.landlordName,
     this.landlordRatingCount,
     this.landlordOverallRating,
-    this.hasApplied,
+    this.enableApplyButton,
   });
 
   factory PropertyFullDetails.fromMapFullDetails(Map<String, dynamic> data) {
@@ -54,7 +54,7 @@ class PropertyFullDetails {
       landlordName: data['landlordName'] ?? 'N/A',
       landlordRatingCount: data['landlordRatingCount'] ?? 0,
       landlordOverallRating: data['landlordOverallRating'] ?? 0.0,
-      hasApplied: data['hasApplied'] ?? false,
+      enableApplyButton: data['enableApplyButton'] ?? true,
     );
   }
 
