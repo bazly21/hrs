@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Tenancy {
   final String propertyID;
   final String tenantID;
@@ -27,6 +29,7 @@ class Tenancy {
       'duration': duration,
       'startDate': startDate,
       'endDate': endDate,
+      'createdAt': FieldValue.serverTimestamp(),
     };
   }
 }
