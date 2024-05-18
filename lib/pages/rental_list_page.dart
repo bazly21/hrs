@@ -60,9 +60,9 @@ class _RentalListPageState extends State<RentalListPage> {
                   itemCount: propertyCount,
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
-
                     // Return the rental list
-                    return rentalList(context, snapshot.data![index], index, propertyCount);
+                    return rentalList(
+                        context, snapshot.data![index], index, propertyCount);
                   },
                 );
               }
@@ -194,24 +194,42 @@ class _RentalListPageState extends State<RentalListPage> {
                               ),
 
                               // Add space between elements
-                              const SizedBox(width: 2),
+                              SizedBox(
+                                  width: propertyData.landlordOverallRating! >
+                                              0 &&
+                                          propertyData.landlordRatingCount! > 0
+                                      ? 2
+                                      : 5),
 
-                              // Star icon
-                              const Icon(
-                                Icons.star_rounded,
-                                color: Colors.amber,
-                                size: 16,
-                              ),
+                              // If the landlord has a rating
+                              if (propertyData.landlordOverallRating! > 0 &&
+                                  propertyData.landlordRatingCount! > 0) ...[
+                                // Star icon
+                                const Icon(
+                                  Icons.star_rounded,
+                                  color: Colors.amber,
+                                  size: 16,
+                                ),
 
-                              // Add space between elements
-                              const SizedBox(width: 2),
+                                // Add space between elements
+                                const SizedBox(width: 2),
 
-                              // Rating value
-                               CustomRichText(
-                                  mainText: propertyData.landlordOverallRating!.toString(),
-                                  subText: " (${propertyData.landlordRatingCount})",
-                                  mainFontSize: 14,
-                                  mainFontWeight: FontWeight.normal)
+                                CustomRichText(
+                                    mainText: propertyData
+                                        .landlordOverallRating!
+                                        .toString(),
+                                    subText:
+                                        " (${propertyData.landlordRatingCount})",
+                                    mainFontSize: 14,
+                                    mainFontWeight: FontWeight.normal)
+                              ],
+
+                              // If the landlord has no rating
+                              if (propertyData.landlordOverallRating! == 0 &&
+                                  propertyData.landlordRatingCount! == 0)
+                                const Text("No rating",
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.black54)),
                             ],
                           ),
                           //////// Profile and Rating Sections (End) //////
