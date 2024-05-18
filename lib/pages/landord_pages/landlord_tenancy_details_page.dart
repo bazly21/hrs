@@ -56,61 +56,45 @@ class _LandlordTenancyDetailsSectionState
 
   Widget _buildTenancyInfo(
       BuildContext context, Map<String, dynamic> tenancyData) {
-    return SingleChildScrollView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        child: Stack(
-          alignment: Alignment
-              .topCenter, // Aligns the children of the stack at the top center
-          children: <Widget>[
-            Container(
-              width: MediaQuery.of(context)
-                  .size
-                  .width, // Makes the container fill the width of the screen
-              height: 337, // The height of the image container
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(tenancyData[
-                      'propertyImageURL']), // Replace with your image URL
-                  fit: BoxFit.cover,
-                ),
+    return LayoutBuilder(builder: (context, constraints) {
+      return RefreshIndicator(
+        onRefresh: _refreshTenancyDetails,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              image: DecorationImage(
+                image: NetworkImage(tenancyData['propertyImageURL']),
+                fit: BoxFit.fill,
+                opacity: 0.8,
               ),
             ),
-            Positioned(
-              top: 290,
-              bottom: 0,
-              width: MediaQuery.of(context)
-                  .size
-                  .width, // Width of the phone screen
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFFFFF),
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(35),
-                      topRight: Radius.circular(35)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 6,
-                      offset: const Offset(0,
-                          -2), // Lifts the container up by 2 pixels to enhance the overlay effect
-                    ),
-                  ],
+            child: Center(
+              child: Card(
+                elevation: 8,
+                margin: const EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(35),
                 ),
+                color: Colors.white,
+                surfaceTintColor: Colors.transparent,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(25.0, 22.0, 25.0, 0),
+                  padding: const EdgeInsets.all(25.0),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Property name and location labels
-                      PropertyDetails(
-                        propertyName: tenancyData['propertyName'],
-                        propertyLocation: tenancyData['propertyAddress'],
-                      ),
+                      // // Property name and location labels
+                      // PropertyDetails(
+                      //   propertyName: tenancyData['propertyName'],
+                      //   propertyLocation: tenancyData['propertyAddress'],
+                      // ),
 
-                      // Add space between elements
-                      const SizedBox(height: 20),
+                      // // Add space between elements
+                      // const SizedBox(height: 20),
 
                       // Landlord's details
                       UserDetails(
@@ -133,35 +117,37 @@ class _LandlordTenancyDetailsSectionState
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26, // Shadow color.
-                                spreadRadius: 1,
-                                blurRadius: 3, // Shadow blur radius.
-                                offset: Offset(
-                                    0, 2), // Vertical offset for the shadow.
-                              ),
-                            ],
-                            color: const Color(0xFFFFFFFF),
-                            borderRadius: BorderRadius.circular(10)),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                          color: const Color(0xFFFFFFFF),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Column(
                             children: [
                               RentalDetails(
-                                  title: "Tenancy Duration",
-                                  text:
-                                      "${tenancyData['tenancyDuration']} months"),
+                                title: "Tenancy Duration",
+                                text:
+                                    "${tenancyData['tenancyDuration']} months",
+                              ),
                               const Divider(),
                               RentalDetails(
-                                  title: "Start Date",
-                                  text: formatDate(
-                                      tenancyData['tenancyStartDate'])),
+                                title: "Start Date",
+                                text:
+                                    formatDate(tenancyData['tenancyStartDate']),
+                              ),
                               const Divider(),
                               RentalDetails(
-                                  title: "End Date",
-                                  text: formatDate(
-                                      tenancyData['tenancyEndDate'])),
+                                title: "End Date",
+                                text: formatDate(tenancyData['tenancyEndDate']),
+                              ),
                             ],
                           ),
                         ),
@@ -171,14 +157,24 @@ class _LandlordTenancyDetailsSectionState
                 ),
               ),
             ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   String formatDate(Timestamp timestamp) {
     DateTime date = timestamp.toDate(); // Convert Timestamp to DateTime
     return DateFormat('dd/MM/yyyy').format(date); // Format the date
+  }
+
+  // Refresh the tenancy details
+  Future<void> _refreshTenancyDetails() async {
+    await RentalService.landlordFetchTenancyInfo(widget.propertyID)
+        .then((value) {
+      setState(() {
+        tenancyDetailsFuture = Future.value(value);
+      });
+    });
   }
 }
