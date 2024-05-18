@@ -143,7 +143,7 @@ class _RegisterProfilePageState extends State<RegisterProfilePage> {
                       context: context,
                       phoneNumber: widget.phoneNumber,
                       profileName: _nameController.text,
-                      role: "Tenant"
+                      role: widget.role
                   )),
             ],
           ),
