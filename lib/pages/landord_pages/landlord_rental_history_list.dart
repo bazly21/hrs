@@ -161,8 +161,8 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
                           children: [
                             RichText(
                               text: TextSpan(
-                                text: tenancyData.rentalPrice == 0.0
-                                    ? 'N/A'
+                                text: tenancyData.rentalPrice == tenancyData.rentalPrice.toInt()
+                                    ? 'RM${tenancyData.rentalPrice.toStringAsFixed(0)}'
                                     : 'RM${tenancyData.rentalPrice.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                     fontSize: 18,
