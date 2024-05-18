@@ -6,13 +6,13 @@ class PropertyDetailsTextField extends StatefulWidget {
   final String? initialValue;
   final TextInputType textInputType;
   final Function(String) getText;
-  
+
   const PropertyDetailsTextField({
-    super.key, 
-    required this.title, 
+    super.key,
+    required this.title,
     this.initialValue,
-    required this.hintText, 
-    this.textInputType = TextInputType.text, 
+    required this.hintText,
+    this.textInputType = TextInputType.text,
     required this.getText
   });
 
@@ -41,7 +41,7 @@ class _PropertyDetailsTextFieldState extends State<PropertyDetailsTextField> {
   @override
   void dispose() {
     textFieldController.removeListener(_handleTextChange);
-    textFieldController.dispose(); 
+    textFieldController.dispose();
     super.dispose();
   }
 
@@ -49,6 +49,7 @@ class _PropertyDetailsTextFieldState extends State<PropertyDetailsTextField> {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // Title
         Text(
@@ -58,10 +59,10 @@ class _PropertyDetailsTextFieldState extends State<PropertyDetailsTextField> {
             fontSize: 16.0,
           ),
         ),
-    
+
         // Add space between elements
         const SizedBox(height: 8),
-    
+
         TextFormField(
           maxLines: null,
           keyboardType: widget.textInputType,

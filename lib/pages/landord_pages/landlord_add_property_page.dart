@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hrs/components/property_details_price_texfield.dart';
 import 'package:hrs/components/property_details_textfield.dart';
 import 'package:image_picker/image_picker.dart';
@@ -139,53 +140,55 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                     // Add space between elements
                     const SizedBox(height: 20),
 
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PropertyDetailsTextField(
-                            title: 'Property Size',
-                            hintText: '0',
-                            textInputType: TextInputType.number,
-                            getText: (String text) {
-                              // Convert text from String to int
-                              // If tryParse returns null then return 0
-                              propertySize = text;
-                            },
+                    IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: PropertyDetailsTextField(
+                              title: 'Property Size (sqft)',
+                              hintText: '0',
+                              textInputType: TextInputType.number,
+                              getText: (String text) {
+                                // Convert text from String to int
+                                // If tryParse returns null then return 0
+                                propertySize = text;
+                              },
+                            ),
                           ),
-                        ),
 
-                        // Add space between elements
-                        const SizedBox(width: 20.0),
+                          // Add space between elements
+                          const SizedBox(width: 20.0),
 
-                        Expanded(
-                          child: PropertyDetailsTextField(
-                            title: 'Bathroom',
-                            hintText: '0',
-                            textInputType: TextInputType.number,
-                            getText: (String text) {
-                              // Convert text from String to int
-                              // If tryParse returns null then return 0
-                              propertyBathrooms = text;
-                            },
+                          Expanded(
+                            child: PropertyDetailsTextField(
+                              title: 'Bathroom',
+                              hintText: '0',
+                              textInputType: TextInputType.number,
+                              getText: (String text) {
+                                // Convert text from String to int
+                                // If tryParse returns null then return 0
+                                propertyBathrooms = text;
+                              },
+                            ),
                           ),
-                        ),
 
-                        // Add space between elements
-                        const SizedBox(width: 20.0),
+                          // Add space between elements
+                          const SizedBox(width: 20.0),
 
-                        Expanded(
-                          child: PropertyDetailsTextField(
-                            title: 'Bedroom',
-                            hintText: '0',
-                            textInputType: TextInputType.number,
-                            getText: (String text) {
-                              // Convert text from String to int
-                              // If tryParse returns null then return 0
-                              propertyBedrooms = text;
-                            },
+                          Expanded(
+                            child: PropertyDetailsTextField(
+                              title: 'Bedroom',
+                              hintText: '0',
+                              textInputType: TextInputType.number,
+                              getText: (String text) {
+                                // Convert text from String to int
+                                // If tryParse returns null then return 0
+                                propertyBedrooms = text;
+                              },
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     // Add space between elements
