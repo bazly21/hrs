@@ -51,6 +51,23 @@ class ApplicationService {
 
           DateTime formattedDate = (applicationData['moveInDate'] as Timestamp).toDate();
 
+          if (applicationData["status"] == "Accepted") {
+            QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
+                .collection('properties')
+                .doc(propertyID)
+                .collection('tenancies')
+                .where('applicationID', isEqualTo: appDoc.id)
+                .get();
+            if (tenancySnapshot.docs.isNotEmpty) {
+              Map<String, dynamic>? tenancyData = tenancySnapshot.docs.first.data() as Map<String, dynamic>?;
+              if (tenancyData != null) {
+                if(tenancyData["status"] == "Ended"){
+                  return null;
+                }
+              }
+            }
+          }
+
           Application application = Application.fromMap({
             ...applicationData,
             'applicationID': appDoc.id,
