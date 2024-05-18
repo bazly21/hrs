@@ -113,6 +113,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                 rating1: userRating.overallPaymentRating,
                 rating2: userRating.overallMaintenanceRating,
                 rating3: userRating.overallCommunicationRating,
+                criteria1: "Payment History",
                 hasTitle: true,
               ),
 
@@ -161,20 +162,33 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                             // Add space between elements
                             SizedBox(height: screenSize.height * 0.003),
 
-                            CustomRating(
-                              numReview: 1,
-                              rating1:
-                                  rating?['supportRating']?.toDouble() ?? 0.0,
-                              rating2:
-                                  rating?['maintenanceRating']?.toDouble() ??
-                                      0.0,
-                              rating3:
-                                  rating?['communicationRating']?.toDouble() ??
-                                      0.0,
-                              spacing: 0.002,
-                              fontSize: 16.0,
-                              iconSize: 19.0,
-                            ),
+                            if(widget.role == "Landlord")
+                              CustomRating(
+                                numReview: 1,
+                                rating1: rating?['supportRating']?.toDouble() ?? 0.0,
+                                rating2: rating?['maintenanceRating']?.toDouble() ?? 0.0,
+                                rating3: rating?['communicationRating']?.toDouble() ?? 0.0,
+                                spacing: 0.002,
+                                fontSize: 16.0,
+                                iconSize: 19.0,
+                              ),
+
+                            if(widget.role == "Tenant")
+                              CustomRating(
+                                numReview: 1,
+                                rating1:
+                                    rating?['paymentRating']?.toDouble() ?? 0.0,
+                                rating2:
+                                    rating?['maintenanceRating']?.toDouble() ??
+                                        0.0,
+                                rating3:
+                                    rating?['communicationRating']?.toDouble() ??
+                                        0.0,
+                                criteria1: "Payment History",
+                                spacing: 0.002,
+                                fontSize: 16.0,
+                                iconSize: 19.0,
+                              ),
 
                             // Add space between elements
                             SizedBox(height: screenSize.height * 0.008),
