@@ -1,4 +1,5 @@
 import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_auth/firebase_auth.dart";
 import "package:hrs/model/property/property_details.dart";
 import "package:hrs/services/property/application_service.dart";
 import "package:hrs/services/property/tenancy_service.dart";
@@ -54,15 +55,15 @@ class PropertyService {
     if (applicantID != null) {
       if (propertyData["status"] == "Rented") {
         enableApplyButton = false;
-      }
-      else {
+      } else {
         // First, check if the user already applied for the property
         hasApplied = await ApplicationService.checkUserApplication(
             propertyID, applicantID);
 
         // Then, if the user has applied, check tenancy status
-        if(hasApplied) {
-          enableApplyButton = await TenancyService.checkUserTenancy(propertyID, applicantID);
+        if (hasApplied) {
+          enableApplyButton =
+              await TenancyService.checkUserTenancy(propertyID, applicantID);
         } else {
           enableApplyButton = true;
         }
@@ -91,11 +92,24 @@ class PropertyService {
   }
 
   static Future<List<PropertyFullDetails>?> fetchAvailableProperties() async {
+    // Get current userID
+    String? userID = FirebaseAuth.instance.currentUser?.uid;
+    QuerySnapshot propertiesSnapshot;
+
     // Fetch all the data inside properties collection
-    QuerySnapshot propertiesSnapshot = await FirebaseFirestore.instance
-        .collection("properties")
-        .where("status", isEqualTo: "Available")
-        .get();
+    if (userID == null) {
+      propertiesSnapshot = await FirebaseFirestore.instance
+          .collection("properties")
+          .where("status", isEqualTo: "Available")
+          .get();
+    }
+    else {
+      propertiesSnapshot = await FirebaseFirestore.instance
+          .collection("properties")
+          .where("status", isEqualTo: "Available")
+          .where("landlordID", isNotEqualTo: userID)
+          .get();
+    }
 
     if (propertiesSnapshot.docs.isEmpty) return null;
 
