@@ -24,6 +24,7 @@ class Tenancy {
     return {
       'tenantID': tenantID,
       'landlordID': landlordID,
+      'applicationID': applicationID,
       'status': status,
       'duration': duration,
       'startDate': startDate,

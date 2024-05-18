@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_details_section.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_applications_section.dart';
+import 'package:hrs/pages/landord_pages/landlord_tenancy_details_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_tenant_criteria_setting_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
@@ -82,7 +83,7 @@ class _LandlordPropertyDetailsPageState
           children: [
             PropertyDetailsSection(propertyID: widget.propertyID),
             PropertyApplicationsSection(propertyID: widget.propertyID),
-            const Center(child: Text("Tenancy")),
+            LandlordTenancyDetailsSection(propertyID: widget.propertyID),
           ],
         ),
       ),

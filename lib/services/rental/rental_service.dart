@@ -95,4 +95,66 @@ class RentalService {
       return null; // Return null in case of any errors
     }
   }
+
+  static Future<Map<String, dynamic>?> landlordFetchTenancyInfo(
+      String propertyID) async {
+    final DocumentSnapshot propertyDoc = await FirebaseFirestore.instance
+        .collection('properties')
+        .doc(propertyID)
+        .get();
+
+    final Map<String, dynamic>? propertyData =
+        propertyDoc.data() as Map<String, dynamic>?;
+
+    if (propertyData == null || propertyData["status"] == "Available")
+      return null;
+
+    // Get a QuerySnapshot of tenancies with matching tenantID
+    final QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
+        .collection('properties')
+        .doc(propertyID)
+        .collection('tenancies')
+        .where('status', isEqualTo: 'Active')
+        .orderBy('createdAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (tenancySnapshot.docs.isEmpty)
+      throw Exception("Tenancy data is not exist");
+
+    final DocumentSnapshot tenancyDoc = tenancySnapshot.docs.first;
+    final Map<String, dynamic> tenancyData =
+        tenancyDoc.data() as Map<String, dynamic>;
+
+    final String? tenantID = tenancyData['tenantID'];
+
+    if (tenantID == null) throw Exception("Tenant ID is not exist");
+
+    final DocumentSnapshot tenantDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(tenantID)
+        .get();
+    final Map<String, dynamic>? tenantData =
+        tenantDoc.data() as Map<String, dynamic>?;
+
+    if (tenantData == null) throw Exception("Tenant data is not exist");
+
+    // Construct the response map
+    return {
+      'propertyName': propertyData['name'],
+      'propertyAddress': propertyData['address'],
+      'propertyImageURL':
+          propertyData['image'][0] ?? 'https://via.placeholder.com/150',
+      'tenantID': tenantID,
+      'tenantName': tenantData['name'] ?? 'N/A',
+      'tenantRatingCount': tenantData['ratingCount']?["tenant"] ?? 0,
+      'tenantRatingAverage':
+          (tenantData['ratingAverage']?["tenant"]?["overallRating"] as num?)
+                  ?.toDouble() ??
+              0.0,
+      'tenancyDuration': tenancyData['duration'],
+      'tenancyStartDate': tenancyData['startDate'],
+      'tenancyEndDate': tenancyData['endDate'],
+    };
+  }
 }
