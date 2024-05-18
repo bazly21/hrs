@@ -80,8 +80,7 @@ class _LandlordPropertyDetailsPageState
         ),
         body: TabBarView(
           children: [
-            Center(
-                child: PropertyDetailsSection(propertyID: widget.propertyID)),
+            PropertyDetailsSection(propertyID: widget.propertyID),
             PropertyApplicationsSection(propertyID: widget.propertyID),
             const Center(child: Text("Tenancy")),
           ],

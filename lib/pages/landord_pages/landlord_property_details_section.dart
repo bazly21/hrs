@@ -42,177 +42,175 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
                   // Check if the snapshot
                   final DocumentSnapshot propertyData = snapshot.data!;
 
-                  return Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: Column(
-                        children: [
-                          // Image container
-                          Container(
-                            height: 220, // The height of the image container
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(propertyData["image"]
-                                    [0]), // Replace with your image URL
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                  return Column(
+                    children: [
+                      // Image container
+                      Container(
+                        height: 220, // The height of the image container
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(propertyData["image"]
+                                [0]), // Replace with your image URL
+                            fit: BoxFit.cover,
                           ),
+                        ),
+                      ),
 
-                          // ********* Property Details Section (Start) *********
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      // ********* Property Details Section (Start) *********
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // ********* Property Name, Property Location & Edit Button (Start) *********
+                            PropertyDetails(
+                              propertyName: propertyData["name"],
+                              propertyLocation: propertyData["address"],
+                              icon: const Icon(Icons.edit, size: 21),
+                              showIcon:
+                                  true, // Set this to false to hide the icon button
+                              onIconPressed: () {
+                                Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditPropertyDetailsPage(
+                                                    propertyID:
+                                                        widget.propertyID)))
+                                    .then((statusMessageFromPreviousPage) {
+                                  if (statusMessageFromPreviousPage !=
+                                      null) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              statusMessageFromPreviousPage)),
+                                    );
+                                  }
+                                });
+                              },
+                            ),
+                            // ********* Property Name, Property Location & Edit Button (End) *********
+
+                            // Add space between elements
+                            SizedBox(height: height * 0.025),
+
+                            // ********* Property Main Details (Start)  *********
+                            Row(
                               children: [
-                                // ********* Property Name, Property Location & Edit Button (Start) *********
-                                PropertyDetails(
-                                  propertyName: propertyData["name"],
-                                  propertyLocation: propertyData["address"],
-                                  icon: const Icon(Icons.edit, size: 21),
-                                  showIcon:
-                                      true, // Set this to false to hide the icon button
-                                  onIconPressed: () {
-                                    Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    EditPropertyDetailsPage(
-                                                        propertyID:
-                                                            widget.propertyID)))
-                                        .then((statusMessageFromPreviousPage) {
-                                      if (statusMessageFromPreviousPage !=
-                                          null) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                              content: Text(
-                                                  statusMessageFromPreviousPage)),
-                                        );
-                                      }
-                                    });
-                                  },
+                                // ********* Property Size Information (Start) *********
+                                // Property Size Icon
+                                const Icon(
+                                  Icons.house_rounded,
+                                  size: 16.0,
+                                  color: Color(0xFF7D7F88),
                                 ),
-                                // ********* Property Name, Property Location & Edit Button (End) *********
 
                                 // Add space between elements
-                                SizedBox(height: height * 0.025),
+                                SizedBox(width: width * 0.015),
 
-                                // ********* Property Main Details (Start)  *********
-                                Row(
-                                  children: [
-                                    // ********* Property Size Information (Start) *********
-                                    // Property Size Icon
-                                    const Icon(
-                                      Icons.house_rounded,
-                                      size: 16.0,
-                                      color: Color(0xFF7D7F88),
-                                    ),
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.015),
-
-                                    // Property Size Text **Database Required**
-                                    Text(
-                                      "${propertyData["size"]} m\u00B2",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF7D7F88)),
-                                    ),
-                                    // ********* Property Size Information (End) *********
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.04),
-
-                                    // ********* Bed Information (Start) *********
-                                    // House's Size Icon
-                                    const Icon(
-                                      Icons.bed,
-                                      size: 16.0,
-                                      color: Color(0xFF7D7F88),
-                                    ),
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.015),
-
-                                    // Propery's Size Text **Database Required**
-                                    Text(
-                                      "${propertyData["bedrooms"]} Rooms",
-                                      style: const TextStyle(
-                                          fontSize: 14.0,
-                                          color: Color(0xFF7D7F88)),
-                                    ),
-                                    // ********* Bed Information (End) *********
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.04),
-
-                                    // ********* Number of Bathroom Information (Start) *********
-                                    // Bathroom Icon
-                                    const Icon(
-                                      Icons.bathroom_rounded,
-                                      size: 16.0,
-                                      color: Color(0xFF7D7F88),
-                                    ),
-
-                                    // Add space between elements
-                                    SizedBox(width: width * 0.015),
-
-                                    // Number of Bathroom Text **Database Required**
-                                    Text(
-                                      "${propertyData["bathrooms"]} Bathrooms",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Color(0xFF7D7F88)),
-                                    ),
-                                    // ********* Number of Bed Information (End) *********
-                                  ],
+                                // Property Size Text **Database Required**
+                                Text(
+                                  "${propertyData["size"]} m\u00B2",
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF7D7F88)),
                                 ),
-                                // ********* Property Main Details (End)  *********
+                                // ********* Property Size Information (End) *********
 
                                 // Add space between elements
-                                SizedBox(height: height * 0.01),
+                                SizedBox(width: width * 0.04),
 
-                                const Divider(),
+                                // ********* Bed Information (Start) *********
+                                // House's Size Icon
+                                const Icon(
+                                  Icons.bed,
+                                  size: 16.0,
+                                  color: Color(0xFF7D7F88),
+                                ),
 
                                 // Add space between elements
-                                SizedBox(height: height * 0.01),
+                                SizedBox(width: width * 0.015),
 
-                                // ********* Property Description Section (Start) *********
-                                // Property Description Label
-                                PropertyDescription(
-                                    title: "Description",
-                                    content: propertyData["description"]),
-
-                                // Furnishing Description Label
-                                PropertyDescription(
-                                    title: "Furnishing",
-                                    content: propertyData["furnishing"]),
-
-                                // Facilities Description Label
-                                PropertyDescription(
-                                    title: "Facilities",
-                                    content: propertyData["facilities"]),
-
-                                // Accessibility Description Label
-                                PropertyDescription(
-                                    title: "Accessibility",
-                                    content: propertyData["accessibilities"]),
-
-                                // Location Label
-                                const Text(
-                                  "Location",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                      fontSize: 16.0),
+                                // Propery's Size Text **Database Required**
+                                Text(
+                                  "${propertyData["bedrooms"]} Rooms",
+                                  style: const TextStyle(
+                                      fontSize: 14.0,
+                                      color: Color(0xFF7D7F88)),
                                 ),
-                                // ********* Property Description Section (End) *********
+                                // ********* Bed Information (End) *********
+
+                                // Add space between elements
+                                SizedBox(width: width * 0.04),
+
+                                // ********* Number of Bathroom Information (Start) *********
+                                // Bathroom Icon
+                                const Icon(
+                                  Icons.bathroom_rounded,
+                                  size: 16.0,
+                                  color: Color(0xFF7D7F88),
+                                ),
+
+                                // Add space between elements
+                                SizedBox(width: width * 0.015),
+
+                                // Number of Bathroom Text **Database Required**
+                                Text(
+                                  "${propertyData["bathrooms"]} Bathrooms",
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF7D7F88)),
+                                ),
+                                // ********* Number of Bed Information (End) *********
                               ],
                             ),
-                          )
-                          // ********* Property Details Section (End) *********
-                        ],
-                      ));
+                            // ********* Property Main Details (End)  *********
+
+                            // Add space between elements
+                            SizedBox(height: height * 0.01),
+
+                            const Divider(),
+
+                            // Add space between elements
+                            SizedBox(height: height * 0.01),
+
+                            // ********* Property Description Section (Start) *********
+                            // Property Description Label
+                            PropertyDescription(
+                                title: "Description",
+                                content: propertyData["description"]),
+
+                            // Furnishing Description Label
+                            PropertyDescription(
+                                title: "Furnishing",
+                                content: propertyData["furnishing"]),
+
+                            // Facilities Description Label
+                            PropertyDescription(
+                                title: "Facilities",
+                                content: propertyData["facilities"]),
+
+                            // Accessibility Description Label
+                            PropertyDescription(
+                                title: "Accessibility",
+                                content: propertyData["accessibilities"]),
+
+                            // Location Label
+                            const Text(
+                              "Location",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                  fontSize: 16.0),
+                            ),
+                            // ********* Property Description Section (End) *********
+                          ],
+                        ),
+                      )
+                      // ********* Property Details Section (End) *********
+                    ],
+                  );
                 } else {
                   return const Center(child: CircularProgressIndicator());
                 }
