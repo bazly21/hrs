@@ -7,7 +7,7 @@ import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/notification_page.dart';
 import 'package:hrs/pages/profile_page_login.dart';
 import 'package:hrs/pages/profile_page_no_login.dart';
-import 'package:hrs/pages/rental_details_page.dart';
+import 'package:hrs/pages/tenancy_details_page.dart';
 import 'package:hrs/pages/rental_list_page.dart';
 import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -39,7 +39,7 @@ class _NavigationPage extends State<NavigationPage> {
         : [
             const RentalListPage(),
             role == 'Tenant' ? const ChatListPage() : Container(),
-            role == 'Tenant' ? const RentalDetailsPage() : Container(),
+            role == 'Tenant' ? const TenancyDetailsPage() : Container(),
             const NotificationPage(),
             role != null ? const ProfilePage() : const ProfilePageNoAccount(),
           ];

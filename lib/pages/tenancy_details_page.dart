@@ -7,14 +7,14 @@ import 'package:hrs/components/user_details.dart';
 import 'package:hrs/services/rental/rental_service.dart';
 import 'package:intl/intl.dart';
 
-class RentalDetailsPage extends StatefulWidget {
-  const RentalDetailsPage({super.key});
+class TenancyDetailsPage extends StatefulWidget {
+  const TenancyDetailsPage({super.key});
 
   @override
-  State<RentalDetailsPage> createState() => _RentalDetailsPageState();
+  State<TenancyDetailsPage> createState() => _TenancyDetailsPageState();
 }
 
-class _RentalDetailsPageState extends State<RentalDetailsPage> {
+class _TenancyDetailsPageState extends State<TenancyDetailsPage> {
   final RentalService _rentalService = RentalService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late Future<Map<String, dynamic>?> tenancyDetailsFuture;

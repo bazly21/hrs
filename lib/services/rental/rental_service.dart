@@ -41,12 +41,14 @@ class RentalService {
   }
 
   Future<Map<String, dynamic>?> fetchTenancyInfo(String tenantID) async {
+    print('Step 1: Fetching tenancies with matching tenantID');
     try {
       // Get a QuerySnapshot of tenancies with matching tenantID
       final QuerySnapshot tenancySnapshot = await _fireStore
-          .collection('tenancies')
+          .collectionGroup('tenancies')
           .where('tenantID', isEqualTo: tenantID)
           .where('status', isEqualTo: 'Active')
+          .orderBy('createdAt', descending: true)
           .limit(1)
           .get();
 
@@ -54,17 +56,16 @@ class RentalService {
         return null; // Early return if no tenancy found
 
       final DocumentSnapshot tenancyDoc = tenancySnapshot.docs.first;
+
       final Map<String, dynamic>? tenancyData =
           tenancyDoc.data() as Map<String, dynamic>?;
-
       if (tenancyData == null)
         return null; // Early return if tenancy data is null
 
-      final String propertyID = tenancyData['propertyID'];
+      final String propertyID = tenancyDoc.reference.parent.parent!.id;
       final DocumentSnapshot<Map<String, dynamic>> propertyDoc =
           await _fireStore.collection('properties').doc(propertyID).get();
       final Map<String, dynamic>? propertyData = propertyDoc.data();
-
       if (propertyData == null)
         return null; // Early return if property data is null
 
@@ -72,7 +73,6 @@ class RentalService {
       final DocumentSnapshot<Map<String, dynamic>> landlordDoc =
           await _fireStore.collection('users').doc(landlordID).get();
       final Map<String, dynamic>? landlordData = landlordDoc.data();
-
       if (landlordData == null)
         return null; // Early return if landlord data is null
 
@@ -81,17 +81,20 @@ class RentalService {
         'propertyName': propertyData['name'],
         'propertyAddress': propertyData['address'],
         'propertyImageURL':
-            propertyData['image'][0] ?? 'https://via.placeholder.com/150',
+            propertyData['image']?[0] ?? 'https://via.placeholder.com/150',
         'landlordID': landlordID,
         'landlordName': landlordData['name'] ?? 'N/A',
-        'landlordRatingCount': landlordData['ratingCount'] ?? 0,
-        'landlordRatingAverage':
-            landlordData['ratingAverage']?["overallRating"] as double? ?? 0.0,
+        'landlordRatingCount': landlordData['ratingCount']?['landlord'] ?? 0,
+        'landlordRatingAverage': (landlordData['ratingAverage']?['landlord']
+                    ?["overallRating"] as num?)
+                ?.toDouble() ??
+            0.0,
         'tenancyDuration': tenancyData['duration'],
         'tenancyStartDate': tenancyData['startDate'],
         'tenancyEndDate': tenancyData['endDate'],
       };
     } catch (e) {
+      print("Error: $e ");
       return null; // Return null in case of any errors
     }
   }
