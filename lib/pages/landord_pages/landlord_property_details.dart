@@ -22,7 +22,7 @@ class _LandlordPropertyDetailsPageState
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -39,6 +39,10 @@ class _LandlordPropertyDetailsPageState
                           fontWeight: FontWeight.w600, fontSize: 14))),
               Tab(
                   child: Text("APPLICATIONS",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600, fontSize: 14))),
+              Tab(
+                  child: Text("TENANCY",
                       style: TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 14))),
             ],
@@ -79,6 +83,7 @@ class _LandlordPropertyDetailsPageState
             Center(
                 child: PropertyDetailsSection(propertyID: widget.propertyID)),
             PropertyApplicationsSection(propertyID: widget.propertyID),
+            const Center(child: Text("Tenancy")),
           ],
         ),
       ),
@@ -91,8 +96,7 @@ class _LandlordPropertyDetailsPageState
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Property'),
-          content: const Text(
-              "Are you sure you want to delete this property?"),
+          content: const Text("Are you sure you want to delete this property?"),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -106,10 +110,9 @@ class _LandlordPropertyDetailsPageState
         );
       },
     );
-    
+
     if (isConfirmed ?? false) {
-      await PropertyService.deleteProperty(widget.propertyID)
-          .then((_) {
+      await PropertyService.deleteProperty(widget.propertyID).then((_) {
         Navigator.pop(context, 'success');
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
