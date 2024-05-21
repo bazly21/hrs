@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/components/rental_details.dart';
 import 'package:hrs/components/user_details.dart';
 import 'package:hrs/services/rental/rental_service.dart';

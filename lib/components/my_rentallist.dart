@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hrs/pages/property_details_page.dart';
 
 class MyRentalList extends StatelessWidget {
   const MyRentalList({super.key});
