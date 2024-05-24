@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/model/property/property_details.dart';
+import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/property_details_page.dart';
+import 'package:hrs/provider/refresh_provider.dart';
+import 'package:hrs/provider/wishlist_provider.dart';
+import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
+import 'package:provider/provider.dart';
 
 class RentalListPage extends StatefulWidget {
   const RentalListPage({super.key});
@@ -15,6 +20,8 @@ class RentalListPage extends StatefulWidget {
 
 class _RentalListPageState extends State<RentalListPage> {
   late Future<List<PropertyFullDetails>?> rentalListFuture;
+  String? role;
+  bool refresh = false;
 
   // Initialize state
   // Execute fetchRentalDetails function and store it
@@ -23,11 +30,22 @@ class _RentalListPageState extends State<RentalListPage> {
   @override
   void initState() {
     super.initState();
-    rentalListFuture = PropertyService.fetchAvailableProperties();
+    rentalListFuture = PropertyService.fetchAvailableProperties(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    role = context.watch<AuthService>().userRole;
+    refresh = context.watch<RefreshProvider>().isRefresh;
+
+    if (refresh) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        handleRefresh().then((_) {
+          context.read<RefreshProvider>().setRefresh(false);
+        });
+      });
+    }
+
     return Scaffold(
       appBar: const CustomAppBar(
         text: "Enter location or property type",
@@ -35,7 +53,7 @@ class _RentalListPageState extends State<RentalListPage> {
       ),
       body: RefreshIndicator(
         onRefresh: handleRefresh,
-        child: FutureBuilder<List<PropertyFullDetails>?>(
+        child: FutureBuilder(
             future: rentalListFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -296,10 +314,26 @@ class _RentalListPageState extends State<RentalListPage> {
                               subText: " /month"),
 
                           // Wishlist Icon
-                          const Icon(
-                            Icons.favorite_border_rounded,
-                            size: 20.0,
-                            color: Color(0xFF7D7F88),
+                          InkWell(
+                            onTap: () {
+                              toggleWishlist(propertyData);
+                            },
+                            child: Consumer<WishlistProvider>(
+                              builder: (context, wishlistProvider, _) {
+                                bool isWishlisted = wishlistProvider
+                                    .wishlistPropertyIDs
+                                    .contains(propertyData.propertyID);
+                                return Icon(
+                                  isWishlisted
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  size: 20.0,
+                                  color: isWishlisted
+                                      ? Colors.red
+                                      : const Color(0xFF7D7F88),
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -316,11 +350,73 @@ class _RentalListPageState extends State<RentalListPage> {
   }
 
   Future<void> handleRefresh() async {
-    await PropertyService.fetchAvailableProperties().then((newData) {
+    await PropertyService.fetchAvailableProperties(context).then((properties) {
       setState(() {
-        rentalListFuture =
-            Future.value(newData); // Use the new data for the future
+        rentalListFuture = Future.value(properties);
       });
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Unable to refresh. Please try again."),
+            duration: Duration(seconds: 3)),
+      );
     });
   }
+
+  void toggleWishlist(PropertyFullDetails propertyData) {
+    if (role != null && role == "Tenant") {
+      bool isWishlisted = context
+          .read<WishlistProvider>()
+          .wishlistPropertyIDs
+          .contains(propertyData.propertyID);
+
+      if (isWishlisted) {
+        context
+            .read<WishlistProvider>()
+            .removeFromWishlist(propertyData.propertyID!)
+            .then((_) => ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Property removed from wishlist'),
+                    duration: Duration(seconds: 2))))
+            .catchError((error) => ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Error removing property from wishlist'))));
+      } else {
+        context
+            .read<WishlistProvider>()
+            .addToWishlist(propertyData.propertyID!)
+            .then((_) => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Property added to wishlist'),
+                    duration: Duration(seconds: 2),
+                  ),
+                ))
+            .catchError((error) => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Error adding property to wishlist'),
+                  ),
+                ));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+              'You must login first to add the property to your wishlist.'),
+          action: SnackBarAction(
+            label: 'Login',
+            onPressed: () {
+              NavigationUtils.pushPage(context, const LoginPage(role: "Tenant"),
+                  SlideDirection.left);
+            },
+          ),
+        ),
+      );
+    }
+  }
+
+  // if (propertyData.isWishlisted) {
+  //   PropertyService.addToWishlist(propertyData.propertyID!);
+  // } else {
+  //   PropertyService.removeFromWishlist(propertyData.propertyID!);
+  // }
 }

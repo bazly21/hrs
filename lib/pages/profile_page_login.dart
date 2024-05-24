@@ -6,6 +6,7 @@ import 'package:hrs/components/my_starrating.dart';
 import 'package:hrs/pages/landord_pages/landlord_rental_history_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
+import 'package:hrs/provider/refresh_provider.dart';
 import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/user_service.dart';
@@ -71,8 +72,9 @@ class _ProfilePageState extends State<ProfilePage> {
     Map<String, dynamic>? profileData = profile.data() as Map<String, dynamic>?;
     String name = profileData?['name'] ?? 'N/A';
     int ratingCount = profileData?['ratingCount']?[_role!.toLowerCase()] ?? 0;
-    double ratingAverage =
-        profileData?['ratingAverage']?[_role!.toLowerCase()]?['overallRating'] ?? 0.0;
+    double ratingAverage = profileData?['ratingAverage']?[_role!.toLowerCase()]
+            ?['overallRating'] ??
+        0.0;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -165,8 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   const RentalHistoryPage(),
                   SlideDirection.left,
                 );
-              }
-              else if (_role == "Landlord") {
+              } else if (_role == "Landlord") {
                 // Navigate to Landlord Rental History Page
                 NavigationUtils.pushPage(
                   context,
@@ -233,10 +234,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 // FirebaseAuth.instance.signOut().then((value) {
                 //   Navigator.of(context).pop(); // Dismiss the dialog
                 // });
-                context
-                    .read<AuthService>()
-                    .signOut()
-                    .then((_) => Navigator.of(context).pop());
+                context.read<AuthService>().signOut().then((_) {
+                  context.read<RefreshProvider>().setRefresh(true);
+                  Navigator.of(context).pop();
+                });
               },
               child: const Text("Logout"),
             ),

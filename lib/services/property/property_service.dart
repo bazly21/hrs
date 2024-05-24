@@ -1,8 +1,11 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
+import "package:flutter/material.dart";
 import "package:hrs/model/property/property_details.dart";
+import "package:hrs/provider/wishlist_provider.dart";
 import "package:hrs/services/property/application_service.dart";
 import "package:hrs/services/property/tenancy_service.dart";
+import "package:provider/provider.dart";
 
 class PropertyService {
   // Get instance of auth and firestore
@@ -91,10 +94,11 @@ class PropertyService {
     return propertyData.data() as Map<String, dynamic>;
   }
 
-  static Future<List<PropertyFullDetails>?> fetchAvailableProperties() async {
+  static Future<List<PropertyFullDetails>?> fetchAvailableProperties(BuildContext context) async {
     // Get current userID
     String? userID = FirebaseAuth.instance.currentUser?.uid;
     QuerySnapshot propertiesSnapshot;
+    WishlistProvider wishlistProvider = context.read<WishlistProvider>();
 
     // Fetch all the data inside properties collection
     if (userID == null) {
@@ -133,6 +137,8 @@ class PropertyService {
           landlordDoc.data() as Map<String, dynamic>?;
 
       if (landlordData == null) return null;
+
+      await wishlistProvider.fetchWishlistPropertyIDs();
 
       Map<String, dynamic> propertyMap = {
         ...propertyData,

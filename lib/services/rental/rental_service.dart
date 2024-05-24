@@ -41,7 +41,6 @@ class RentalService {
   }
 
   Future<Map<String, dynamic>?> fetchTenancyInfo(String tenantID) async {
-    print('Step 1: Fetching tenancies with matching tenantID');
     try {
       // Get a QuerySnapshot of tenancies with matching tenantID
       final QuerySnapshot tenancySnapshot = await _fireStore
