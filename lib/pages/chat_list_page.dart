@@ -19,7 +19,7 @@ class _ChatListPageState extends State<ChatListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
+      appBar: const MyAppBar(
         text: "Search chat",
         appBarType: "Search",
       ),
@@ -50,7 +50,7 @@ class _ChatListPageState extends State<ChatListPage> {
                   return Divider(
                     // Indent the divider to start after the profile image
                     indent: indentValue
-                  ); 
+                  );
                 },
               );
             }

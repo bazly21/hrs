@@ -46,7 +46,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(text: widget.receiverName, hasImage: true),
+      appBar: MyAppBar(text: widget.receiverName, hasImage: true),
       body: Column(
         children: [
           // ********* Chat Bubble (Start) ********* **Database Required**

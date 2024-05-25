@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String text;
   final String appBarType;
   final bool hasImage;
 
-  const CustomAppBar({
+  const MyAppBar({
     super.key,
     required this.text,
     this.appBarType = "Title",

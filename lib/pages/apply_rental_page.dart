@@ -36,7 +36,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Apply Rent"),
+      appBar: const MyAppBar(text: "Apply Rent"),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

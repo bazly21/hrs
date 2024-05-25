@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: LoginPage(),
       home: const NavigationPage()
+      // home:  ProfilePicture(),
       // home: const RatingList()
     );
   }

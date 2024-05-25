@@ -47,7 +47,7 @@ class _RentalListPageState extends State<RentalListPage> {
     }
 
     return Scaffold(
-      appBar: const CustomAppBar(
+      appBar: const MyAppBar(
         text: "Enter location or property type",
         appBarType: "Search",
       ),

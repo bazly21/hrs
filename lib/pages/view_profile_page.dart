@@ -46,7 +46,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
           });
         } else if (snapshot.hasData && snapshot.data != null) {
           return Scaffold(
-            appBar: CustomAppBar(text: "${snapshot.data!.name}'s Profile"),
+            appBar: MyAppBar(text: "${snapshot.data!.name}'s Profile"),
             body: _buildProfile(screenSize, snapshot.data!),
           );
         }

@@ -50,7 +50,7 @@ class _LandlordRatingPageState extends State<LandlordRatingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Rate Tenant"),
+      appBar: const MyAppBar(text: "Rate Tenant"),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

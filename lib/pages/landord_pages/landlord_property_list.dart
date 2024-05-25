@@ -6,7 +6,7 @@ import 'package:hrs/pages/landord_pages/landlord_property_details.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 
 class LandlordPropertyListPage extends StatefulWidget {
-  
+
   const LandlordPropertyListPage({super.key});
 
   @override
@@ -26,7 +26,7 @@ class _LandlordPropertyListPageState extends State<LandlordPropertyListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Search property", appBarType: "Search"),
+      appBar: const MyAppBar(text: "Search property", appBarType: "Search"),
       body: RefreshIndicator(
         onRefresh: refreshRentalList,
         child: FutureBuilder<List<DocumentSnapshot>>(
@@ -42,15 +42,15 @@ class _LandlordPropertyListPageState extends State<LandlordPropertyListPage> {
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
                   final DocumentSnapshot propertyData = snapshot.data![index];
-        
+
                   return propertyCard(context, propertyData);
                 },
               );
-            } 
-            
+            }
+
             // If no properties are found
             return const Center(child: Text("No rental properties found"));
-            
+
           },
         ),
       ),

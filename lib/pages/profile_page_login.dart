@@ -80,10 +80,10 @@ class _ProfilePageState extends State<ProfilePage> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // Profile Picture
-        const CircleAvatar(
+        CircleAvatar(
           radius: 50.0,
           backgroundImage:
-              NetworkImage('https://via.placeholder.com/150'), // Example URL
+              NetworkImage(profileData?['profilePictureURL'] ?? 'https://via.placeholder.com/150'), // Example URL
           backgroundColor:
               Colors.transparent, // Make background transparent if using image
         ),

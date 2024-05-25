@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/model/user/user.dart';
 import 'package:hrs/pages/navigation_page.dart';
@@ -57,53 +60,81 @@ class AuthService with ChangeNotifier {
     }
   }
 
-  Future<void> registerProfile(
-      {required BuildContext context,
-      required String profileName,
-      required String phoneNumber,
-      required String role}) async {
-    if (profileName.isNotEmpty) {
-      // Get current user's information
-      User? user = FirebaseAuth.instance.currentUser;
-
-      // If user is logged in
-      if (user != null) {
-        //Get UID (User ID)
-        String uid = user.uid;
-
-        UserProfile userProfile = UserProfile(
-            name: profileName, phoneNumber: phoneNumber, role: [role]);
-
-        try {
-          // Store profileName to the FireStore database
-          await FirebaseFirestore.instance.collection('users').doc(uid).set(
-                userProfile.toMap(),
-                SetOptions(merge: true),
-              );
-
-          // Check if the widget is still mounted before navigating
-          if (context.mounted) {
-            _userRole = role;
-            saveRole(role);
-            notifyListeners();
-
-            goToNavigationPage(context);
-          }
-        } catch (e) {
-          if (context.mounted) {
-            // Display error message if the storing operation is failed
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text(
-                    "Something happened while storing profile name. Please try again")));
-          }
-        }
-      }
-    } else {
+  Future<void> registerProfile({
+    required BuildContext context,
+    required String profileName,
+    required String phoneNumber,
+    required String role,
+    required File? profileImageFile,
+  }) async {
+    if (profileName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Please enter your name."),
         ),
       );
+      return;
+    }
+
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // Handle the case when the user is not logged in
+      return;
+    }
+
+    String uid = user.uid;
+
+    try {
+      String? profilePictureURL;
+
+      if (profileImageFile != null) {
+        String fileName =
+            "images/users/$uid/${DateTime.now().millisecondsSinceEpoch}_${profileImageFile.uri.pathSegments.last}";
+        final ref = FirebaseStorage.instance.ref().child(fileName);
+
+        UploadTask uploadTask = ref.putFile(profileImageFile);
+        final snapshot = await uploadTask.whenComplete(() => null);
+
+        profilePictureURL = await snapshot.ref.getDownloadURL();
+      }
+
+      UserProfile userProfile = UserProfile(
+        name: profileName,
+        phoneNumber: phoneNumber,
+        role: [role],
+        profilePictureURL: profilePictureURL,
+      );
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).set(
+            userProfile.toMap(),
+            SetOptions(merge: true),
+          );
+
+      _userRole = role;
+      saveRole(role);
+      notifyListeners();
+
+      if (context.mounted) {
+        goToNavigationPage(context);
+      }
+    } catch (e) {
+      String errorMessage;
+
+      if (e is FirebaseException && e.code == 'storage/unauthorized') {
+        errorMessage = "User is not authorized to upload the image.";
+      } else if (e is FirebaseException && e.code == 'storage/canceled') {
+        errorMessage = "Image upload has been canceled.";
+      } else {
+        errorMessage =
+            "An error occurred while registering the profile. Please try again.";
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
     }
   }
 

@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(text: widget.role == "Tenant" ? "Login" : "Login as Landlord"),
+      appBar: MyAppBar(text: widget.role == "Tenant" ? "Login" : "Login as Landlord"),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(

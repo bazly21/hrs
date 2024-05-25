@@ -32,7 +32,7 @@ class _OTPConfirmationPageState extends State<OTPConfirmationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(text: "Confirmation Code"),
+      appBar: const MyAppBar(text: "Confirmation Code"),
       body: SafeArea(
         child: Center(
           child: Column(
