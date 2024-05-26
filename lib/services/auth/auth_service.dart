@@ -107,7 +107,7 @@ class AuthService with ChangeNotifier {
       );
 
       await FirebaseFirestore.instance.collection('users').doc(uid).set(
-            userProfile.toMap(),
+            userProfile.registerProfileMap(),
             SetOptions(merge: true),
           );
 

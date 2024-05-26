@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_classavatar.dart';
+import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_profilemenu.dart';
-import 'package:hrs/components/my_starrating.dart';
+import 'package:hrs/model/user/user.dart';
 import 'package:hrs/pages/landord_pages/landlord_rental_history_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
@@ -21,25 +22,26 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final UserService _userService = UserService();
-  late Future<DocumentSnapshot> _userDetails;
+  late Future<UserProfile> _userDetails;
   String? _role;
 
   @override
   void initState() {
     super.initState();
-    _userDetails =
-        _userService.getUserDetails(FirebaseAuth.instance.currentUser!.uid);
+    _role = context.read<AuthService>().userRole;
+    _userDetails = _userService.getUserDetails(
+        FirebaseAuth.instance.currentUser!.uid, _role!);
   }
 
   @override
   Widget build(BuildContext context) {
-    _role = context.read<AuthService>().userRole;
+    // _role = context.read<AuthService>().userRole;
 
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 37.0, 16.0, 0),
-          child: FutureBuilder<DocumentSnapshot>(
+          child: FutureBuilder<UserProfile>(
               future: _userDetails,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -55,7 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     );
                   });
-                } else if (!snapshot.hasData || snapshot.data!.exists) {
+                } else if (snapshot.hasData) {
                   return _buildProfile(context, snapshot.data!);
                 }
 
@@ -68,24 +70,15 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Column _buildProfile(BuildContext context, DocumentSnapshot profile) {
-    Map<String, dynamic>? profileData = profile.data() as Map<String, dynamic>?;
-    String name = profileData?['name'] ?? 'N/A';
-    int ratingCount = profileData?['ratingCount']?[_role!.toLowerCase()] ?? 0;
-    double ratingAverage = profileData?['ratingAverage']?[_role!.toLowerCase()]
-            ?['overallRating'] ??
-        0.0;
-
+  Column _buildProfile(BuildContext context, UserProfile userProfile) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         // Profile Picture
-        CircleAvatar(
+        CustomCircleAvatar(
+          imageURL: userProfile.profilePictureURL,
+          name: userProfile.name!,
           radius: 50.0,
-          backgroundImage:
-              NetworkImage(profileData?['profilePictureURL'] ?? 'https://via.placeholder.com/150'), // Example URL
-          backgroundColor:
-              Colors.transparent, // Make background transparent if using image
         ),
 
         // Add space between elements
@@ -93,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
         // Profile Name
         Text(
-          name,
+          userProfile.name!,
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 24),
         ),
 
@@ -101,14 +94,17 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 3.0),
 
         // Rating Icon
-        if (ratingCount != 0)
+        if (userProfile.ratingCount != 0) ...[
           Padding(
             padding: const EdgeInsets.only(left: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                StarRating(rating: ratingAverage),
+                CustomRatingBar(
+                  rating: userProfile.overallRating!,
+                  itemSize: 21.0,
+                ),
 
                 // Expand More Button
                 InkWell(
@@ -125,13 +121,14 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
           ),
-
-        // Add space between elements
-        if (ratingCount != 0) const SizedBox(height: 3.0),
+          const SizedBox(height: 3.0)
+        ],
 
         // Number of Reviews
         Text(
-          ratingCount != 0 ? "($ratingCount reviews)" : "No reviews yet",
+          userProfile.ratingCount != 0
+              ? "(${userProfile.ratingCount} reviews)"
+              : "No reviews yet",
           style: const TextStyle(
             color: Color(0xFF7D7F88),
             fontSize: 16.0,
@@ -247,3 +244,5 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
+
+
