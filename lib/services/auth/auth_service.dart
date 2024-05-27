@@ -9,6 +9,7 @@ import 'package:hrs/pages/navigation_page.dart';
 import 'package:hrs/pages/otp_confirmation_page.dart';
 import 'package:hrs/pages/register_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:hrs/services/utils/error_message_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService with ChangeNotifier {
@@ -121,13 +122,19 @@ class AuthService with ChangeNotifier {
     } catch (e) {
       String errorMessage;
 
-      if (e is FirebaseException && e.code == 'storage/unauthorized') {
-        errorMessage = "User is not authorized to upload the image.";
-      } else if (e is FirebaseException && e.code == 'storage/canceled') {
-        errorMessage = "Image upload has been canceled.";
+      if (e is FirebaseException) {
+        switch (e.code) {
+          case 'storage/unauthorized':
+            errorMessage = unauthorizedErrorMessage;
+            break;
+          case 'storage/canceled':
+            errorMessage = canceledErrorMessage;
+            break;
+          default:
+            errorMessage =  genericRegisterErrorMessage;
+        }
       } else {
-        errorMessage =
-            "An error occurred while registering the profile. Please try again.";
+        errorMessage = genericRegisterErrorMessage;
       }
 
       if (context.mounted) {

@@ -4,6 +4,7 @@ import 'package:hrs/components/custom_classavatar.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/model/user/user.dart';
+import 'package:hrs/pages/edit_profile_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_rental_history_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
@@ -35,7 +36,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    // _role = context.read<AuthService>().userRole;
+    bool profileRefresh = context.watch<RefreshProvider>().profileRefresh;
+
+    if (profileRefresh) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        refreshProfile();
+        if (context.mounted) {
+          context.read<RefreshProvider>().profileRefresh = false;
+        }
+      });
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -143,7 +153,29 @@ class _ProfilePageState extends State<ProfilePage> {
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.015),
 
-        const ProfileMenu(text: "Personal Details", icon: Icons.person),
+        ProfileMenu(
+            text: "Account",
+            icon: Icons.person,
+            onPressed: () {
+              // Navigate to Edit Profile Page
+              NavigationUtils.pushPage(
+                context,
+                AccountPage(
+                  userProfile: userProfile,
+                ),
+                SlideDirection.left,
+              ).then((message) {
+                if (message != null) {
+                  // Show snackbar message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(message),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                }
+              });
+            }),
 
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
@@ -243,6 +275,14 @@ class _ProfilePageState extends State<ProfilePage> {
       },
     );
   }
+
+  Future<void> refreshProfile() async {
+    await _userService
+        .getUserDetails(FirebaseAuth.instance.currentUser!.uid, _role!)
+        .then((newData) {
+      setState(() {
+        _userDetails = Future.value(newData);
+      });
+    });
+  }
 }
-
-

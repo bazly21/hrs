@@ -312,45 +312,4 @@ class _RegisterProfilePageState extends State<RegisterProfilePage> {
       }
     }
   }
-
-  SafeArea _reservedBody(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Column(
-          children: [
-            // Add space between elements
-            const SizedBox(height: 20),
-
-            // Name textfield label
-            const MyLabel(
-                mainAxisAlignment: MainAxisAlignment.start,
-                text: "Name",
-                fontSize: 16.0),
-
-            // Add space between elements
-            const SizedBox(height: 10),
-
-            // Name textfield
-            MyTextField(
-              controller: _nameController,
-              hintText: "Enter your full name",
-              obscureText: false,
-            ),
-
-            // Add space between elements
-            const SizedBox(height: 28),
-
-            // Next button
-            // MyButton(
-            //     text: "Create Account",
-            //     onPressed: () => context.read<AuthService>().registerProfile(
-            //         context: context,
-            //         phoneNumber: widget.phoneNumber,
-            //         profileName: _nameController.text,
-            //         role: widget.role)),
-          ],
-        ),
-      ),
-    );
-  }
 }

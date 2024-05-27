@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         fontFamily: "SFProDisplay",
         scaffoldBackgroundColor: const Color(0xFFFCFCFC),
-        primaryColor: const Color(0xFF765CF8),
+        primaryColor: const Color(0xFF8568F3),
       ),
       // home: LoginPage(),
       home: const NavigationPage()
