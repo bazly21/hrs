@@ -4,7 +4,7 @@ import 'package:hrs/components/custom_classavatar.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/model/user/user.dart';
-import 'package:hrs/pages/edit_profile_page.dart';
+import 'package:hrs/pages/accout_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_rental_history_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
