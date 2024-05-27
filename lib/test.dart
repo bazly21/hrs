@@ -80,7 +80,7 @@ class _ProfilePictureState extends State<ProfilePicture> {
     return CustomTextFormField(
         label: "Name",
         hintText: "Enter your name",
-        nameController: _nameController,
+        controller: _nameController,
         validator: (value) {
           if (value == null || value.isEmpty) {
             return "Name cannot be empty";

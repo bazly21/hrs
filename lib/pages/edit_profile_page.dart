@@ -169,7 +169,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         CustomTextFormField(
             label: "Name",
             hintText: "Enter your name",
-            nameController: _nameController,
+            controller: _nameController,
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return "Name cannot be empty";

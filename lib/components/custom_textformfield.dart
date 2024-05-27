@@ -5,18 +5,21 @@ class CustomTextFormField extends StatelessWidget {
     super.key,
     required String label,
     required String hintText,
-    required TextEditingController nameController,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
     void Function(String)? onChanged
   })  : _label = label,
         _hintText = hintText,
-        _nameController = nameController,
+        _controller = controller,
+        _keyboardType = keyboardType,
         _validator = validator,
         _onChanged = onChanged;
 
   final String _label;
   final String _hintText;
-  final TextEditingController _nameController;
+  final TextEditingController _controller;
+  final TextInputType _keyboardType;
   final String? Function(String?)? _validator;
   final void Function(String)? _onChanged;
 
@@ -36,10 +39,10 @@ class CustomTextFormField extends StatelessWidget {
         const SizedBox(height: 10),
 
         TextFormField(
-          controller: _nameController,
-          keyboardType: TextInputType.name,
+          controller: _controller,
+          keyboardType: _keyboardType,
           validator: _validator,
-          // textCapitalization: _textCapitalization,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           decoration: InputDecoration(
             enabledBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.grey),
@@ -58,6 +61,7 @@ class CustomTextFormField extends StatelessWidget {
             hintText: _hintText,
             hintStyle: const TextStyle(color: Color(0xFFA6A6A6), fontSize: 14),
             contentPadding: const EdgeInsets.all(10.0),
+            errorMaxLines: 2,
           ),
           onChanged: _onChanged,
         ),

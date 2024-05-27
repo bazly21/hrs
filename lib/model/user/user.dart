@@ -17,6 +17,7 @@ class UserProfile {
   factory UserProfile.fromMap(Map<String, dynamic> userMap, String role) {
     return UserProfile(
         name: userMap["name"] ?? "N/A",
+        phoneNumber: userMap["phoneNumber"],
         overallRating: (userMap["ratingAverage"]?[role.toLowerCase()]
                     ?["overallRating"] as num?)
                 ?.toDouble() ??

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_appbar.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/model/user/user.dart';
+import 'package:hrs/pages/change_phone_num_page.dart';
 import 'package:hrs/pages/edit_profile_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 
@@ -23,23 +24,31 @@ class AccountPage extends StatelessWidget {
                 text: "Edit Profile",
                 icon: Icons.person,
                 onPressed: (() => NavigationUtils.pushPage(
-                    context,
-                    EditProfilePage(userProfile: userProfile),
-                    SlideDirection.left).then((message) => {
-                      if (message != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(message),
-                            duration: const Duration(seconds: 3),
-                          ),
-                        )
-                      }
-                    }))),
+                        context,
+                        EditProfilePage(userProfile: userProfile),
+                        SlideDirection.left)
+                    .then((message) => {
+                          if (message != null)
+                            {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(message),
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              )
+                            }
+                        }))),
 
             // Add space between elements
             const SizedBox(height: 16),
 
-            const ProfileMenu(text: "Change Phone Number", icon: Icons.numbers),
+            ProfileMenu(
+                text: "Change Phone Number",
+                icon: Icons.numbers,
+                onPressed: () => NavigationUtils.pushPage(
+                    context,
+                    ChangePhoneNumberPage(oldPhoneNumber: userProfile.phoneNumber!),
+                    SlideDirection.left)),
           ],
         ),
       ),
