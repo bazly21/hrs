@@ -30,7 +30,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final User user = FirebaseAuth.instance.currentUser!;
   ImageProvider? _initialProfilePicture;
   File? _imageFile;
-  bool _showInitialProfilePicture = true;
+  bool _showInitialProfilePicture = false;
   bool _isLoading = false;
 
   @override
@@ -39,6 +39,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (widget.userProfile.profilePictureURL != null) {
       _initialProfilePicture =
           NetworkImage(widget.userProfile.profilePictureURL!);
+      _showInitialProfilePicture = true;
     }
 
     // Set initial value of name textfield
@@ -237,6 +238,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
         FirebaseFirestore.instance.collection("users").doc(user.uid);
 
     try {
+      // If user has selected a new profile picture, upload it to Firebase Storage
+      // and get the download URL
       if (_imageFile != null) {
         final fileName =
             "images/users/${user.uid}/${DateTime.now().millisecondsSinceEpoch}_${_imageFile!.uri.pathSegments.last}";
@@ -245,24 +248,32 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
         final snapshot = await uploadTask;
         newProfilePictureURL = await snapshot.ref.getDownloadURL();
-
-        // Delete the old profile picture from Firebase Storage
-        if (widget.userProfile.profilePictureURL != null) {
-          final oldRef = FirebaseStorage.instance
-              .refFromURL(widget.userProfile.profilePictureURL!);
-          await oldRef.delete();
-        }
       }
 
-      final updateData = {
+      // Create a map of data to update
+      final Map<String, dynamic> updateData = {
         "name": _nameController.text,
       };
 
+      // If user has selected a new profile picture, add it to the map
       if (newProfilePictureURL != null) {
         updateData["profilePictureURL"] = newProfilePictureURL;
       }
+      // If user has removed the profile picture, set the profile picture URL to null
+      else if (!_showInitialProfilePicture) {
+        updateData["profilePictureURL"] = null;
+      }
 
       await userRef.update(updateData);
+
+      // If user's profile picture has been updated,
+      // delete the old profile picture from Firebase Storage
+      if (widget.userProfile.profilePictureURL != null) {
+        final oldRef = FirebaseStorage.instance
+            .refFromURL(widget.userProfile.profilePictureURL!);
+        print("Old ref: $oldRef");
+        await oldRef.delete();
+      }
 
       if (context.mounted) {
         context.read<RefreshProvider>().profileRefresh = true;
