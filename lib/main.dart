@@ -9,7 +9,8 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Ensure flutter binding is initialized
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Ensure flutter binding is initialized
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: LoginPage(),
       home: const NavigationPage()
+      // home: const TestPage(),
       // home:  ProfilePicture(),
       // home: const RatingList()
     );
