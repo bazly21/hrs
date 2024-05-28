@@ -42,6 +42,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _showInitialProfilePicture = true;
     }
 
+    print("showInitialProfilePicture: $_showInitialProfilePicture");
+
     // Set initial value of name textfield
     _nameController.text = widget.userProfile.name ?? "";
   }
@@ -268,10 +270,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       // If user's profile picture has been updated,
       // delete the old profile picture from Firebase Storage
-      if (widget.userProfile.profilePictureURL != null) {
+      if ((newProfilePictureURL != null || !_showInitialProfilePicture) &&
+          widget.userProfile.profilePictureURL != null) {
         final oldRef = FirebaseStorage.instance
             .refFromURL(widget.userProfile.profilePictureURL!);
-        print("Old ref: $oldRef");
         await oldRef.delete();
       }
 
