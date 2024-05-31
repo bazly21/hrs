@@ -11,3 +11,6 @@ const String networkRequestFailedErrorMessage = "Network error. Please check you
 const String quotaExceededErrorMessage = "SMS quota exceeded. Please try again later.";
 const String phoneNumberExistsErrorMessage = "The phone number is already in use by another account.";
 const String invalidAccessErrorMessage = "Invalid access. Please sign in again.";
+
+// Generic error messages
+const String genericFutureErrorMessage= "An error occurred while getting the data. Please try again.";

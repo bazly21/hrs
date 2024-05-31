@@ -8,6 +8,7 @@ import 'package:hrs/pages/accout_page.dart';
 import 'package:hrs/pages/landord_pages/landlord_rental_history_list.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/rental_history_page.dart';
+import 'package:hrs/pages/wishlist_list_page.dart';
 import 'package:hrs/provider/refresh_provider.dart';
 import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -180,7 +181,14 @@ class _ProfilePageState extends State<ProfilePage> {
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
 
-        const ProfileMenu(text: "Wishlist", icon: Icons.favorite_rounded),
+        ProfileMenu(text: "Wishlist", icon: Icons.favorite_rounded, onPressed: () {
+          // Navigate to Wishlist Page
+          NavigationUtils.pushPage(
+            context,
+            const WishlistListPage(),
+            SlideDirection.left,
+          );
+        }),
 
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
