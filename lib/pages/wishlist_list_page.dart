@@ -17,7 +17,7 @@ class WishlistListPage extends StatefulWidget {
 class _WishlistListPageState extends State<WishlistListPage> {
   late WishlistProvider _wishlistProvider;
   late Future<List<PropertyFullDetails>> _wishlistFuture;
-  bool refresh = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -30,52 +30,55 @@ class _WishlistListPageState extends State<WishlistListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'My Wishlist'),
-      body: RefreshIndicator(
-        onRefresh: refreshData,
-        child: LayoutBuilder(builder: (context, constraints) {
-          return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: FutureBuilder(
-                  future: _wishlistFuture,
-                  builder: (context, snapshot) {
-                    // If the connection is active, show a loading indicator
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (snapshot.hasError) {
-                      _buildErrorMessage(snapshot, context);
-                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                      int wishlistCount = snapshot.data!.length;
+      body: _isLoading
+          ? _buildLoadingAnimation()
+          : _buildMainBody(),
+    );
+  }
 
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: wishlistCount,
-                        itemBuilder: (context, index) {
-                          var propertyData = snapshot.data![index];
+  RefreshIndicator _buildMainBody() {
+    return RefreshIndicator(
+      onRefresh: refreshData,
+      child: LayoutBuilder(builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: FutureBuilder(
+                future: _wishlistFuture,
+                builder: (context, snapshot) {
+                  // If the connection is active, show a loading indicator
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildLoadingAnimation();
+                  } else if (snapshot.hasError) {
+                    _buildErrorMessage(snapshot, context);
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    int wishlistCount = snapshot.data!.length;
 
-                          return RentalCard(
-                            propertyData: propertyData, 
-                            isLastIndex: index == wishlistCount - 1,                             
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: wishlistCount,
+                      itemBuilder: (context, index) {
+                        var propertyData = snapshot.data![index];
+
+                        return RentalCard(
+                            propertyData: propertyData,
+                            isLastIndex: index == wishlistCount - 1,
                             iconOnPressed: () {
                               _removeWishlist(propertyData.propertyID!);
-                            }
-                          );
-                        },
-                      );
-                    }
-
-                    return const Center(
-                      child: Text('There are no properties in your wishlist.'),
+                            });
+                      },
                     );
-                  }),
-            ),
-          );
-        }),
-      ),
+                  }
+
+                  return const Center(
+                    child: Text('There are no properties in your wishlist.'),
+                  );
+                }),
+          ),
+        );
+      }),
     );
   }
 
@@ -107,11 +110,13 @@ class _WishlistListPageState extends State<WishlistListPage> {
     });
   }
 
+  Center _buildLoadingAnimation() => const Center(child: CircularProgressIndicator());
+
   void _removeWishlist(String propertyID) {
     // Show a dialog to confirm the removal of the property from the wishlist
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Remove from Wishlist'),
           content: const Text(
@@ -119,18 +124,25 @@ class _WishlistListPageState extends State<WishlistListPage> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
+                Navigator.of(dialogContext).pop();
+
+                setState(() {
+                  _isLoading = true;
+                });
+
                 _wishlistProvider
                     .removeFromWishlist(propertyID)
                     .then((_) async {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Property removed from wishlist'),
+                      content: Text('Successfully removed the property from wishlist'),
+                      duration: Duration(seconds: 3),
                     ),
                   );
 
@@ -141,11 +153,13 @@ class _WishlistListPageState extends State<WishlistListPage> {
                     const SnackBar(
                       content: Text(
                           'An error occurred while removing the property from the wishlist. Please try again.'),
+                      duration: Duration(seconds: 3),
                     ),
                   );
                 }).then((_) {
-                  // Pop the dialog after removing from wishlist and refreshing data
-                  Navigator.of(context).pop();
+                  setState(() {
+                    _isLoading = false;
+                  });
                 });
               },
               child: const Text('Remove'),
