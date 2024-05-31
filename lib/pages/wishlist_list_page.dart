@@ -59,12 +59,7 @@ class _WishlistListPageState extends State<WishlistListPage> {
 
                           return RentalCard(
                             propertyData: propertyData, 
-                            isLastIndex: index == wishlistCount - 1, 
-                            icon: const Icon(
-                              Icons.delete,
-                              size: 20.0,
-                              color: Color(0xFF7D7F88),                          
-                            ), 
+                            isLastIndex: index == wishlistCount - 1,                             
                             iconOnPressed: () {
                               _removeWishlist(propertyData.propertyID!);
                             }

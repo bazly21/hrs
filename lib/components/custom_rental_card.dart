@@ -2,23 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/pages/property_details_page.dart';
+import 'package:hrs/provider/wishlist_provider.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:provider/provider.dart';
 
 class RentalCard extends StatelessWidget {
   const RentalCard({
     super.key,
     required PropertyFullDetails propertyData,
     required bool isLastIndex,
-    required Icon icon,
+    bool requiresConsumer = false,
     required void Function() iconOnPressed,
   })  : _propertyData = propertyData,
         _isLastIndex = isLastIndex,
-        _icon = icon,
+        _requiresConsumer = requiresConsumer,
         _iconOnPressed = iconOnPressed;
 
   final PropertyFullDetails _propertyData;
   final bool _isLastIndex;
-  final Icon _icon;
+  final bool _requiresConsumer;
   final void Function() _iconOnPressed;
 
   @override
@@ -223,7 +225,7 @@ class RentalCard extends StatelessWidget {
                               subText: " /month"),
 
                           // Wishlist Icon
-                          InkWell(onTap: _iconOnPressed, child: _icon)
+                          InkWell(onTap: _iconOnPressed, child: _buildIcon())
                         ],
                       ),
                       //////// Rental Property's Price and Wishlist Section (End) //////
@@ -236,5 +238,29 @@ class RentalCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildIcon() {
+    if (_requiresConsumer) {
+      return Consumer<WishlistProvider>(
+        builder: (context, wishlistProvider, _) {
+          bool isWishlisted = wishlistProvider.wishlistPropertyIDs
+              .contains(_propertyData.propertyID);
+          return Icon(
+            isWishlisted
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            size: 20.0,
+            color: isWishlisted ? Colors.red : const Color(0xFF7D7F88),
+          );
+        },
+      );
+    } else {
+      return const Icon(
+        Icons.delete,
+        size: 20.0,
+        color: Color(0xFF7D7F88),
+      );
+    }
   }
 }
