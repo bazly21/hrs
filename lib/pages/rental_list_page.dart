@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_appbar.dart';
 import 'package:hrs/components/custom_rental_card.dart';
-import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/provider/refresh_provider.dart';
@@ -18,6 +18,7 @@ class RentalListPage extends StatefulWidget {
 }
 
 class _RentalListPageState extends State<RentalListPage> {
+  final TextEditingController _searchController = TextEditingController();
   late Future<List<PropertyFullDetails>?> rentalListFuture;
   String? role;
   bool refresh = false;
@@ -46,9 +47,9 @@ class _RentalListPageState extends State<RentalListPage> {
     }
 
     return Scaffold(
-      appBar: const MyAppBar(
-        text: "Enter location or property type",
-        appBarType: "Search",
+      appBar: SearchAppBar(
+        hintText: "Enter location or property type",
+        controller: _searchController,
       ),
       body: RefreshIndicator(
         onRefresh: handleRefresh,
