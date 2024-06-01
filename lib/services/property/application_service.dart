@@ -1,18 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hrs/model/application/application_model.dart';
+import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/model/tenant_criteria/tenant_criteria.dart';
 
 class ApplicationService {
   // Get instance of auth and firestore
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  static Future<Map<String, dynamic>> getPropertyApplication(String propertyID) async {
+  static Future<Map<String, dynamic>> getPropertyApplication(
+      String propertyID) async {
     Map<String, dynamic> applicationMap = {};
     bool containsAcceptedApplication = false;
     bool hasTenantCriteria = false;
 
-    DocumentSnapshot<Map<String, dynamic>> propertyDoc =
-        await FirebaseFirestore.instance.collection('properties').doc(propertyID).get();
+    DocumentSnapshot<Map<String, dynamic>> propertyDoc = await FirebaseFirestore
+        .instance
+        .collection('properties')
+        .doc(propertyID)
+        .get();
     Map<String, dynamic>? propertyData = propertyDoc.data();
 
     if (propertyData == null) throw Exception("Property data is not exist");
@@ -34,22 +41,25 @@ class ApplicationService {
           Map<String, dynamic>? applicationData =
               appDoc.data() as Map<String, dynamic>?;
 
-          if (applicationData == null || appDoc["applicantID"] == null) return null;
+          if (applicationData == null || appDoc["applicantID"] == null)
+            return null;
           String applicantID = appDoc["applicantID"];
 
           // Fetch applicant user document
-          DocumentSnapshot applicantDoc =
-            await FirebaseFirestore.instance
+          DocumentSnapshot applicantDoc = await FirebaseFirestore.instance
               .collection('users')
               .doc(applicantID)
               .get();
 
-          Map<String, dynamic>? applicantData = applicantDoc.data() as Map<String, dynamic>?;
+          Map<String, dynamic>? applicantData =
+              applicantDoc.data() as Map<String, dynamic>?;
 
           // Return null if applicantData or moveIndDate is not exist
-          if (applicantData == null || applicationData['moveInDate'] == null) return null;
+          if (applicantData == null || applicationData['moveInDate'] == null)
+            return null;
 
-          DateTime formattedDate = (applicationData['moveInDate'] as Timestamp).toDate();
+          DateTime formattedDate =
+              (applicationData['moveInDate'] as Timestamp).toDate();
 
           if (applicationData["status"] == "Accepted") {
             QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
@@ -59,9 +69,10 @@ class ApplicationService {
                 .where('applicationID', isEqualTo: appDoc.id)
                 .get();
             if (tenancySnapshot.docs.isNotEmpty) {
-              Map<String, dynamic>? tenancyData = tenancySnapshot.docs.first.data() as Map<String, dynamic>?;
+              Map<String, dynamic>? tenancyData =
+                  tenancySnapshot.docs.first.data() as Map<String, dynamic>?;
               if (tenancyData != null) {
-                if(tenancyData["status"] == "Ended"){
+                if (tenancyData["status"] == "Ended") {
                   return null;
                 }
               }
@@ -74,7 +85,8 @@ class ApplicationService {
             'moveInDate': formattedDate,
             "applicantName": applicantData["name"],
             "applicantProfilePic": applicantData["profilePic"],
-            "applicantOverallRating": applicantData["ratingAverage"]?["tenant"]?["overallRating"],
+            "applicantOverallRating": applicantData["ratingAverage"]?["tenant"]
+                ?["overallRating"],
             "applicantRatingCount": applicantData["ratingCount"]?["tenant"],
           });
 
@@ -152,5 +164,82 @@ class ApplicationService {
         .doc(propertyID)
         .collection("applications")
         .add(applicationData.toMap());
+  }
+
+  // Get application list by tenantID
+  Future<List<Application>> getApplicationListByTenantID() async {
+    String? applicantID = _auth.currentUser?.uid;
+
+    // Throw an error if tenantID is null
+    if (applicantID == null) {
+      throw FirebaseAuthException(
+        code: 'invalid-access',
+        message: 'User is not signed in.',
+      );
+    }
+
+    QuerySnapshot applicationSnapshots = await _fireStore
+        .collectionGroup("applications")
+        .where("applicantID", isEqualTo: applicantID)
+        .orderBy("submittedAt", descending: true)
+        .get();
+
+    // Return empty list if no application found
+    if (applicationSnapshots.docs.isEmpty) {
+      return [];
+    }
+
+    List<Application> applicationList = await Future.wait(
+      applicationSnapshots.docs.map((appDoc) async {
+        Map<String, dynamic>? applicationData =
+            appDoc.data() as Map<String, dynamic>?;
+
+        if (applicationData == null) return null;
+
+        // Fetch property document
+        DocumentSnapshot propertyDoc =
+            await appDoc.reference.parent.parent!.get();
+        Map<String, dynamic>? propertyData =
+            propertyDoc.data() as Map<String, dynamic>?;
+
+        if (propertyData == null || propertyData["landlordID"] == null) {
+          return null;
+        }
+
+        String landlordID = propertyData["landlordID"];
+
+        // Fetch landlord user document
+        DocumentSnapshot landlordDoc =
+            await _fireStore.collection('users').doc(landlordID).get();
+        Map<String, dynamic>? landlordData =
+            landlordDoc.data() as Map<String, dynamic>?;
+
+        // Return null if landlordData is not exist
+        // or landlordData is empty
+        if (landlordData == null) return null;
+
+        // Get landlord overall rating and rating count
+        propertyData["landlordOverallRating"] =
+            landlordData["ratingAverage"]?["landlord"]?["overallRating"];
+        propertyData["landlordRatingCount"] = landlordData["ratingCount"]?["landlord"];
+
+        // Get landlord name and profile picture
+        propertyData["landlordName"] = landlordData["name"];
+        propertyData["profilePicURL"] = landlordData["profilePictureURL"];
+
+        // Convert property data to PropertyFullDetails object
+        PropertyFullDetails propertyDetails =
+            PropertyFullDetails.fromMapHalfDetails(propertyData);
+        
+        Application application = Application(
+          status: applicationData["status"] ?? "Pending",
+          propertyDetails: propertyDetails,
+        );
+
+        return application;
+      }),
+    ).then((list) => list.whereType<Application>().toList());
+
+    return applicationList;
   }
 }

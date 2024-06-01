@@ -16,6 +16,7 @@ class PropertyFullDetails {
   final int? landlordRatingCount;
   final double? landlordOverallRating;
   final bool? enableApplyButton;
+  final String? landlordProfilePic;
 
   PropertyFullDetails({
     this.furnishing,
@@ -35,6 +36,7 @@ class PropertyFullDetails {
     this.landlordRatingCount,
     this.landlordOverallRating,
     this.enableApplyButton,
+    this.landlordProfilePic,
   });
 
   factory PropertyFullDetails.fromMapFullDetails(Map<String, dynamic> data) {
@@ -70,6 +72,7 @@ class PropertyFullDetails {
       image: List<String>.from(data['image']),
       landlordID: data['landlordID'],
       landlordName: data['landlordName'] ?? 'N/A',
+      landlordProfilePic: data['profilePicURL'] ?? 'https://via.placeholder.com/150',
       landlordRatingCount: data['landlordRatingCount'] ?? 0,
       landlordOverallRating: data['landlordOverallRating'] ?? 0.0,
     );

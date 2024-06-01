@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hrs/model/property/property_details.dart';
 
 class Application {
   final String? applicantID;
@@ -14,7 +15,9 @@ class Application {
   final String? applicantProfilePic;
   final double? applicantOverallRating;
   final int? applicantRatingCount;
+  final PropertyFullDetails? propertyDetails;
   final String status;
+
 
   Application({
     this.applicantID,
@@ -30,6 +33,7 @@ class Application {
     this.applicantProfilePic,
     this.applicantOverallRating,
     this.applicantRatingCount,
+    this.propertyDetails,
     this.status = "Pending",
   });
 

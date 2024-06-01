@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/appbar_shadow.dart';
+import 'package:hrs/pages/application_history_list.dart';
 import 'package:hrs/pages/rental_history_list.dart';
 
 class RentalHistoryPage extends StatefulWidget {
@@ -13,7 +14,7 @@ class _RentalHistoryPageState extends State<RentalHistoryPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const ApplicationPage(),
+    const ApplicationHistoryList(),
     const RentalHistoryList(),
   ];
 
