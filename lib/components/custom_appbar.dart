@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/components/appbar_shadow.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -55,17 +56,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       toolbarHeight: preferredSize.height,
-      flexibleSpace: Container(
-        // Create shadow for the AppBar
-        decoration: BoxDecoration(boxShadow: [
-          BoxShadow(
-            color: Colors.grey[200]!, // Shadow color.
-            spreadRadius: 1,
-            blurRadius: 3, // Shadow blur radius.
-            offset: const Offset(0, 2), // Vertical offset for the shadow.
-          )
-        ], color: Colors.white),
-      ),
+      flexibleSpace: const AppBarShadow(),
       title: Container(
         height: 41,
         decoration: BoxDecoration(
