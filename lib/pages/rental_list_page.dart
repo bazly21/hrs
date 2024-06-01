@@ -34,6 +34,12 @@ class _RentalListPageState extends State<RentalListPage> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     role = context.watch<AuthService>().userRole;
     refresh = context.watch<RefreshProvider>().isRefresh;
@@ -50,6 +56,7 @@ class _RentalListPageState extends State<RentalListPage> {
       appBar: SearchAppBar(
         hintText: "Enter location or property type",
         controller: _searchController,
+        onChanged: _handleSearch,
       ),
       body: RefreshIndicator(
         onRefresh: handleRefresh,
@@ -84,13 +91,12 @@ class _RentalListPageState extends State<RentalListPage> {
                     var propertyData = snapshot.data![index];
 
                     return RentalCard(
-                      propertyData: propertyData, 
-                      isLastIndex: index == propertyCount - 1, 
-                      requiresConsumer: true,
-                      iconOnPressed: () {
-                        toggleWishlist(propertyData.propertyID!);
-                      }
-                    );
+                        propertyData: propertyData,
+                        isLastIndex: index == propertyCount - 1,
+                        requiresConsumer: true,
+                        iconOnPressed: () {
+                          toggleWishlist(propertyData.propertyID!);
+                        });
                   },
                 );
               }
@@ -183,9 +189,10 @@ class _RentalListPageState extends State<RentalListPage> {
     }
   }
 
-  // if (propertyData.isWishlisted) {
-  //   PropertyService.addToWishlist(propertyData.propertyID!);
-  // } else {
-  //   PropertyService.removeFromWishlist(propertyData.propertyID!);
-  // }
+  void _handleSearch(searchQuery) {
+    setState(() {
+      rentalListFuture = PropertyService.fetchAvailableProperties(context,
+          searchQuery: searchQuery);
+    });
+  }
 }

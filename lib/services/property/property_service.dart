@@ -94,27 +94,29 @@ class PropertyService {
     return propertyData.data() as Map<String, dynamic>;
   }
 
-  static Future<List<PropertyFullDetails>?> fetchAvailableProperties(BuildContext context) async {
+  static Future<List<PropertyFullDetails>?> fetchAvailableProperties(
+      BuildContext context,
+      {String? searchQuery}) async {
     // Get current userID
     String? userID = FirebaseAuth.instance.currentUser?.uid;
     QuerySnapshot propertiesSnapshot;
     WishlistProvider wishlistProvider = context.read<WishlistProvider>();
 
-    // Fetch all the data inside properties collection
-    if (userID == null) {
-      propertiesSnapshot = await FirebaseFirestore.instance
-          .collection("properties")
-          .where("status", isEqualTo: "Available")
-          .get();
-    }
-    else {
-      propertiesSnapshot = await FirebaseFirestore.instance
-          .collection("properties")
-          .where("status", isEqualTo: "Available")
-          .where("landlordID", isNotEqualTo: userID)
-          .get();
+    // Initialize the Firestore query
+    Query propertiesQuery = FirebaseFirestore.instance
+        .collection("properties")
+        .where("status", isEqualTo: "Available");
+
+    // Add condition to exclude properties of the current user
+    if (userID != null) {
+      propertiesQuery =
+          propertiesQuery.where("landlordID", isNotEqualTo: userID);
     }
 
+    // Fetch the properties
+    propertiesSnapshot = await propertiesQuery.get();
+
+    // Return null if no properties found
     if (propertiesSnapshot.docs.isEmpty) return null;
 
     List<PropertyFullDetails> propertiesDetailsList =
@@ -123,7 +125,6 @@ class PropertyService {
           propertyDoc.data() as Map<String, dynamic>?;
 
       if (propertyData == null) return null;
-
       if (propertyData["landlordID"] == null) return null;
 
       String landlordID = propertyData["landlordID"];
@@ -150,10 +151,16 @@ class PropertyService {
       };
 
       return PropertyFullDetails.fromMapHalfDetails(propertyMap);
-    })).then((noob) => noob
-            .where((element) => element != null)
-            .toList()
-            .cast<PropertyFullDetails>());
+    })).then((list) => list.whereType<PropertyFullDetails>().toList());
+
+    // Filter properties based on searchQuery if it is not null and not empty
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      propertiesDetailsList = propertiesDetailsList.where((property) {
+        return property.propertyName!
+            .toLowerCase()
+            .contains(searchQuery.toLowerCase());
+      }).toList();
+    }
 
     return propertiesDetailsList;
   }

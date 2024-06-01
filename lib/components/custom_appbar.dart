@@ -42,11 +42,14 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required String hintText,
     required TextEditingController controller,
+    required void Function(String) onChanged,
   })  : _hintText = hintText,
-        _controller = controller;
+        _controller = controller,
+        _onChanged = onChanged;
 
   final String _hintText;
   final TextEditingController _controller;
+  final void Function(String) _onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +101,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           style: const TextStyle(fontSize: 14),
           cursorColor: Colors.black54,
+          onChanged: _onChanged,
         ),
       ),
       backgroundColor: Colors.white,
