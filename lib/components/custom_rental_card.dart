@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/pages/property_details_page.dart';
@@ -115,10 +116,11 @@ class RentalCard extends StatelessWidget {
                               // Profile picture
                               InkWell(
                                 onTap: () {},
-                                child: const CircleAvatar(
-                                  radius: 9,
-                                  backgroundImage: NetworkImage(
-                                      'https://via.placeholder.com/150'),
+                                child: CustomCircleAvatar(
+                                  imageURL: _propertyData.landlordProfilePic,
+                                  name: _propertyData.landlordName!,
+                                  radius: 9.0,
+                                  fontSize: 7.0,
                                 ),
                               ),
 

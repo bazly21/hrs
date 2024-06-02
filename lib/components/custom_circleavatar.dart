@@ -7,13 +7,16 @@ class CustomCircleAvatar extends StatelessWidget {
     required String? imageURL,
     required String name,
     double radius = 50.0,
+    double fontSize = 35.0,
   })  : _imageURL = imageURL,
         _name = name,
-        _radius = radius;
+        _radius = radius,
+        _fontSize = fontSize;
 
   final String? _imageURL;
   final String _name;
   final double _radius;
+  final double _fontSize;
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +27,8 @@ class CustomCircleAvatar extends StatelessWidget {
       child: _imageURL == null
           ? Text(
               getInitials(_name),
-              style: const TextStyle(
-                fontSize: 35,
+              style: TextStyle(
+                fontSize: _fontSize,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),

@@ -8,7 +8,7 @@ import 'package:hrs/pages/notification_page.dart';
 import 'package:hrs/pages/profile_page_login.dart';
 import 'package:hrs/pages/profile_page_no_login.dart';
 import 'package:hrs/pages/tenancy_details_page.dart';
-import 'package:hrs/pages/rental_list_page.dart';
+import 'package:hrs/pages/rental_property_list_page.dart';
 import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:provider/provider.dart';

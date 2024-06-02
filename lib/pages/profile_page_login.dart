@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hrs/components/custom_classavatar.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/my_profilemenu.dart';
 import 'package:hrs/model/user/user.dart';

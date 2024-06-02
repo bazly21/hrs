@@ -225,7 +225,7 @@ class ApplicationService {
 
         // Get landlord name and profile picture
         propertyData["landlordName"] = landlordData["name"];
-        propertyData["profilePicURL"] = landlordData["profilePictureURL"];
+        propertyData["landlordProfilePictureURL"] = landlordData["profilePictureURL"];
 
         // Convert property data to PropertyFullDetails object
         PropertyFullDetails propertyDetails =

@@ -145,6 +145,7 @@ class PropertyService {
         ...propertyData,
         "propertyID": propertyDoc.id,
         "landlordName": landlordData["name"],
+        "landlordProfilePictureURL": landlordData["profilePictureURL"],
         "landlordRatingCount": landlordData["ratingCount"]?["landlord"],
         "landlordOverallRating": landlordData["ratingAverage"]?["landlord"]
             ?["overallRating"],

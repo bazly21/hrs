@@ -72,7 +72,7 @@ class PropertyFullDetails {
       image: List<String>.from(data['image']),
       landlordID: data['landlordID'],
       landlordName: data['landlordName'] ?? 'N/A',
-      landlordProfilePic: data['profilePicURL'] ?? 'https://via.placeholder.com/150',
+      landlordProfilePic: data['landlordProfilePictureURL'],
       landlordRatingCount: data['landlordRatingCount'] ?? 0,
       landlordOverallRating: data['landlordOverallRating'] ?? 0.0,
     );
