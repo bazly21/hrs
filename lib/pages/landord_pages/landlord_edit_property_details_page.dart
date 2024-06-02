@@ -567,14 +567,13 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
       });
 
       final List<String> newImageUrls = await _uploadImages(context);
-      final List<String> invalidImageUrls = await _getInvalidImageUrls();
+      final List<String> invalidImageUrls = _getInvalidImageUrls();
 
       if (context.mounted) {
         await _deleteInvalidImages(context, invalidImageUrls);
       }
 
-      final List<String> updatedImages =
-          await _getUpdatedImageUrls(newImageUrls);
+      final List<String> updatedImages = _getUpdatedImageUrls(newImageUrls);
 
       final propertyDetailsMap = {
         'name': _nameController.text,
@@ -655,7 +654,7 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
     return downloadUrls;
   }
 
-  Future<List<String>> _getUpdatedImageUrls(List<String> newImageUrls) async {
+  List<String> _getUpdatedImageUrls(List<String> newImageUrls) {
     final List<String> updatedUrls = [];
 
     // Add existing image URLs
@@ -668,7 +667,7 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
     return updatedUrls;
   }
 
-  Future<List<String>> _getInvalidImageUrls() async {
+  List<String> _getInvalidImageUrls() {
     return _copyImages.where((image) => !_images.contains(image)).toList();
   }
 
