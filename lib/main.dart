@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/pages/navigation_page.dart';
+import 'package:hrs/provider/image_provider.dart';
 import 'package:hrs/provider/refresh_provider.dart';
 import 'package:hrs/provider/wishlist_provider.dart';
 import 'package:hrs/services/auth/auth_service.dart';
@@ -21,6 +22,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => WishlistProvider()),
         ChangeNotifierProvider(create: (context) => RefreshProvider()),
+        ChangeNotifierProvider(create: (context) => ImageService()),
       ],
       child: const MyApp(),
     ),

@@ -59,16 +59,18 @@ class _PropertyDetailsPriceTextFieldState extends State<PropertyDetailsPriceText
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Rent Price / Month',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16.0,
+        Expanded(
+          child: const Text(
+            'Rent Price / Month',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16.0,
+            ),
           ),
         ),
             
         // Add space between elements
-        const SizedBox(height: 8.0),
+        const SizedBox(height: 15.0),
             
         TextField(
           controller: rentalPriceTextController,
@@ -95,7 +97,7 @@ class _PropertyDetailsPriceTextFieldState extends State<PropertyDetailsPriceText
             isDense: true,
             contentPadding: const EdgeInsets.all(10)
           ),
-          enableInteractiveSelection: false,
+          // enableInteractiveSelection: false,
           showCursor: false,
           inputFormatters: [
             // Make sure only numeric characters can be entered.
