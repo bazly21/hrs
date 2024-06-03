@@ -75,7 +75,17 @@ class _NavigationPage extends State<NavigationPage> {
       );
     } else if (index == 2 && role == 'Landlord') {
       NavigationUtils.pushPage(
-          context, const AddPropertyPage(), SlideDirection.up);
+          context, const AddPropertyPage(), SlideDirection.up).then((message) {
+        if (message != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              duration: const Duration(seconds: 3),
+              backgroundColor: Colors.green[700],
+            ),
+          );
+        }
+          });
     } else {
       setState(() => _selectedIndex = index);
     }

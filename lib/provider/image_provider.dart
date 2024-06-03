@@ -21,4 +21,9 @@ class ImageService with ChangeNotifier {
     _images.removeAt(index);
     notifyListeners();
   }
+
+  void clearImage() {
+    _images.clear();
+    notifyListeners();
+  }
 }
