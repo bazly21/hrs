@@ -5,6 +5,7 @@ import 'package:hrs/components/my_propertydescription.dart';
 import 'package:hrs/components/my_rentaldetails.dart';
 import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/pages/landord_pages/landlord_edit_property_details_page.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/property_service.dart';
 
 class PropertyDetailsSection extends StatefulWidget {
@@ -138,11 +139,12 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
                 icon: const Icon(Icons.edit, size: 21),
                 showIcon: true, // Set this to false to hide the icon button
                 onIconPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EditPropertyDetailsPage(
-                              propertyID: widget.propertyID))).then((status) {
+                  NavigationUtils.pushPage(
+                          context,
+                          EditPropertyDetailsPage(
+                              propertyID: widget.propertyID),
+                          SlideDirection.up)
+                      .then((status) {
                     if (status != null && status['success']) {
                       // Refresh data
                       setState(() {

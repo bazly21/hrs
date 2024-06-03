@@ -598,7 +598,8 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
           .doc(widget.propertyID)
           .update(propertyDetailsMap);
 
-      PropertyFullDetails updatedPropertyDetails = await PropertyService.getPropertyFullDetails(widget.propertyID, null);
+      PropertyFullDetails updatedPropertyDetails =
+          await PropertyService.getPropertyFullDetails(widget.propertyID, null);
 
       if (context.mounted) {
         Navigator.pop(context, {
@@ -609,20 +610,20 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
       }
     } catch (e) {
       String errorMessage = getErrorMessage(e);
-      
+
       if (context.mounted) {
+        // Remove loading animation
+        setState(() {
+          _isSaving = false;
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                Text(errorMessage),
+            content: Text(errorMessage),
             duration: const Duration(seconds: 3),
           ),
         );
       }
-    } finally {
-      setState(() {
-        _isSaving = false;
-      });
     }
   }
 
