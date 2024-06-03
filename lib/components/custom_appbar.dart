@@ -76,9 +76,9 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
             enabledBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.transparent),
                 borderRadius: BorderRadius.all(Radius.circular(10.0))),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF8568F3)),
-              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              borderRadius: const BorderRadius.all(Radius.circular(10.0)),
             ),
             prefixIcon: const Icon(Icons.search, color: Color(0xFF858585)),
             border: InputBorder.none,
