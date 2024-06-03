@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_textformfield.dart';
 import 'package:hrs/components/property_details_price_texfield.dart';
 import 'package:hrs/provider/image_provider.dart';
+import 'package:hrs/services/utils/error_message_utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -566,11 +567,11 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
         _isSaving = true;
       });
 
-      final List<String> newImageUrls = await _uploadImages(context);
+      final List<String> newImageUrls = await _uploadImages();
       final List<String> invalidImageUrls = _getInvalidImageUrls();
 
       if (context.mounted) {
-        await _deleteInvalidImages(context, invalidImageUrls);
+        await _deleteInvalidImages(invalidImageUrls);
       }
 
       final List<String> updatedImages = _getUpdatedImageUrls(newImageUrls);
@@ -599,17 +600,21 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Property details updated successfully'),
+            duration: Duration(seconds: 3),
           ),
         );
 
         Navigator.pop(context);
       }
     } catch (e) {
+      String errorMessage = getErrorMessage(e);
+      
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content:
-                Text('Failed to update property details. Please try again'),
+                Text(errorMessage),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -620,7 +625,7 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
     }
   }
 
-  Future<List<String>> _uploadImages(BuildContext context) async {
+  Future<List<String>> _uploadImages() async {
     final List<String> downloadUrls = [];
     final uploadImagesPath = _images
         .where(
@@ -639,13 +644,6 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
           final url = await snapshot.ref.getDownloadURL();
           downloadUrls.add(url);
         } catch (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to upload images. Please try again'),
-              ),
-            );
-          }
           rethrow;
         }
       }
@@ -671,21 +669,12 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
     return _copyImages.where((image) => !_images.contains(image)).toList();
   }
 
-  Future<void> _deleteInvalidImages(
-      BuildContext context, List<String> invalidImageUrls) async {
+  Future<void> _deleteInvalidImages(List<String> invalidImageUrls) async {
     if (invalidImageUrls.isNotEmpty) {
       for (String invalidImageUrl in invalidImageUrls) {
         try {
           await FirebaseStorage.instance.refFromURL(invalidImageUrl).delete();
         } catch (_) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content:
-                    Text('Failed to delete invalid images. Please try again'),
-              ),
-            );
-          }
           rethrow;
         }
       }

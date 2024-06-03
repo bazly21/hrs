@@ -42,8 +42,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       _showInitialProfilePicture = true;
     }
 
-    print("showInitialProfilePicture: $_showInitialProfilePicture");
-
     // Set initial value of name textfield
     _nameController.text = widget.userProfile.name ?? "";
   }
