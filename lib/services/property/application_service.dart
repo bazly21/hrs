@@ -120,14 +120,20 @@ class ApplicationService {
 
   // Save tenant criteria
   Future<void> saveTenantCriteria(
-      String propertyID, TenantCriteria tenantCriteria) async {
+      String propertyID, TenantCriteria? tenantCriteria) async {
     DocumentReference propertyDocRef =
         _fireStore.collection('properties').doc(propertyID);
 
     // Update the tenant criteria on property document
-    await propertyDocRef.update({
-      'tenantCriteria': tenantCriteria.toMap(),
-    });
+    if (tenantCriteria == null) {
+      await propertyDocRef.update({
+        'tenantCriteria': null,
+      });
+    } else {
+      await propertyDocRef.update({
+        'tenantCriteria': tenantCriteria.toMap(),
+      });
+    }
   }
 
   static Future<bool> checkUserApplication(
@@ -221,11 +227,13 @@ class ApplicationService {
         // Get landlord overall rating and rating count
         propertyData["landlordOverallRating"] =
             landlordData["ratingAverage"]?["landlord"]?["overallRating"];
-        propertyData["landlordRatingCount"] = landlordData["ratingCount"]?["landlord"];
+        propertyData["landlordRatingCount"] =
+            landlordData["ratingCount"]?["landlord"];
 
         // Get landlord name and profile picture
         propertyData["landlordName"] = landlordData["name"];
-        propertyData["landlordProfilePictureURL"] = landlordData["profilePictureURL"];
+        propertyData["landlordProfilePictureURL"] =
+            landlordData["profilePictureURL"];
 
         // Convert property data to PropertyFullDetails object
         PropertyDetails propertyDetails =
