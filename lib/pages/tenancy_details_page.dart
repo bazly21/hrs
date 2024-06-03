@@ -118,7 +118,7 @@ class _TenancyDetailsPageState extends State<TenancyDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Property name and location labels
-                    PropertyDetails(
+                    PropertyDetailsInfo(
                       propertyName: tenancyData['propertyName'],
                       propertyLocation: tenancyData['propertyAddress'],
                     ),

@@ -6,7 +6,7 @@ import 'package:hrs/model/property/property_details.dart';
 class WishlistProvider with ChangeNotifier {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-  
+
   List<String> _wishlistPropertyIDs = [];
 
   List<String> get wishlistPropertyIDs => _wishlistPropertyIDs;
@@ -61,7 +61,7 @@ class WishlistProvider with ChangeNotifier {
     }
   }
 
-  Future<List<PropertyFullDetails>> getWishlist() async {
+  Future<List<PropertyDetails>> getWishlist() async {
     final user = _auth.currentUser;
 
     // Check if user is logged in
@@ -102,9 +102,9 @@ class WishlistProvider with ChangeNotifier {
 
         propertyData['propertyID'] = propertyId;
 
-        return PropertyFullDetails.fromMapHalfDetails(propertyData);
+        return PropertyDetails.fromMapHalfDetails(propertyData);
       }),
-    ).then((list) => list.whereType<PropertyFullDetails>().toList());
+    ).then((list) => list.whereType<PropertyDetails>().toList());
 
     return propertyDetails;
   }

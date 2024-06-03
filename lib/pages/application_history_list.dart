@@ -16,7 +16,7 @@ class ApplicationHistoryList extends StatefulWidget {
 class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
   final ApplicationService _applicationService = ApplicationService();
   late Future<List<Application>> _appHistoryListFuture;
-  
+
   @override
   void initState() {
     super.initState();
@@ -49,21 +49,21 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                       _buildErrorMessage(snapshot, context);
                     } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                       int applicationCount = snapshot.data!.length;
-      
+
                       return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: applicationCount,
                         itemBuilder: (context, index) {
                           var propertyData = snapshot.data![index];
-      
+
                           return _buildApplicationList(
                             propertyData,
                             isLastIndex: index == applicationCount - 1,);
                         },
                       );
                     }
-      
+
                     return const Center(
                       child: Text('There are no applications found.'),
                     );
@@ -76,8 +76,8 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
   }
 
   Widget _buildApplicationList(Application application, {bool isLastIndex = false}) {
-    PropertyFullDetails propertyData = application.propertyDetails!;
-    
+    PropertyDetails propertyData = application.propertyDetails!;
+
     num rentalPrice = propertyData.rentalPrice!;
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
         ? rentalPrice.toStringAsFixed(2)
@@ -132,17 +132,17 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                           ),
                         ),
                         //////// Property Name Section (End) //////
-      
+
                         //////// Property Location Section (Start) //////
                         Text(
                           propertyData.address!,
                           style: const TextStyle(fontSize: 15),
                         ),
                         //////// Property Location Section (End) //////
-      
+
                         // Add space between elements
                         const SizedBox(height: 4.0),
-      
+
                         //////// Profile and Rating Sections (Start) //////
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -157,7 +157,7 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                                     'https://via.placeholder.com/150'),
                               ),
                             ),
-      
+
                             // Add space between elements
                             SizedBox(
                                 width: propertyData.landlordOverallRating! >
@@ -165,7 +165,7 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                                         propertyData.landlordRatingCount! > 0
                                     ? 2
                                     : 5),
-      
+
                             // If the landlord has a rating
                             if (propertyData.landlordOverallRating! > 0 &&
                                 propertyData.landlordRatingCount! > 0) ...[
@@ -175,10 +175,10 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                                 color: Colors.amber,
                                 size: 16,
                               ),
-      
+
                               // Add space between elements
                               const SizedBox(width: 2),
-      
+
                               CustomRichText(
                                   mainText: propertyData
                                       .landlordOverallRating!
@@ -188,7 +188,7 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                                   mainFontSize: 14,
                                   mainFontWeight: FontWeight.normal)
                             ],
-      
+
                             // If the landlord has no rating
                             if (propertyData.landlordOverallRating! == 0 &&
                                 propertyData.landlordRatingCount! == 0)
@@ -197,14 +197,14 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                                       fontSize: 14, color: Colors.black54)),
                           ],
                         ),
-                        //////// Profile and Rating Sections (End) //////       
+                        //////// Profile and Rating Sections (End) //////
                       ],
                     ),
                     //////// Property Brief Information Section (End) //////
-      
+
                     // Add space between elements
                     const SizedBox(height: 25),
-      
+
                     //////// Rental Property's Price and Wishlist Section (Start) //////
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -213,7 +213,7 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                         CustomRichText(
                             mainText: "RM$formattedRentalPrice",
                             subText: " /month"),
-      
+
                         // Text to show the status of the application
                         Text(
                           application.status,
@@ -271,7 +271,7 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
       });
     });
   }
-  
+
   Color _getStatusTextColor(String status) {
     switch (status) {
       case "Pending":

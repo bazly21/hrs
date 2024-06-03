@@ -16,7 +16,7 @@ class WishlistListPage extends StatefulWidget {
 
 class _WishlistListPageState extends State<WishlistListPage> {
   late WishlistProvider _wishlistProvider;
-  late Future<List<PropertyFullDetails>> _wishlistFuture;
+  late Future<List<PropertyDetails>> _wishlistFuture;
   bool _isLoading = false;
 
   @override
@@ -83,7 +83,7 @@ class _WishlistListPageState extends State<WishlistListPage> {
   }
 
   void _buildErrorMessage(
-      AsyncSnapshot<List<PropertyFullDetails>> snapshot, BuildContext context) {
+      AsyncSnapshot<List<PropertyDetails>> snapshot, BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       String errorMessage;
       if (snapshot.error is FirebaseException) {

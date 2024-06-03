@@ -19,7 +19,7 @@ class RentalListPage extends StatefulWidget {
 
 class _RentalListPageState extends State<RentalListPage> {
   final TextEditingController _searchController = TextEditingController();
-  late Future<List<PropertyFullDetails>?> rentalListFuture;
+  late Future<List<PropertyDetails>?> rentalListFuture;
   String? role;
   bool refresh = false;
 

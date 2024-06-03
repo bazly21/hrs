@@ -228,9 +228,9 @@ class ApplicationService {
         propertyData["landlordProfilePictureURL"] = landlordData["profilePictureURL"];
 
         // Convert property data to PropertyFullDetails object
-        PropertyFullDetails propertyDetails =
-            PropertyFullDetails.fromMapHalfDetails(propertyData);
-        
+        PropertyDetails propertyDetails =
+            PropertyDetails.fromMapHalfDetails(propertyData);
+
         Application application = Application(
           status: applicationData["status"] ?? "Pending",
           propertyDetails: propertyDetails,

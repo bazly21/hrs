@@ -598,7 +598,7 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
           .doc(widget.propertyID)
           .update(propertyDetailsMap);
 
-      PropertyFullDetails updatedPropertyDetails =
+      PropertyDetails updatedPropertyDetails =
           await PropertyService.getPropertyFullDetails(widget.propertyID, null);
 
       if (context.mounted) {

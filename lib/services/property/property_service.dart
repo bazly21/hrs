@@ -18,7 +18,7 @@ class PropertyService {
   }
 
   // Get property full details including landlord details
-  static Future<PropertyFullDetails> getPropertyFullDetails(
+  static Future<PropertyDetails> getPropertyFullDetails(
       String propertyID, String? applicantID) async {
     Map<String, dynamic> propertyFullDetails = {};
     bool enableApplyButton = true;
@@ -83,8 +83,8 @@ class PropertyService {
       "enableApplyButton": enableApplyButton,
     };
 
-    PropertyFullDetails propertyDetails =
-        PropertyFullDetails.fromMapFullDetails(propertyFullDetails);
+    PropertyDetails propertyDetails =
+        PropertyDetails.fromMapFullDetails(propertyFullDetails);
 
     return propertyDetails;
   }
@@ -94,7 +94,7 @@ class PropertyService {
     return propertyData.data() as Map<String, dynamic>;
   }
 
-  static Future<List<PropertyFullDetails>?> fetchAvailableProperties(
+  static Future<List<PropertyDetails>?> fetchAvailableProperties(
       BuildContext context,
       {String? searchQuery}) async {
     // Get current userID
@@ -119,7 +119,7 @@ class PropertyService {
     // Return null if no properties found
     if (propertiesSnapshot.docs.isEmpty) return null;
 
-    List<PropertyFullDetails> propertiesDetailsList =
+    List<PropertyDetails> propertiesDetailsList =
         await Future.wait(propertiesSnapshot.docs.map((propertyDoc) async {
       Map<String, dynamic>? propertyData =
           propertyDoc.data() as Map<String, dynamic>?;
@@ -151,8 +151,8 @@ class PropertyService {
             ?["overallRating"],
       };
 
-      return PropertyFullDetails.fromMapHalfDetails(propertyMap);
-    })).then((list) => list.whereType<PropertyFullDetails>().toList());
+      return PropertyDetails.fromMapHalfDetails(propertyMap);
+    })).then((list) => list.whereType<PropertyDetails>().toList());
 
     // Filter properties based on searchQuery if it is not null and not empty
     if (searchQuery != null && searchQuery.isNotEmpty) {

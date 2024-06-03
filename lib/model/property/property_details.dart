@@ -1,4 +1,4 @@
-class PropertyFullDetails {
+class PropertyDetails {
   final String? furnishing;
   final List<String>? image;
   final String? address;
@@ -18,7 +18,7 @@ class PropertyFullDetails {
   final bool? enableApplyButton;
   final String? landlordProfilePic;
 
-  PropertyFullDetails({
+  PropertyDetails({
     this.furnishing,
     this.image,
     this.address,
@@ -39,8 +39,8 @@ class PropertyFullDetails {
     this.landlordProfilePic,
   });
 
-  factory PropertyFullDetails.fromMapFullDetails(Map<String, dynamic> data) {
-    return PropertyFullDetails(
+  factory PropertyDetails.fromMapFullDetails(Map<String, dynamic> data) {
+    return PropertyDetails(
       furnishing: data['furnishing'],
       image: List<String>.from(data['image']),
       address: data['address'],
@@ -60,8 +60,8 @@ class PropertyFullDetails {
     );
   }
 
-  factory PropertyFullDetails.fromMapHalfDetails(Map<String, dynamic> data) {
-    return PropertyFullDetails(
+  factory PropertyDetails.fromMapHalfDetails(Map<String, dynamic> data) {
+    return PropertyDetails(
       propertyID: data['propertyID'],
       propertyName: data['name'] ?? 'N/A',
       address: data['address'] ?? 'N/A',

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
-class PropertyDetails extends StatelessWidget {
+class PropertyDetailsInfo extends StatelessWidget {
   final String propertyName, propertyLocation;
   final bool isFavorite; // For favourite/wishlist icon
   final bool showIcon;
   final Icon? icon;
   final VoidCallback? onIconPressed;
 
-  const PropertyDetails({
+  const PropertyDetailsInfo({
     super.key,
     required this.propertyName,
     required this.propertyLocation,
     this.isFavorite = false,
     this.showIcon = false,
-    this.onIconPressed, 
+    this.onIconPressed,
     this.icon,
   });
 

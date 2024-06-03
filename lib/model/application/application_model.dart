@@ -15,7 +15,7 @@ class Application {
   final String? applicantProfilePic;
   final double? applicantOverallRating;
   final int? applicantRatingCount;
-  final PropertyFullDetails? propertyDetails;
+  final PropertyDetails? propertyDetails;
   final String status;
 
 

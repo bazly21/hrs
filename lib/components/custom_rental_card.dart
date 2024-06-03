@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 class RentalCard extends StatelessWidget {
   const RentalCard({
     super.key,
-    required PropertyFullDetails propertyData,
+    required PropertyDetails propertyData,
     required bool isLastIndex,
     bool requiresConsumer = false,
     required void Function() iconOnPressed,
@@ -19,7 +19,7 @@ class RentalCard extends StatelessWidget {
         _requiresConsumer = requiresConsumer,
         _iconOnPressed = iconOnPressed;
 
-  final PropertyFullDetails _propertyData;
+  final PropertyDetails _propertyData;
   final bool _isLastIndex;
   final bool _requiresConsumer;
   final void Function() _iconOnPressed;

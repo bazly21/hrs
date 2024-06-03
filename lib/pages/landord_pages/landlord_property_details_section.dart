@@ -18,7 +18,7 @@ class PropertyDetailsSection extends StatefulWidget {
 }
 
 class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
-  late Future<PropertyFullDetails> propertyApplicationsFuture;
+  late Future<PropertyDetails> propertyApplicationsFuture;
   int _currentIndex = 0;
 
   @override
@@ -40,7 +40,7 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: FutureBuilder<PropertyFullDetails>(
+              child: FutureBuilder<PropertyDetails>(
                 future: propertyApplicationsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -59,7 +59,7 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
                     });
                   } else if (snapshot.hasData && snapshot.data != null) {
                     // Check if the snapshot has data
-                    final PropertyFullDetails propertyData = snapshot.data!;
+                    final PropertyDetails propertyData = snapshot.data!;
                     return _buildPropertyDetails(
                         propertyData, context, height, width);
                   }
@@ -74,7 +74,7 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
     );
   }
 
-  Column _buildPropertyDetails(PropertyFullDetails propertyData,
+  Column _buildPropertyDetails(PropertyDetails propertyData,
       BuildContext context, double height, double width) {
     return Column(
       children: [
@@ -133,7 +133,7 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ********* Property Name, Property Location & Edit Button (Start) *********
-              PropertyDetails(
+              PropertyDetailsInfo(
                 propertyName: propertyData.propertyName!,
                 propertyLocation: propertyData.address!,
                 icon: const Icon(Icons.edit, size: 21),

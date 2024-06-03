@@ -30,7 +30,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   bool isWishlist = false; // Initial state of the wishlist icon
   int _currentIndex = 0;
 
-  late Future<PropertyFullDetails> rentalDetailsFuture;
+  late Future<PropertyDetails> rentalDetailsFuture;
 
   // Initialize state
   // Execute fetchRentalDetails function and store it
@@ -77,7 +77,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         });
   }
 
-  Container _buildBottomNavigationBar(PropertyFullDetails propertyData) {
+  Container _buildBottomNavigationBar(PropertyDetails propertyData) {
     // Format the rental price to 2 decimal places
     num rentalPrice = propertyData.rentalPrice!;
     String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
@@ -143,7 +143,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  Column _buildContent(PropertyFullDetails propertyData, BuildContext context) {
+  Column _buildContent(PropertyDetails propertyData, BuildContext context) {
     return Column(
       children: [
         // ********* App Bar and Image Container (Start)  *********
@@ -220,7 +220,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             children: [
               const SizedBox(height: 10.0),
 
-              PropertyDetails(
+              PropertyDetailsInfo(
                 propertyName: propertyData.propertyName!,
                 propertyLocation: propertyData.address!,
                 isFavorite: isWishlist, // or false, based on your state
