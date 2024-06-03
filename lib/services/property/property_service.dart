@@ -77,6 +77,7 @@ class PropertyService {
     propertyFullDetails = {
       ...propertyData,
       "landlordName": landlordData["name"],
+      "landlordProfilePictureURL": landlordData["profilePictureURL"],
       "landlordRatingCount": landlordData["ratingCount"]?["landlord"],
       "landlordOverallRating": landlordData["ratingAverage"]?["landlord"]
           ?["overallRating"],

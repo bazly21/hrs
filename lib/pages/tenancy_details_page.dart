@@ -127,11 +127,11 @@ class _TenancyDetailsPageState extends State<TenancyDetailsPage> {
                     const SizedBox(height: 20),
 
                     // Landlord's details
-                    UserDetails(
-                      landlordName: tenancyData['landlordName'],
+                    UserDetailsSection(
+                      userName: tenancyData['landlordName'],
                       rating: tenancyData['landlordRatingAverage'],
-                      numReview: tenancyData['landlordRatingCount'],
-                      landlordID: tenancyData['landlordID'],
+                      ratingCount: tenancyData['landlordRatingCount'],
+                      userID: tenancyData['landlordID'],
                       textButton: "Contact owner",
                     ),
 

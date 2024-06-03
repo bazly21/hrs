@@ -212,7 +212,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
         // ********* App Bar and Image Container (End)  *********
 
         // ********* Property Main Details (Start)  *********
-        // Add space between elements
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
@@ -312,11 +311,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
               const SizedBox(height: 14),
 
               // ********* Landlord Profile Section (Start) *********
-              UserDetails(
-                landlordName: propertyData.landlordName!,
+              UserDetailsSection(
+                userName: propertyData.landlordName!,
                 rating: propertyData.landlordOverallRating!,
-                numReview: propertyData.landlordRatingCount!,
-                landlordID: propertyData.landlordID!,
+                ratingCount: propertyData.landlordRatingCount!,
+                userID: propertyData.landlordID!,
+                imageUrl: propertyData.landlordProfilePic,
               ),
               // ********* Landlord Profile Section (End) *********
 
@@ -341,14 +341,6 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   title: "Accessibility",
                   content: propertyData.accessibilities!),
 
-              // Location Label
-              const Text(
-                "Location",
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                    fontSize: 16.0),
-              ),
               // ********* Property Description Section (End) *********
             ],
           ),

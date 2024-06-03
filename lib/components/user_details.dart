@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/pages/chat_page.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
@@ -6,22 +7,34 @@ import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:provider/provider.dart';
 
-class UserDetails extends StatelessWidget {
-  final String landlordName, landlordID, position, textButton;
-  final String? image;
-  final int numReview;
-  final double rating;
-
-  const UserDetails({
+class UserDetailsSection extends StatelessWidget {
+  const UserDetailsSection({
     super.key,
-    required this.landlordName,
-    this.position = "Property Owner",
-    required this.rating,
-    required this.numReview,
-    this.image,
-    this.textButton = "Chat with owner",
-    required this.landlordID
-  });
+    required String userName,
+    required double rating,
+    required int ratingCount,
+    required String userID,
+    String position = "Property Owner",
+    String textButton = "Chat with owner",
+    String role = "Landlord",
+    String? imageUrl,
+  })  : _userName = userName,
+        _role = role,
+        _position = position,
+        _rating = rating,
+        _ratingCount = ratingCount,
+        _imageUrl = imageUrl,
+        _textButton = textButton,
+        _userID = userID;
+
+  final String _userName;
+  final String _role;
+  final String _userID;
+  final String _position;
+  final String _textButton;
+  final String? _imageUrl;
+  final int _ratingCount;
+  final double _rating;
 
   @override
   Widget build(BuildContext context) {
@@ -34,19 +47,11 @@ class UserDetails extends StatelessWidget {
           onTap: () {
             NavigationUtils.pushPage(
                 context,
-                ProfileViewPage(userID: landlordID, role: "Landlord"),
+                ProfileViewPage(userID: _userID, role: _role),
                 SlideDirection.left);
           },
-          child: ClipOval(
-            child: Image.network(
-              image ??
-                  'https://via.placeholder.com/150', // Replace with your profile picture URL
-              width: 42, // Width for the profile picture
-              height: 42, // Height for the profile picture
-              fit: BoxFit
-                  .cover, // Cover the bounds of the parent widget (ClipOval)
-            ),
-          ),
+          child: CustomCircleAvatar(
+              imageURL: _imageUrl, name: _userName, radius: 21.0, fontSize: 15),
         ),
 
         // Add space between elements
@@ -58,7 +63,7 @@ class UserDetails extends StatelessWidget {
           children: [
             // Landlord's Name **Database Required**
             Text(
-              landlordName,
+              _userName,
               style: const TextStyle(
                   fontWeight: FontWeight.normal,
                   color: Colors.black,
@@ -70,7 +75,7 @@ class UserDetails extends StatelessWidget {
 
             // Title
             Text(
-              position,
+              _position,
               style: const TextStyle(
                   fontWeight: FontWeight.normal,
                   color: Color(0xFF7D7F88),
@@ -93,10 +98,9 @@ class UserDetails extends StatelessWidget {
             if (role != null) {
               NavigationUtils.pushPage(
                   context,
-                  ChatPage(receiverID: landlordID, receiverName: landlordName),
+                  ChatPage(receiverID: _userID, receiverName: _userName),
                   SlideDirection.left);
-            }
-            else {
+            } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text("Please log in to chat with the owner"),
@@ -127,7 +131,7 @@ class UserDetails extends StatelessWidget {
             ),
           ),
           child: Text(
-            textButton,
+            _textButton,
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.black),
           ),
@@ -138,7 +142,7 @@ class UserDetails extends StatelessWidget {
 
   Widget _buildLandlordRating() {
     // If there is no rating
-    if (numReview == 0 && rating == 0.0) {
+    if (_ratingCount == 0 && _rating == 0.0) {
       return const Text(
         "No reviews yet",
         style: TextStyle(
@@ -154,12 +158,12 @@ class UserDetails extends StatelessWidget {
           // Star icon
           const Icon(
             Icons.star_rounded,
-            color: Color(0xFFFFBF75),
-            size: 21.0,
+            color: Colors.amber,
+            size: 18.0,
           ),
 
           // Add space between elements
-          const SizedBox(width: 5),
+          const SizedBox(width: 3),
 
           // Rating value
           RichText(
@@ -167,11 +171,11 @@ class UserDetails extends StatelessWidget {
                   // Default text style
                   style: const TextStyle(color: Colors.black, fontSize: 14),
                   children: [
-                TextSpan(text: "$rating"),
+                TextSpan(text: "$_rating"),
                 TextSpan(
-                    text: numReview > 1
-                        ? " ($numReview Reviews)"
-                        : " ($numReview Review)",
+                    text: _ratingCount > 1
+                        ? " ($_ratingCount Reviews)"
+                        : " ($_ratingCount Review)",
                     style: const TextStyle(color: Color(0xFF7D7F88)))
               ])),
         ],

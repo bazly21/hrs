@@ -54,6 +54,7 @@ class PropertyDetails {
       propertyName: data['name'] ?? 'N/A',
       facilities: data['facilities'],
       landlordName: data['landlordName'] ?? 'N/A',
+      landlordProfilePic: data['landlordProfilePictureURL'],
       landlordRatingCount: data['landlordRatingCount'] ?? 0,
       landlordOverallRating: data['landlordOverallRating'] ?? 0.0,
       enableApplyButton: data['enableApplyButton'] ?? true,
