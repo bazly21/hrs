@@ -538,7 +538,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       if (landlordID == null) {
         throw FirebaseAuthException(code: 'unauthenticated');
       }
-      
+
       // Create a new document reference for the property
       DocumentReference newPropertyRef = _fireStore.collection('properties').doc();
 
@@ -558,6 +558,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
         'facilities': _facilitiesController.text,
         'accessibilities': _accessibilitiesController.text,
         'image': newImageUrls,
+        'status': 'Available',
       };
 
       // Update the property details
