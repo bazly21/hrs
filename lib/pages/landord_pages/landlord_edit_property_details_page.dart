@@ -5,7 +5,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_textformfield.dart';
 import 'package:hrs/components/property_details_price_texfield.dart';
+import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/provider/image_provider.dart';
+import 'package:hrs/services/property/property_service.dart';
 import 'package:hrs/services/utils/error_message_utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -596,15 +598,14 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
           .doc(widget.propertyID)
           .update(propertyDetailsMap);
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Property details updated successfully'),
-            duration: Duration(seconds: 3),
-          ),
-        );
+      PropertyFullDetails updatedPropertyDetails = await PropertyService.getPropertyFullDetails(widget.propertyID, null);
 
-        Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context, {
+          'success': true,
+          'message': 'Property details updated successfully',
+          'updatedData': updatedPropertyDetails
+        });
       }
     } catch (e) {
       String errorMessage = getErrorMessage(e);

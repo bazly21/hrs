@@ -139,15 +139,26 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
                 showIcon: true, // Set this to false to hide the icon button
                 onIconPressed: () {
                   Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EditPropertyDetailsPage(
-                                  propertyID: widget.propertyID)))
-                      .then((statusMessageFromPreviousPage) {
-                    if (statusMessageFromPreviousPage != null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(statusMessageFromPreviousPage)),
-                      );
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditPropertyDetailsPage(
+                              propertyID: widget.propertyID))).then((status) {
+                    if (status != null && status['success']) {
+                      // Refresh data
+                      setState(() {
+                        propertyApplicationsFuture =
+                            Future.value(status['updatedData']);
+                      });
+
+                      // Show success message
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(status['message']),
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      });
                     }
                   });
                 },
