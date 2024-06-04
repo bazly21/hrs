@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hrs/components/custom_appbar.dart';
 import 'package:hrs/components/custom_dropdown.dart';
 import 'package:hrs/model/tenant_criteria/tenant_criteria.dart';
@@ -220,15 +219,14 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
                     ElevatedButton(
                       onPressed: resetFormFields,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[400],
-                        foregroundColor: Colors.white,
+                        // backgroundColor: Colors.red[400],
+                        // foregroundColor: Colors.white,
                         fixedSize: const Size(130, 42),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
                       child: const Text('Reset'),
                     ),
-
                     ElevatedButton(
                       onPressed: () => saveTenantCriteria(context),
                       style: ElevatedButton.styleFrom(
