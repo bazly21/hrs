@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_question_mark
+
 import 'package:flutter/material.dart';
 
 class CustomDropDownField extends StatelessWidget {
@@ -5,23 +7,20 @@ class CustomDropDownField extends StatelessWidget {
     super.key,
     required String label,
     required String hintText,
-    required List<DropdownMenuItem<String>>? items,
-    required void Function(String?)? onChanged,
-    String? Function(String?)? validator,
-    required GlobalKey<FormFieldState<String>> formFieldKey,
+    required List<DropdownMenuItem<dynamic>>? items,
+    required void Function(dynamic?)? onChanged,
+    String? Function(dynamic?)? validator,
   })  : _label = label,
         _hintText = hintText,
         _items = items,
         _validator = validator,
-        _onChanged = onChanged,
-        _formFieldKey = formFieldKey;
+        _onChanged = onChanged;
 
   final String _label;
   final String _hintText;
-  final List<DropdownMenuItem<String>>? _items;
-  final void Function(String?)? _onChanged;
-  final String? Function(String?)? _validator;
-  final GlobalKey<FormFieldState<String>> _formFieldKey;
+  final List<DropdownMenuItem<dynamic>>? _items;
+  final void Function(dynamic?)? _onChanged;
+  final String? Function(dynamic?)? _validator;
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +35,8 @@ class CustomDropDownField extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-
-        // Add space between elements
         const SizedBox(height: 10),
-
-        DropdownButtonFormField<String>(
-          key: _formFieldKey,
+        DropdownButtonFormField<dynamic>(
           items: _items,
           onChanged: _onChanged,
           validator: _validator,
@@ -52,25 +47,26 @@ class CustomDropDownField extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(10.0)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
               borderRadius: const BorderRadius.all(Radius.circular(10.0)),
             ),
             errorBorder: OutlineInputBorder(
-              borderSide:
-                  BorderSide(color: Theme.of(context).colorScheme.error),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
               borderRadius: const BorderRadius.all(Radius.circular(10.0)),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.error, width: 2.0),
+                color: Theme.of(context).colorScheme.error,
+                width: 2.0,
+              ),
               borderRadius: const BorderRadius.all(Radius.circular(10.0)),
             ),
             hintText: _hintText,
             hintStyle: const TextStyle(
-                color: Color(0xFFA6A6A6),
-                fontSize: 14,
-                fontWeight: FontWeight.normal),
+              color: Color(0xFFA6A6A6),
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
+            ),
             contentPadding: const EdgeInsets.all(10.0),
             errorMaxLines: 2,
           ),

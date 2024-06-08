@@ -1,283 +1,117 @@
-import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hrs/components/custom_appbar.dart';
-import 'package:hrs/components/custom_textformfield.dart';
+import 'package:intl/intl.dart';
 
-class TestPage extends StatefulWidget {
-  const TestPage({
-    super.key,
-  });
-
+class DateFormField extends StatefulWidget {
   @override
-  State<TestPage> createState() => _TestPageState();
+  _DateFormFieldState createState() => _DateFormFieldState();
 }
 
-class _TestPageState extends State<TestPage> {
-  final TextEditingController _otpController = TextEditingController();
+class _DateFormFieldState extends State<DateFormField> {
   final _formKey = GlobalKey<FormState>();
-  final String userID = FirebaseAuth.instance.currentUser!.uid;
-  final String oldPhoneNumber = FirebaseAuth.instance.currentUser!.phoneNumber!;
-
-  int _counter = 20;
-  bool _disabledResend = true;
-  String? _verificationId;
-  int? _resendToken;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Start the timer once the page is loaded
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      startTimer();
-    });
-  }
+  DateTime? _selectedDate;
+  bool _isDateFocused = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: "OTP Verification",
-      ),
-      body: _buildForm(context),
-    );
-  }
-
-  Padding _buildForm(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 25, 16, 16),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // New phone number textfield
-            _buildTextFormField(),
-
-            // Add space between elements
-            if (_counter != 0) ...[
-              const SizedBox(height: 16),
-              _buildTimerText(),
-            ],
-
-            // Add space between elements
-            const SizedBox(height: 25),
-
-            _buildButton(),
-
-            // Add space between elements
-            const SizedBox(height: 15),
-
-            _buildResendOTPButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextFormField() {
-    return CustomTextFormField(
-      label: "OTP code",
-      hintText: "Enter OTP code",
-      controller: _otpController,
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return "OTP code cannot be empty";
-        }
-
-        // Check if the value contains any non-numeric characters
-        if (RegExp(r'\D').hasMatch(value)) {
-          return "OTP code must contain numbers only";
-        }
-
-        return null;
-      },
-    );
-  }
-
-  Row _buildButton() {
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                _signInWithOTP(_otpController.text.trim());
-              }
-            },
-            child: const Text("Next"),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Row _buildResendOTPButton() {
-    return Row(
-      children: [
-        Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF462AB5),
-                surfaceTintColor: Colors.white,
-                disabledBackgroundColor: Colors.grey[200],
-                disabledForegroundColor: Colors.grey[500],
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: const BorderSide(color: Colors.grey, width: 0.7))),
-            onPressed: _disabledResend
-                ? null
-                : () {
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onTap: () async {
                     setState(() {
-                      // Reset the counter to 20 seconds
-                      _counter = 20;
-                      // Disable the button
-                      _disabledResend = true;
+                      _isDateFocused = true;
                     });
 
-                    // Start the timer
-                    startTimer();
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2100),
+                    );
+                    if (pickedDate != null && pickedDate != _selectedDate) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                        _isDateFocused = false;
+                      });
+                    }
                   },
-            child: const Text("Resend OTP"),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTimerText() {
-    return Align(
-      alignment: Alignment.center,
-      child: RichText(
-        text: TextSpan(
-          text: "Resend OTP in ",
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-          ),
-          children: [
-            TextSpan(
-              text: "$_counter",
-              style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        suffixIcon: const Icon(Icons.calendar_today),
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: _isDateFocused ? Colors.blue : const Color(0xFF606060)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10.0))),
+                        errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.error),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10.0))),
+                        focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                                width: 2.0),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10.0))),
+                        hintText: 'Select move-in date',
+                        hintStyle: const TextStyle(
+                            color: Color(0xFFA6A6A6),
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal),
+                        contentPadding: const EdgeInsets.all(10.0),
+                        errorMaxLines: 2,
+                      ),
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Please select a date';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        // Here you can save the date value if needed
+                      },
+                      // Display the selected date in the TextFormField
+                      controller: TextEditingController(
+                        text: _selectedDate == null
+                            ? ''
+                            : DateFormat('dd-MM-yyyy').format(_selectedDate!),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Date is valid')));
+                    }
+                  },
+                  child: const Text('Submit'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _formKey.currentState!.reset();
+                    setState(() {
+                      _selectedDate = null;
+                    });
+                  },
+                  child: const Text('Reset'),
+                )
+              ],
             ),
-            const TextSpan(text: " seconds"),
-          ],
+          ),
         ),
       ),
     );
-  }
-
-  void startTimer() {
-    const onsec = Duration(seconds: 1);
-    Timer.periodic(onsec, (timer) {
-      if (_counter == 0) {
-        setState(() {
-          timer.cancel();
-          _disabledResend = false;
-        });
-      } else {
-        setState(() {
-          _counter--;
-        });
-      }
-    });
-  }
-
-  Future<void> _signInWithOTP(String otp) async {
-    try {
-      // Create a PhoneAuthCredential with the verification ID and OTP code
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-          verificationId: _verificationId!, smsCode: otp);
-
-      // Get the current user
-      User? user = FirebaseAuth.instance.currentUser;
-
-      // Update the user's phone number with the new phone number
-      await user?.updatePhoneNumber(credential);
-
-      // Sign in the user with the credential
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      // Navigation or showing a success message
-      if (context.mounted) {
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pop(context, "Phone number updated successfully!");
-      }
-    } catch (e) {
-      // Handle any errors that occurred during the sign-in process
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text("An error occurred during sign-in. Please try again."),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _resendOTP() async {
-    // Resend the OTP
-    // Create dummy phone number
-    const phoneNumber = "+60123456789";
-
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      forceResendingToken: _resendToken,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await FirebaseAuth.instance.signInWithCredential(credential);
-
-        // Navigation or showing a success message
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Phone number verified successfully!"),
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        // Handle verification failure
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text("An error occurred while verifying the phone number."),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      },
-      codeSent: (String verificationId, int? resendToken) async {
-        // OTP has been sent to the new phone number
-        setState(() {
-          _verificationId = verificationId;
-          _resendToken = resendToken;
-          _counter = 20; // Reset the counter to 20 seconds
-          _disabledResend = true; // Disable the button
-        });
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        // Auto-retrieval timeout
-        
-      },
-    );
-
-    // Start the timer
-    startTimer();
   }
 }

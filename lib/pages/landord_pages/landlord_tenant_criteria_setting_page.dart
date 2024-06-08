@@ -16,10 +16,6 @@ class TenantCriteriaSettingPage extends StatefulWidget {
 class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
   final ApplicationService _applicationService = ApplicationService();
   final _formKey = GlobalKey<FormState>();
-  final _profileTypeKey = GlobalKey<FormFieldState<String>>();
-  final _numberOfPaxKey = GlobalKey<FormFieldState<String>>();
-  final _nationalityKey = GlobalKey<FormFieldState<String>>();
-  final _tenancyDurationKey = GlobalKey<FormFieldState<String>>();
 
   String? selectedProfileType;
   String? selectedNumberOfPax;
@@ -122,7 +118,6 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CustomDropDownField(
-                  formFieldKey: _profileTypeKey,
                   label: 'Profile Type',
                   hintText: 'Select desired profile type',
                   items: profileTypes.map((type) {
@@ -145,7 +140,6 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
                 ),
                 const SizedBox(height: 20.0),
                 CustomDropDownField(
-                  formFieldKey: _numberOfPaxKey,
                   label: 'Number of Pax',
                   hintText: 'Select number of pax',
                   items: numberOfPaxOptions.map((pax) {
@@ -168,7 +162,6 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
                 ),
                 const SizedBox(height: 20.0),
                 CustomDropDownField(
-                  formFieldKey: _nationalityKey,
                   label: 'Nationality',
                   hintText: 'Select desired tenant nationality',
                   items: nationalities.map((nationality) {
@@ -191,7 +184,6 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
                 ),
                 const SizedBox(height: 20.0),
                 CustomDropDownField(
-                  formFieldKey: _tenancyDurationKey,
                   label: 'Tenancy Duration',
                   hintText: 'Select desired tenancy duration',
                   items: tenancyDurations.map((duration) {
@@ -254,12 +246,10 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
       selectedNumberOfPax = null;
       selectedNationality = null;
       selectedTenancyDuration = null;
-      _profileTypeKey.currentState?.reset();
-      _numberOfPaxKey.currentState?.reset();
-      _nationalityKey.currentState?.reset();
-      _tenancyDurationKey.currentState?.reset();
 
-      // // Remove the focus
+      _formKey.currentState?.reset();
+
+      // Remove the focus
       FocusScope.of(context).requestFocus(FocusNode());
     });
   }
