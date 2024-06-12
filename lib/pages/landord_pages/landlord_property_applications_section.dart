@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/model/application/application_model.dart';
+import 'package:hrs/pages/chat_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
 import 'package:hrs/services/property/application_service.dart';
@@ -261,6 +262,16 @@ class _PropertyApplicationsSectionState
         // If the user selects 'Start Tenancy'
         else if (result == "Start Tenancy") {
           showTenancyForm(context, applicationData);
+        }
+        else if (result == "Contact Tenant") {
+          // Go to the chat page
+          NavigationUtils.pushPage(
+              context,
+              ChatPage(
+                receiverID: applicationData.applicantID!,
+                receiverName: applicationData.applicantName!,
+              ),
+              SlideDirection.left);
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
