@@ -10,7 +10,8 @@ class ApplicationService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   static Future<Map<String, dynamic>> getPropertyApplication(
-      String propertyID) async {
+    String propertyID,
+  ) async {
     Map<String, dynamic> applicationMap = {};
     bool containsAcceptedApplication = false;
     bool hasTenantCriteria = false;
@@ -22,6 +23,7 @@ class ApplicationService {
         .get();
     Map<String, dynamic>? propertyData = propertyDoc.data();
 
+    // Throw an error if property data is null or not exist
     if (propertyData == null) throw Exception("Property data is not exist");
 
     // Fetch the rental property's applications
@@ -41,8 +43,9 @@ class ApplicationService {
           Map<String, dynamic>? applicationData =
               appDoc.data() as Map<String, dynamic>?;
 
-          if (applicationData == null || appDoc["applicantID"] == null)
+          if (applicationData == null || appDoc["applicantID"] == null) {
             return null;
+          }
           String applicantID = appDoc["applicantID"];
 
           // Fetch applicant user document
@@ -55,12 +58,15 @@ class ApplicationService {
               applicantDoc.data() as Map<String, dynamic>?;
 
           // Return null if applicantData or moveIndDate is not exist
-          if (applicantData == null || applicationData['moveInDate'] == null)
+          if (applicantData == null || applicationData['moveInDate'] == null) {
             return null;
+          }
 
           DateTime formattedDate =
               (applicationData['moveInDate'] as Timestamp).toDate();
 
+          // Check if the application is accepted and the tenancy is ended
+          // If so, exclude the application from the list
           if (applicationData["status"] == "Accepted") {
             QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
                 .collection('properties')
@@ -68,10 +74,14 @@ class ApplicationService {
                 .collection('tenancies')
                 .where('applicationID', isEqualTo: appDoc.id)
                 .get();
+            
+            // If there is tenancy
             if (tenancySnapshot.docs.isNotEmpty) {
               Map<String, dynamic>? tenancyData =
                   tenancySnapshot.docs.first.data() as Map<String, dynamic>?;
               if (tenancyData != null) {
+                // If tenancy status is ended, 
+                // exclude the application from the list
                 if (tenancyData["status"] == "Ended") {
                   return null;
                 }
@@ -94,6 +104,14 @@ class ApplicationService {
         }),
       ).then((list) => list.whereType<Application>().toList());
 
+      // If application list is empty
+      if (applicationList.isEmpty) {
+        return applicationMap;
+      }
+
+      // Check if application list contains accepted application
+      // This will be used to disable the other application 
+      // accept button if there is already
       containsAcceptedApplication = applicationList
           .any((application) => application!.status == 'Accepted');
 

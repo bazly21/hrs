@@ -100,8 +100,10 @@ class _LandlordTenancyDetailsSectionState
                         userName: tenancyData['tenantName'],
                         rating: tenancyData['tenantRatingAverage'],
                         ratingCount: tenancyData['tenantRatingCount'],
+                        imageUrl: tenancyData['tenantProfilePictureUrl'],
                         userID: tenancyData['tenantID'],
-                        textButton: "Contact owner",
+                        textButton: "Contact tenant",
+                        position: "Tenant",
                       ),
 
                       // Add space between elements

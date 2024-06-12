@@ -51,29 +51,33 @@ class RentalService {
           .limit(1)
           .get();
 
-      if (tenancySnapshot.docs.isEmpty)
+      if (tenancySnapshot.docs.isEmpty) {
         return null; // Early return if no tenancy found
+      }
 
       final DocumentSnapshot tenancyDoc = tenancySnapshot.docs.first;
 
       final Map<String, dynamic>? tenancyData =
           tenancyDoc.data() as Map<String, dynamic>?;
-      if (tenancyData == null)
+      if (tenancyData == null) {
         return null; // Early return if tenancy data is null
+      }
 
       final String propertyID = tenancyDoc.reference.parent.parent!.id;
       final DocumentSnapshot<Map<String, dynamic>> propertyDoc =
           await _fireStore.collection('properties').doc(propertyID).get();
       final Map<String, dynamic>? propertyData = propertyDoc.data();
-      if (propertyData == null)
+      if (propertyData == null) {
         return null; // Early return if property data is null
+      }
 
       final String landlordID = propertyData['landlordID'];
       final DocumentSnapshot<Map<String, dynamic>> landlordDoc =
           await _fireStore.collection('users').doc(landlordID).get();
       final Map<String, dynamic>? landlordData = landlordDoc.data();
-      if (landlordData == null)
+      if (landlordData == null) {
         return null; // Early return if landlord data is null
+      }
 
       // Construct the response map
       return {
@@ -108,8 +112,9 @@ class RentalService {
     final Map<String, dynamic>? propertyData =
         propertyDoc.data() as Map<String, dynamic>?;
 
-    if (propertyData == null || propertyData["status"] == "Available")
+    if (propertyData == null || propertyData["status"] == "Available") {
       return null;
+    }
 
     // Get a QuerySnapshot of tenancies with matching tenantID
     final QuerySnapshot tenancySnapshot = await FirebaseFirestore.instance
@@ -121,8 +126,9 @@ class RentalService {
         .limit(1)
         .get();
 
-    if (tenancySnapshot.docs.isEmpty)
+    if (tenancySnapshot.docs.isEmpty) {
       throw Exception("Tenancy data is not exist");
+    }
 
     final DocumentSnapshot tenancyDoc = tenancySnapshot.docs.first;
     final Map<String, dynamic> tenancyData =
@@ -154,6 +160,7 @@ class RentalService {
           (tenantData['ratingAverage']?["tenant"]?["overallRating"] as num?)
                   ?.toDouble() ??
               0.0,
+      'tenantProfilePictureUrl': tenantData['profilePictureURL'] ?? 'https://via.placeholder.com/150',
       'tenancyDuration': tenancyData['duration'],
       'tenancyStartDate': tenancyData['startDate'],
       'tenancyEndDate': tenancyData['endDate'],
