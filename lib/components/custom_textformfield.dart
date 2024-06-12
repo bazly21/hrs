@@ -8,6 +8,7 @@ class CustomTextFormField extends StatelessWidget {
     required String hintText,
     TextEditingController? controller,
     TextInputType keyboardType = TextInputType.text,
+    String? subText,
     Widget? prefixIcon,
     Widget? suffixIcon,
     List<TextInputFormatter>? inputFormatters,
@@ -18,6 +19,7 @@ class CustomTextFormField extends StatelessWidget {
         _hintText = hintText,
         _controller = controller,
         _keyboardType = keyboardType,
+        _subText = subText,
         _prefixIcon = prefixIcon,
         _suffixIcon = suffixIcon,
         _inputFormatters = inputFormatters,
@@ -29,6 +31,7 @@ class CustomTextFormField extends StatelessWidget {
   final String _hintText;
   final TextEditingController? _controller;
   final TextInputType _keyboardType;
+  final String? _subText;
   final Widget? _prefixIcon;
   final Widget? _suffixIcon;
   final List<TextInputFormatter>? _inputFormatters;
@@ -50,6 +53,16 @@ class CustomTextFormField extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
+
+       if (_subText != null)
+          Text(
+            _subText,
+            style: const TextStyle(
+              fontSize: 13.0,
+              color: Color(0xFFA6A6A6),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
 
         // Add space between elements
         const SizedBox(height: 10),
