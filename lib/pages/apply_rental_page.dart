@@ -144,7 +144,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
                 ),
                 const SizedBox(height: 20),
                 CustomTextFormField(
-                  label: "Date time",
+                  label: "Move-in Date",
                   hintText: "dd-mm-YYYY",
                   controller: TextEditingController(
                     text: _moveInDate == null
