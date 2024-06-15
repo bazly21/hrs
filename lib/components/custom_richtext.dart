@@ -66,7 +66,7 @@ class CustomRichText extends StatelessWidget {
             text: subText,
             style: TextStyle(
                 color: Colors.grey,
-                fontSize: 14,
+                fontSize: subFontSize,
                 fontWeight: subFontWeight),
           ),
         ],

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:hrs/components/my_starrating.dart';
+import 'package:hrs/components/custom_rating_bar.dart';
 
-class CriteriaRating extends StatelessWidget {
+class CustomCriteriaRating extends StatelessWidget {
   final String criteria;
   final double rating;
   final double iconSize;
   final double fontSize;
 
-  const CriteriaRating({
+  const CustomCriteriaRating({
     super.key, 
     required this.criteria,
     required this.rating, 
@@ -28,7 +28,10 @@ class CriteriaRating extends StatelessWidget {
           ),
         ),
 
-        StarRating(rating: rating, iconSize: iconSize)
+        CustomRatingBar(
+          rating: rating,
+          itemSize: iconSize,
+        ),
       ],
     );
   }
