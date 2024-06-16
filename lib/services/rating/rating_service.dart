@@ -1,5 +1,4 @@
 import "package:cloud_firestore/cloud_firestore.dart";
-import "package:collection/collection.dart";
 import "package:hrs/model/rating/landlord_rating.dart";
 import "package:hrs/model/rating/rating_details.dart";
 import "package:hrs/model/rating/tenant_rating.dart";
