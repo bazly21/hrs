@@ -1,10 +1,12 @@
+import 'package:hrs/model/rating/rating_details.dart';
+
 class TenantProfile {
   final String name;
   final int ratingCount;
   final double overallPaymentRating;
   final double overallCommunicationRating;
   final double overallMaintenanceRating;
-  final List<Map<String, dynamic>?> ratings;
+  final List<RatingDetails> ratings;
 
   TenantProfile({
     required this.name,
@@ -15,7 +17,7 @@ class TenantProfile {
     required this.ratings,
   });
 
-  factory TenantProfile.fromMap(Map<String, dynamic> userData, List<Map<String, dynamic>?> ratings) {
+  factory TenantProfile.fromMap(Map<String, dynamic> userData, List<RatingDetails> ratings) {
     return TenantProfile(
       name: userData["name"] ?? "N/A",
       ratingCount: userData["ratingCount"]?["tenant"] ?? 0,

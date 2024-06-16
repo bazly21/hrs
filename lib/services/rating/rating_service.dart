@@ -1,6 +1,7 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:collection/collection.dart";
 import "package:hrs/model/rating/landlord_rating.dart";
+import "package:hrs/model/rating/rating_details.dart";
 import "package:hrs/model/rating/tenant_rating.dart";
 import "package:hrs/model/user/landlord_profile.dart";
 import "package:hrs/model/user/tenant_profile.dart";
@@ -180,61 +181,75 @@ class RatingService {
   static Future getUserRatings(String userID, String role) async {
     final DocumentSnapshot userSnapshot =
         await FirebaseFirestore.instance.collection("users").doc(userID).get();
+
     final Map<String, dynamic>? userData =
         userSnapshot.data() as Map<String, dynamic>?;
 
     // Early return if user data is not exist
     if (userData == null) throw Exception("User does not exist");
 
-    // Fetch user ratings
+    // Fetch user ratings subcollection
+    // based on the role of the user
     final QuerySnapshot ratingSnapshot = await FirebaseFirestore.instance
         .collection("users")
         .doc(userID)
         .collection("ratings")
+        .where("ratedAs", isEqualTo: role)
         .get();
 
-    List<Map<String, dynamic>?> ratings = [];
+    List<RatingDetails> ratings = [];
 
+    // If rating snapshot is not empty,
+    // fetch the reviewer details
     if (ratingSnapshot.docs.isNotEmpty) {
-      ratings = await Future.wait(ratingSnapshot.docs
-          .map((ratingDoc) async {
-            final Map<String, dynamic>? ratingData =
-                ratingDoc.data() as Map<String, dynamic>?;
+      ratings = await Future.wait(ratingSnapshot.docs.map((ratingDoc) async {
+        final Map<String, dynamic>? ratingData =
+            ratingDoc.data() as Map<String, dynamic>?;
 
-            if (ratingData == null) return null;
-            if (!ratingData.containsKey("reviewerID") ||
-                ratingData["reviewerID"].isEmpty) return null;
+        // Early return if rating data is not exist
+        // or reviewerID is empty
+        if (ratingData == null ||
+            !ratingData.containsKey("reviewerID") ||
+            ratingData["reviewerID"].isEmpty) {
+          return null;
+        }
 
-            final DocumentSnapshot reviewerSnapshot = await FirebaseFirestore
-                .instance
-                .collection("users")
-                .doc(ratingData["reviewerID"])
-                .get();
-            final Map<String, dynamic>? reviewerData =
-                reviewerSnapshot.data() as Map<String, dynamic>?;
+        String reviewerID = ratingData["reviewerID"];
 
-            if (reviewerData == null) return null;
+        // Fetch reviewer details
+        final DocumentSnapshot reviewerSnapshot = await FirebaseFirestore
+            .instance
+            .collection("users")
+            .doc(reviewerID)
+            .get();
 
-            if (role == "Landlord") {
-              return {
-                "reviewerName": reviewerData["name"],
-                "supportRating": ratingData["supportRating"],
-                "communicationRating": ratingData["communicationRating"],
-                "maintenanceRating": ratingData["maintenanceRating"],
-                "comments": ratingData["comments"],
-              };
-            } else {
-              return {
-                "reviewerName": reviewerData["name"],
-                "paymentRating": ratingData["paymentRating"],
-                "communicationRating": ratingData["communicationRating"],
-                "maintenanceRating": ratingData["maintenanceRating"],
-                "comments": ratingData["comments"],
-              };
-            }
-          })
-          .whereNotNull()
-          .toList());
+        final Map<String, dynamic>? reviewerData =
+            reviewerSnapshot.data() as Map<String, dynamic>?;
+
+        // Early return if reviewer data is not exist
+        if (reviewerData == null) return null;
+
+        return RatingDetails(
+          reviewerName: reviewerData["name"] ?? "N/A",
+          profilePictureUrl: reviewerData["profilePictureURL"],
+          communicationRating: ratingData["communicationRating"] ?? 0.0,
+          maintenanceRating: ratingData["maintenanceRating"] ?? 0.0,
+          comments: ratingData["comments"],
+          supportRating: role == "Landlord" ? ratingData["supportRating"] ?? 0.0 : null,
+          paymentRating: role == "Tenant" ? ratingData["paymentRating"] ?? 0.0 : null,
+        );
+
+        // return {
+        //   "reviewerName": reviewerData["name"],
+        //   "profilePictureUrl": reviewerData["profilePictureURL"],
+        //   "communicationRating": ratingData["communicationRating"],
+        //   "maintenanceRating": ratingData["maintenanceRating"],
+        //   "comments": ratingData["comments"],
+        //   ...role == "Landlord"
+        //       ? {"supportRating": ratingData["supportRating"]}
+        //       : {"paymentRating": ratingData["paymentRating"]}
+          
+      })).then((list) => list.whereType<RatingDetails>().toList());
     }
 
     if (role == "Landlord") {

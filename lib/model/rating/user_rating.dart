@@ -1,21 +1,23 @@
 class UserRating {
-  final String name;
-  final int ratingCount;
-  final double overallCommunicationRating;
-  final double overallSupportRating;
-  final double overallMaintenanceRating;
-  final List<Map<String, dynamic>?> ratings;
+  final String? name;
+  final int? ratingCount;
+  final double? overallCommunicationRating;
+  final double? overallSupportRating;
+  final double? overallMaintenanceRating;
+  final double? overallPaymentRating;
+  final List<Map<String, dynamic>>? ratings;
 
   UserRating({
-    required this.name,
-    required this.ratingCount,
-    required this.overallCommunicationRating,
-    required this.overallSupportRating,
-    required this.overallMaintenanceRating,
-    required this.ratings,
+    this.name,
+    this.ratingCount,
+    this.overallCommunicationRating,
+    this.overallSupportRating,
+    this.overallMaintenanceRating,
+    this.overallPaymentRating,
+    this.ratings,
   });
 
-  factory UserRating.fromMap(Map<String, dynamic> userData, List<Map<String, dynamic>?> ratings) {
+  factory UserRating.fromMap(Map<String, dynamic> userData, List<Map<String, dynamic>> ratings) {
     return UserRating(
       name: userData["name"] ?? "N/A",
       ratingCount: userData["ratingCount"] ?? 0,

@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/components/custom_rating.dart';
 import 'package:hrs/components/my_appbar.dart';
+import 'package:hrs/model/rating/rating_details.dart';
 import 'package:hrs/services/rating/rating_service.dart';
 
 class ProfileViewPage extends StatefulWidget {
@@ -80,7 +83,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                     child: CustomCircleAvatar(
                       radius: 50.0,
                       name: userRating.name,
-                      imageURL: null,
+                      imageURL: userRating.profilePictureUrl,
                     ),
                   ),
 
@@ -130,119 +133,212 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                   const Divider(),
 
                   // Add space between elements
+                  SizedBox(height: screenSize.height * 0.01),
+
+                  // Ratings
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Ratings",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18,
+                        ),
+                      ),
+
+                      // Only show the view all button
+                      // if there are more than 3 ratings
+                      if (userRating.ratings.length > 3)
+                        InkWell(
+                          onTap: () {
+                            // Navigate to the ratings page
+                          },
+                          child: Row(
+                            children: [
+                              Text(
+                                "View All",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 14,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ],
+                          ),
+                        )
+                    ],
+                  ),
+
                   SizedBox(height: screenSize.height * 0.02),
 
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: userRating.ratings.length,
-                    itemBuilder: (context, index) {
-                      final rating = userRating.ratings[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Profile Picture
-                            const CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                  'https://via.placeholder.com/150'), // Example URL
-                              backgroundColor: Colors
-                                  .transparent, // Make background transparent if using image
-                            ),
-
-                            // Add space between elements
-                            SizedBox(width: screenSize.width * 0.04),
-
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    rating?['reviewerName'] ?? 'N/A',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 17,
-                                    ),
-                                  ),
-
-                                  // Add space between elements
-                                  SizedBox(height: screenSize.height * 0.003),
-
-                                  if (widget.role == "Landlord")
-                                    CustomRating(
-                                      numReview: 1,
-                                      rating1: rating?['supportRating']
-                                              ?.toDouble() ??
-                                          0.0,
-                                      rating2: rating?['maintenanceRating']
-                                              ?.toDouble() ??
-                                          0.0,
-                                      rating3: rating?['communicationRating']
-                                              ?.toDouble() ??
-                                          0.0,
-                                      spacing: 0.002,
-                                      fontSize: 16.0,
-                                      iconSize: 19.0,
-                                    ),
-
-                                  if (widget.role == "Tenant")
-                                    CustomRating(
-                                      numReview: 1,
-                                      rating1: rating?['paymentRating']
-                                              ?.toDouble() ??
-                                          0.0,
-                                      rating2: rating?['maintenanceRating']
-                                              ?.toDouble() ??
-                                          0.0,
-                                      rating3: rating?['communicationRating']
-                                              ?.toDouble() ??
-                                          0.0,
-                                      criteria1: "Payment History",
-                                      spacing: 0.002,
-                                      fontSize: 16.0,
-                                      iconSize: 19.0,
-                                    ),
-
-                                  // Add space between elements
-                                  SizedBox(height: screenSize.height * 0.008),
-
-                                  Text(
-                                    rating?['comments'] != "" &&
-                                            rating?['comments'] != null
-                                        ? rating!['comments']
-                                        : 'No comment provided.',
-                                    style: const TextStyle(fontSize: 16.0),
-                                  ),
-
-                                  // Add space between elements
-                                  SizedBox(height: screenSize.height * 0.002),
-
-                                  Row(
-                                    children: [
-                                      Text(
-                                        rating?['date'] ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 14.0,
-                                          color: Color(0xFF7D7F88),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                  // If there are no ratings, display a message
+                  if (userRating.ratings.isEmpty) ...[
+                    SizedBox(
+                      height: constraints.maxHeight * 0.25,
+                      child: const Center(
+                        child: Text(
+                          "No reviews yet",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey
+                          ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                  ] else ...[
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: min(3, userRating.ratings.length),
+                      itemBuilder: (context, index) {
+                        final List<RatingDetails> ratings = userRating.ratings;
+                        final RatingDetails rating = ratings[index];
+                        final int lastIndex = min(3, ratings.length) - 1;
+
+                        return _buildRatingDetails(
+                            index, lastIndex, rating, screenSize);
+                      },
+                    ),
+
+                    // View All Ratings Button
+                    // if (userRating.ratings.length > 3)
+                    if (userRating.ratings.length > 3) ...[
+                      const Divider(),
+                      SizedBox(
+                        height: 40,
+                        child: InkWell(
+                          radius: 20,
+                          onTap: () {
+                            // Navigate to the ratings page
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "View All Ratings (${userRating.ratingCount})",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 14,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ]
                 ],
               ),
             ),
           ),
         );
       }),
+    );
+  }
+
+  Padding _buildRatingDetails(
+    int index,
+    int lastIndex,
+    RatingDetails rating,
+    Size screenSize,
+  ) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: index == lastIndex ? 0 : 16.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Profile Picture
+          CustomCircleAvatar(
+            radius: 25.0,
+            name: rating.reviewerName!,
+            imageURL: rating.profilePictureUrl,
+          ),
+
+          // Add space between elements
+          SizedBox(width: screenSize.width * 0.04),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  rating.reviewerName!,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                  ),
+                ),
+
+                // Add space between elements
+                SizedBox(height: screenSize.height * 0.003),
+
+                if (widget.role == "Landlord")
+                  CustomRating(
+                    numReview: 1,
+                    rating1: rating.supportRating!,
+                    rating2: rating.maintenanceRating!,
+                    rating3: rating.communicationRating!,
+                    spacing: 0.002,
+                    fontSize: 16.0,
+                    iconSize: 19.0,
+                  ),
+
+                if (widget.role == "Tenant")
+                  CustomRating(
+                    numReview: 1,
+                    rating1: rating.paymentRating!,
+                    rating2: rating.maintenanceRating!,
+                    rating3: rating.communicationRating!,
+                    criteria1: "Payment History",
+                    spacing: 0.002,
+                    fontSize: 16.0,
+                    iconSize: 19.0,
+                  ),
+
+                // Add space between elements
+                SizedBox(height: screenSize.height * 0.008),
+
+                // If there is comment, display the comment
+                if (rating.comments != null && rating.comments != "")
+                  Text(
+                    rating.comments!,
+                    style: const TextStyle(fontSize: 16.0),
+                  ),
+
+                // Add space between elements
+                SizedBox(height: screenSize.height * 0.002),
+
+                // Review Date
+                // Only show the review date if it is available
+                if (rating.reviewDate != null)
+                  Row(
+                    children: [
+                      Text(
+                        rating.reviewDate!.toString(),
+                        style: const TextStyle(
+                          fontSize: 14.0,
+                          color: Color(0xFF7D7F88),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
