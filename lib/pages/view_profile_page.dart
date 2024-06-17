@@ -58,24 +58,6 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
     );
   }
 
-  AppBar _buildAppBar(dynamic userProfile) {
-    String name = userProfile.name!;
-
-    return AppBar(
-      title: Text(
-        "$name's Profile",
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 20.0,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      elevation: 0.0,
-      centerTitle: true,
-      surfaceTintColor: Colors.white,
-    );
-  }
-
   Widget _buildProfile(dynamic userProfile) {
     bool hasRating = userProfile.ratingCount > 0;
     bool hasRatingMoreThanOne = userProfile.ratingCount > 1;
@@ -99,159 +81,176 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             ) {
               return <Widget>[
                 // Profile Info
-                SliverAppBar(
-                  expandedHeight: hasRating ? 230 : 200, // 230 and 200
-                  surfaceTintColor: Colors.white,
-                  backgroundColor: Colors.white,
-                  title: Text(
-                    "$name's Profile",
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w600,
+                SliverOverlapAbsorber(
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: SliverAppBar(
+                    expandedHeight: hasRating ? 230 : 200,
+                    surfaceTintColor: Colors.white,
+                    backgroundColor: Colors.white,
+                    title: Text(
+                      "$name's Profile",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                  centerTitle: true,
-                  flexibleSpace: LayoutBuilder(builder: (context, constraints) {
-                    // Calculate the percentage of the expansion
-                    var top = constraints.biggest.height;
-                    bool isExpanded = top > kToolbarHeight + 50;
-
-                    return FlexibleSpaceBar(
-                      background: isExpanded
-                          ? Container(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
+                    centerTitle: true,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomCircleAvatar(
+                              imageURL: imageUrl,
+                              name: name,
+                              radius: 40.0,
+                              fontSize: 30.0,
+                            ),
+                            const SizedBox(width: 10.0),
+                            Expanded(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  CustomCircleAvatar(
-                                    imageURL: imageUrl,
-                                    name: name,
-                                    radius: 40.0,
-                                    fontSize: 30.0,
+                                  CustomRichText(
+                                    mainText: name,
+                                    subText: hasRating
+                                        ? " ($ratingCount review${hasRatingMoreThanOne ? 's' : ''})"
+                                        : "",
+                                    mainFontWeight: FontWeight.w600,
                                   ),
-                                  const SizedBox(width: 10.0),
-                                  Expanded(
-                                    child: Column(
+                                  const SizedBox(height: 5.0),
+                      
+                                  // If there are no ratings
+                                  if (!hasRating) ...[
+                                    const Text(
+                                      "No reviews yet",
+                                      style: TextStyle(
+                                        fontSize: 15.0,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ] else ...[
+                                    Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        CustomRichText(
-                                          mainText: name,
-                                          subText: hasRating
-                                              ? " ($ratingCount review${hasRatingMoreThanOne ? 's' : ''})"
-                                              : "",
-                                          mainFontWeight: FontWeight.w600,
+                                        Text(
+                                          widget.role == "Landlord"
+                                              ? "Support and assistance"
+                                              : "Payment history",
+                                          style: const TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.grey,
+                                          ),
                                         ),
-                                        const SizedBox(height: 5.0),
-
-                                        // If there are no ratings
-                                        if (!hasRating) ...[
-                                          const Text(
-                                            "No reviews yet",
-                                            style: TextStyle(
-                                              fontSize: 15.0,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ] else ...[
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                widget.role == "Landlord"
-                                                    ? "Support and assistance"
-                                                    : "Payment history",
-                                                style: const TextStyle(
-                                                  fontSize: 15.0,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                              CustomRatingBar(
-                                                rating: widget.role ==
-                                                        "Landlord"
-                                                    ? userProfile
-                                                        .overallSupportRating!
-                                                    : userProfile
-                                                        .overallPaymentRating!,
-                                                itemSize: 16.0,
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(height: 3.0),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              const Text(
-                                                "Maintenace",
-                                                style: TextStyle(
-                                                  fontSize: 15.0,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                              CustomRatingBar(
-                                                rating:
-                                                    overallMaintenanceRating,
-                                                itemSize: 16.0,
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(height: 3.0),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              const Text(
-                                                "Communication",
-                                                style: TextStyle(
-                                                  fontSize: 15.0,
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                              CustomRatingBar(
-                                                rating:
-                                                    overallCommunicationRating,
-                                                itemSize: 16.0,
-                                              )
-                                            ],
-                                          ),
-                                        ],
+                                        CustomRatingBar(
+                                          rating: widget.role == "Landlord"
+                                              ? userProfile.overallSupportRating!
+                                              : userProfile.overallPaymentRating!,
+                                          itemSize: 16.0,
+                                        )
                                       ],
                                     ),
-                                  ),
+                                    const SizedBox(height: 3.0),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "Maintenace",
+                                          style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        CustomRatingBar(
+                                          rating: overallMaintenanceRating,
+                                          itemSize: 16.0,
+                                        )
+                                      ],
+                                    ),
+                                    const SizedBox(height: 3.0),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          "Communication",
+                                          style: TextStyle(
+                                            fontSize: 15.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        CustomRatingBar(
+                                          rating: overallCommunicationRating,
+                                          itemSize: 16.0,
+                                        )
+                                      ],
+                                    ),
+                                  ],
                                 ],
                               ),
-                            )
-                          : Container(), // Empty container when not expanded
-                    );
-                  }),
-                  bottom: const TabBar(
-                    tabs: [
-                      Tab(text: "RATINGS"),
-                    ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    bottom: const TabBar(
+                      tabs: [
+                        Tab(text: "RATINGS"),
+                      ],
+                    ),
+                    // floating: false,
+                    pinned: true,
                   ),
-                  // floating: false,
-                  pinned: true,
                 ),
               ];
             },
             body: TabBarView(
               children: [
                 hasRating
-                    ? ListView.builder(
-                        itemCount: userProfile.ratings.length,
-                        itemBuilder: (context, index) {
-                          return _buildRatingDetails(
-                            index,
-                            userProfile.ratings[index],
-                            MediaQuery.of(context).size,
-                          );
-                        },
-                      )
+                    ? SafeArea(
+                        top: false,
+                        bottom: false,
+                        child: Builder(
+                          builder: (BuildContext context) {
+                            return CustomScrollView(
+                              slivers: [
+                                SliverOverlapInjector(
+                                  handle: NestedScrollView
+                                      .sliverOverlapAbsorberHandleFor(context),
+                                ),
+                                SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (BuildContext context, int index) {
+                                      return _buildRatingDetails(
+                                        index,
+                                        userProfile.ratings[index],
+                                        MediaQuery.of(context).size,
+                                      );
+                                    },
+                                    childCount: userProfile.ratings.length,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        )
+                        // child: ListView.builder(
+                        //     itemCount: userProfile.ratings.length,
+                        //     itemBuilder: (context, index) {
+                        //       return _buildRatingDetails(
+                        //         index,
+                        //         userProfile.ratings[index],
+                        //         MediaQuery.of(context).size,
+                        //       );
+                        //     },
+                        //   ),
+                        )
                     : const Center(
                         child: Text("No ratings yet"),
                       ),
@@ -263,7 +262,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
     );
   }
 
-  Padding _buildRatingDetails(
+  Widget _buildRatingDetails(
     int index,
     RatingDetails rating,
     Size screenSize,
