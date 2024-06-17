@@ -1,9 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/components/custom_rating.dart';
-import 'package:hrs/components/my_appbar.dart';
+import 'package:hrs/components/custom_rating_bar.dart';
+import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/model/rating/rating_details.dart';
 import 'package:hrs/services/rating/rating_service.dart';
 
@@ -27,16 +26,8 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
         RatingService.getUserRatings(widget.userID, widget.role);
   }
 
-  Future<void> _loadProfile() async {
-    // Simulating an asynchronous operation
-    await Future.delayed(const Duration(seconds: 2));
-    // Perform the actual profile loading here
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
     return FutureBuilder(
       future: _loadProfileFuture,
       builder: (context, snapshot) {
@@ -50,10 +41,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             Navigator.pop(context, "Unable to load profile. Please try again.");
           });
         } else if (snapshot.hasData && snapshot.data != null) {
-          return Scaffold(
-            appBar: MyAppBar(text: "${snapshot.data!.name}'s Profile"),
-            body: _buildProfile(screenSize, snapshot.data!),
-          );
+          return _buildMainBody(snapshot.data!);
         }
 
         return const Scaffold(
@@ -63,199 +51,225 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
     );
   }
 
-  Widget _buildProfile(Size screenSize, dynamic userRating) {
-    return RefreshIndicator(
-      onRefresh: _loadProfile,
-      child: LayoutBuilder(builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          // padding: const EdgeInsets.fromLTRB(16.0, 37.0, 16.0, 0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 37.0, 16.0, 0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Profile Picture
-                  Center(
-                    child: CustomCircleAvatar(
-                      radius: 50.0,
-                      name: userRating.name,
-                      imageURL: userRating.profilePictureUrl,
+  Widget _buildMainBody(dynamic userProfile) {
+    return Scaffold(
+      // appBar: _buildAppBar(userProfile),
+      body: _buildProfile(userProfile),
+    );
+  }
+
+  AppBar _buildAppBar(dynamic userProfile) {
+    String name = userProfile.name!;
+
+    return AppBar(
+      title: Text(
+        "$name's Profile",
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 20.0,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      elevation: 0.0,
+      centerTitle: true,
+      surfaceTintColor: Colors.white,
+    );
+  }
+
+  Widget _buildProfile(dynamic userProfile) {
+    bool hasRating = userProfile.ratingCount > 0;
+    bool hasRatingMoreThanOne = userProfile.ratingCount > 1;
+    String name = userProfile.name!;
+    String? imageUrl = userProfile.profilePictureUrl;
+    int ratingCount = userProfile.ratingCount!;
+    double overallCommunicationRating = userProfile.overallCommunicationRating!;
+    double overallMaintenanceRating = userProfile.overallMaintenanceRating!;
+
+    return SafeArea(
+      child: RefreshIndicator(
+        onRefresh: () async {
+          await Future.delayed(const Duration(seconds: 1));
+        },
+        child: DefaultTabController(
+          length: 1,
+          child: NestedScrollView(
+            headerSliverBuilder: (
+              BuildContext context,
+              bool innerBoxIsScrolled,
+            ) {
+              return <Widget>[
+                // Profile Info
+                SliverAppBar(
+                  expandedHeight: hasRating ? 230 : 200, // 230 and 200
+                  surfaceTintColor: Colors.white,
+                  backgroundColor: Colors.white,
+                  title: Text(
+                    "$name's Profile",
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  centerTitle: true,
+                  flexibleSpace: LayoutBuilder(builder: (context, constraints) {
+                    // Calculate the percentage of the expansion
+                    var top = constraints.biggest.height;
+                    bool isExpanded = top > kToolbarHeight + 50;
 
-                  // Add space between elements
-                  SizedBox(height: screenSize.height * 0.015),
+                    return FlexibleSpaceBar(
+                      background: isExpanded
+                          ? Container(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomCircleAvatar(
+                                    imageURL: imageUrl,
+                                    name: name,
+                                    radius: 40.0,
+                                    fontSize: 30.0,
+                                  ),
+                                  const SizedBox(width: 10.0),
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        CustomRichText(
+                                          mainText: name,
+                                          subText: hasRating
+                                              ? " ($ratingCount review${hasRatingMoreThanOne ? 's' : ''})"
+                                              : "",
+                                          mainFontWeight: FontWeight.w600,
+                                        ),
+                                        const SizedBox(height: 5.0),
 
-                  // Profile Name
-                  Center(
-                    child: Text(
-                      userRating.name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 24),
-                    ),
-                  ),
-
-                  // Add space between elements
-                  SizedBox(height: screenSize.height * 0.015),
-
-                  const Divider(),
-
-                  // Add space between elements
-                  SizedBox(height: screenSize.height * 0.02),
-
-                  if (widget.role == "Landlord") ...[
-                    CustomRating(
-                      numReview: userRating.ratingCount,
-                      rating1: userRating.overallSupportRating,
-                      rating2: userRating.overallMaintenanceRating,
-                      rating3: userRating.overallCommunicationRating,
-                      hasTitle: true,
-                      iconSize: 21.0,
-                    ),
-                  ] else ...[
-                    CustomRating(
-                      numReview: userRating.ratingCount,
-                      rating1: userRating.overallPaymentRating,
-                      rating2: userRating.overallMaintenanceRating,
-                      rating3: userRating.overallCommunicationRating,
-                      criteria1: "Payment History",
-                      hasTitle: true,
-                      iconSize: 21.0,
-                    ),
-                  ],
-
-                  SizedBox(height: screenSize.height * 0.02),
-
-                  const Divider(),
-
-                  // Add space between elements
-                  SizedBox(height: screenSize.height * 0.01),
-
-                  // Ratings
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Ratings",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                        ),
-                      ),
-
-                      // Only show the view all button
-                      // if there are more than 3 ratings
-                      if (userRating.ratings.length > 3)
-                        InkWell(
-                          onTap: () {
-                            // Navigate to the ratings page
-                          },
-                          child: Row(
-                            children: [
-                              Text(
-                                "View All",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Theme.of(context).primaryColor,
-                                ),
+                                        // If there are no ratings
+                                        if (!hasRating) ...[
+                                          const Text(
+                                            "No reviews yet",
+                                            style: TextStyle(
+                                              fontSize: 15.0,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                widget.role == "Landlord"
+                                                    ? "Support and assistance"
+                                                    : "Payment history",
+                                                style: const TextStyle(
+                                                  fontSize: 15.0,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              CustomRatingBar(
+                                                rating: widget.role ==
+                                                        "Landlord"
+                                                    ? userProfile
+                                                        .overallSupportRating!
+                                                    : userProfile
+                                                        .overallPaymentRating!,
+                                                itemSize: 16.0,
+                                              )
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3.0),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                "Maintenace",
+                                                style: TextStyle(
+                                                  fontSize: 15.0,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              CustomRatingBar(
+                                                rating:
+                                                    overallMaintenanceRating,
+                                                itemSize: 16.0,
+                                              )
+                                            ],
+                                          ),
+                                          const SizedBox(height: 3.0),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              const Text(
+                                                "Communication",
+                                                style: TextStyle(
+                                                  fontSize: 15.0,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              CustomRatingBar(
+                                                rating:
+                                                    overallCommunicationRating,
+                                                itemSize: 16.0,
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 7),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                size: 14,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ],
-                          ),
-                        )
+                            )
+                          : Container(), // Empty container when not expanded
+                    );
+                  }),
+                  bottom: const TabBar(
+                    tabs: [
+                      Tab(text: "RATINGS"),
                     ],
                   ),
-
-                  SizedBox(height: screenSize.height * 0.02),
-
-                  // If there are no ratings, display a message
-                  if (userRating.ratings.isEmpty) ...[
-                    SizedBox(
-                      height: constraints.maxHeight * 0.25,
-                      child: const Center(
-                        child: Text(
-                          "No reviews yet",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey
-                          ),
-                        ),
+                  // floating: false,
+                  pinned: true,
+                ),
+              ];
+            },
+            body: TabBarView(
+              children: [
+                hasRating
+                    ? ListView.builder(
+                        itemCount: userProfile.ratings.length,
+                        itemBuilder: (context, index) {
+                          return _buildRatingDetails(
+                            index,
+                            userProfile.ratings[index],
+                            MediaQuery.of(context).size,
+                          );
+                        },
+                      )
+                    : const Center(
+                        child: Text("No ratings yet"),
                       ),
-                    ),
-                  ] else ...[
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: min(3, userRating.ratings.length),
-                      itemBuilder: (context, index) {
-                        final List<RatingDetails> ratings = userRating.ratings;
-                        final RatingDetails rating = ratings[index];
-                        final int lastIndex = min(3, ratings.length) - 1;
-
-                        return _buildRatingDetails(
-                            index, lastIndex, rating, screenSize);
-                      },
-                    ),
-
-                    // View All Ratings Button
-                    // if (userRating.ratings.length > 3)
-                    if (userRating.ratings.length > 3) ...[
-                      const Divider(),
-                      SizedBox(
-                        height: 40,
-                        child: InkWell(
-                          radius: 20,
-                          onTap: () {
-                            // Navigate to the ratings page
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "View All Ratings (${userRating.ratingCount})",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                              const SizedBox(width: 7),
-                              Icon(
-                                Icons.arrow_forward_ios,
-                                size: 14,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ]
-                ],
-              ),
+              ],
             ),
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 
   Padding _buildRatingDetails(
     int index,
-    int lastIndex,
     RatingDetails rating,
     Size screenSize,
   ) {
     return Padding(
-      padding: EdgeInsets.only(bottom: index == lastIndex ? 0 : 16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -291,8 +305,8 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                     rating2: rating.maintenanceRating!,
                     rating3: rating.communicationRating!,
                     spacing: 0.002,
-                    fontSize: 16.0,
-                    iconSize: 19.0,
+                    fontSize: 14.0,
+                    iconSize: 16.0,
                   ),
 
                 if (widget.role == "Tenant")
@@ -303,8 +317,8 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                     rating3: rating.communicationRating!,
                     criteria1: "Payment History",
                     spacing: 0.002,
-                    fontSize: 16.0,
-                    iconSize: 19.0,
+                    fontSize: 14.0,
+                    iconSize: 16.0,
                   ),
 
                 // Add space between elements
@@ -314,7 +328,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                 if (rating.comments != null && rating.comments != "")
                   Text(
                     rating.comments!,
-                    style: const TextStyle(fontSize: 16.0),
+                    style: const TextStyle(fontSize: 14.0),
                   ),
 
                 // Add space between elements

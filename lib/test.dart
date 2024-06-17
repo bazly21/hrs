@@ -1,117 +1,188 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
+import 'package:hrs/components/custom_rating_bar.dart';
+import 'package:hrs/components/custom_richtext.dart';
 
-class DateFormField extends StatefulWidget {
+class SubTestPage extends StatefulWidget {
+  const SubTestPage({super.key});
+
   @override
-  _DateFormFieldState createState() => _DateFormFieldState();
+  State<SubTestPage> createState() => _SubTestPageState();
 }
 
-class _DateFormFieldState extends State<DateFormField> {
-  final _formKey = GlobalKey<FormState>();
-  DateTime? _selectedDate;
-  bool _isDateFocused = false;
+class _SubTestPageState extends State<SubTestPage> {
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("John Doe"),
+          centerTitle: true,
+        ),
+        body: CustomScrollView(
+          slivers: [
+            SliverPersistentHeader(
+              delegate: _ProfileInfoHeader(
+                height: 140,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    CustomCircleAvatar(
+                      radius: 40,
+                      name: "John Doe",
+                      imageURL: null,
+                    ),
+                    SizedBox(height: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("John Doe", style: TextStyle(fontSize: 20)),
+                        SizedBox(height: 10),
+                        CustomRatingBar(rating: 4.5),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              pinned: false,
+            ),
+            SliverPersistentHeader(
+              delegate: _SliverAppBarDelegate(
+                Column(
+                  children: <Widget>[
+                    TabBar(
+                      tabs: [
+                        Tab(icon: Icon(Icons.directions_car), text: "Car"),
+                        Tab(
+                            icon: Icon(Icons.directions_transit),
+                            text: "Transit"),
+                        Tab(icon: Icon(Icons.directions_bike), text: "Bike"),
+                      ],
+                      indicatorColor:
+                          Colors.blue, // You can customize the indicator color
+                      labelColor:
+                          Colors.black, // You can customize the label color
+                      unselectedLabelColor: Colors
+                          .grey, // You can customize the unselected label color
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          ListView.builder(
+                            itemCount: 30,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                title: Text("Car $index"),
+                              );
+                            },
+                          ),
+                          Container(
+                            color: Colors.white,
+                            child: Center(
+                              child: Text("Transit"),
+                            ),
+                          ),
+                          Container(
+                            color: Colors.white,
+                            child: Center(
+                              child: Text("Bike"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                context,
+              ),
+              pinned: true,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar, this._context);
+
+  final Column _tabBar;
+  final BuildContext _context;
+
+  @override
+  double get minExtent => kToolbarHeight;
+  @override
+  double get maxExtent => MediaQuery.of(_context).size.height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
+  }
+}
+
+class TestPage extends StatelessWidget {
+  const TestPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    setState(() {
-                      _isDateFocused = true;
-                    });
-
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(2100),
-                    );
-                    if (pickedDate != null && pickedDate != _selectedDate) {
-                      setState(() {
-                        _selectedDate = pickedDate;
-                        _isDateFocused = false;
-                      });
-                    }
-                  },
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        suffixIcon: const Icon(Icons.calendar_today),
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: _isDateFocused ? Colors.blue : const Color(0xFF606060)),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10.0))),
-                        errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.error),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10.0))),
-                        focusedErrorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.error,
-                                width: 2.0),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10.0))),
-                        hintText: 'Select move-in date',
-                        hintStyle: const TextStyle(
-                            color: Color(0xFFA6A6A6),
-                            fontSize: 14,
-                            fontWeight: FontWeight.normal),
-                        contentPadding: const EdgeInsets.all(10.0),
-                        errorMaxLines: 2,
-                      ),
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Please select a date';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        // Here you can save the date value if needed
-                      },
-                      // Display the selected date in the TextFormField
-                      controller: TextEditingController(
-                        text: _selectedDate == null
-                            ? ''
-                            : DateFormat('dd-MM-yyyy').format(_selectedDate!),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Date is valid')));
-                    }
-                  },
-                  child: const Text('Submit'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _formKey.currentState!.reset();
-                    setState(() {
-                      _selectedDate = null;
-                    });
-                  },
-                  child: const Text('Reset'),
-                )
-              ],
-            ),
-          ),
-        ),
+      appBar: AppBar(
+        title: const Text("Test Page"),
+      ),
+      body: Center(
+        child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const SubTestPage()));
+            },
+            child: const Text("Go to SubTestPage")),
       ),
     );
+  }
+}
+
+class _ProfileInfoHeader extends SliverPersistentHeaderDelegate {
+  _ProfileInfoHeader({
+    required double height,
+    required Widget child,
+  })  : _height = height,
+        _child = child;
+
+  final double _height;
+  final Widget _child;
+
+  @override
+  double get minExtent => kToolbarHeight;
+
+  @override
+  double get maxExtent => _height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return SizedBox(child: _child);
+  }
+
+  @override
+  bool shouldRebuild(_ProfileInfoHeader oldDelegate) {
+    return true;
   }
 }
