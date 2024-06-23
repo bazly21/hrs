@@ -70,7 +70,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 28),
 
               // Next button
-              MyButton(
+              CustomButton(
                 text: "Next",
                 onPressed: () => context.read<AuthService>().authentication(
                     context: context,

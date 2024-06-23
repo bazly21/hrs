@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class MyButton extends StatelessWidget {
+class CustomButton extends StatelessWidget {
 
   final String text;
   final VoidCallback onPressed;
 
-  const MyButton({
+  const CustomButton({
     super.key,
     required this.text,
     required this.onPressed
@@ -19,19 +19,16 @@ class MyButton extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF8568F3),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.96),
-                ),
-              ), 
-              onPressed: onPressed,
-              child: Text(text),
-            ),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8568F3),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.96),
+              ),
+            ), 
+            onPressed: onPressed,
+            child: Text(text),
           ),
         ),
       ],
