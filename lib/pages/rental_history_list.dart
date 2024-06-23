@@ -35,8 +35,11 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                 );
               } else if (snapshot.hasError) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(snapshot.error.toString())));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(snapshot.error.toString()),
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ));
                 });
               } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                 final List<TenantEndedTenancy> tenancies = snapshot.data!;
@@ -202,8 +205,13 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                                     .then((message) {
                                   if (message != null) {
                                     // Show success message
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(message)));
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text(message),
+                                      duration: const Duration(seconds: 3),
+                                      backgroundColor:
+                                          Colors.green[700],
+                                    ));
 
                                     // Refresh the list of tenancies
                                     _refreshEndedTenancies();

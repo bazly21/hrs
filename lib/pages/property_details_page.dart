@@ -132,10 +132,12 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
             // Apply Button
             ElevatedButton(
-              onPressed:
-                  !propertyData.enableApplyButton! ? null : () => _goToPage(context),
+              onPressed: !propertyData.enableApplyButton!
+                  ? null
+                  : () => _goToPage(context),
               style: AppStyles.elevatedButtonStyle,
-              child: Text(!propertyData.enableApplyButton! ? "Applied" : "Apply"),
+              child:
+                  Text(!propertyData.enableApplyButton! ? "Applied" : "Apply"),
             )
           ],
         ),
@@ -362,7 +364,11 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
           refreshData();
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
+            SnackBar(
+              content: Text(message),
+              duration: const Duration(seconds: 3),
+              backgroundColor: Colors.green[700],
+            ),
           );
         }
       });
@@ -388,8 +394,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
   }
 
   Future<void> refreshData() async {
-    await PropertyService
-        .getPropertyFullDetails(widget.propertyID, _auth.currentUser?.uid)
+    await PropertyService.getPropertyFullDetails(
+            widget.propertyID, _auth.currentUser?.uid)
         .then((newData) {
       setState(() {
         rentalDetailsFuture = Future.value(newData);

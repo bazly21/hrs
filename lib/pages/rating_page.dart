@@ -174,9 +174,13 @@ class _RatingPageState extends State<RatingPage> {
         Navigator.pop(context, 'Rating submitted successfully');
       }
     } catch (e) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Error submitting rating: ${e.toString()}')),
-      );
+      if (context.mounted) {
+        scaffoldMessenger.showSnackBar(SnackBar(
+          content: Text('Error submitting rating: ${e.toString()}'),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ));
+      }
       print('Error submitting rating: $e');
     }
   }

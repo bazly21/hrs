@@ -50,6 +50,9 @@ class _TenancyDetailsPageState extends State<TenancyDetailsPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(snapshot.error.toString()),
+                              duration: const Duration(seconds: 3),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.error,
                             ),
                           );
                         });

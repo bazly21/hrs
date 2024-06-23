@@ -72,7 +72,11 @@ class _RentalListPageState extends State<RentalListPage> {
                 // Show an error message if there's an error fetching the data
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${snapshot.error}')),
+                    SnackBar(
+                      content: Text('${snapshot.error}'),
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
                   );
                 });
               }
@@ -131,9 +135,11 @@ class _RentalListPageState extends State<RentalListPage> {
       });
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Unable to refresh. Please try again."),
-            duration: Duration(seconds: 3)),
+        SnackBar(
+          content: const Text("Unable to refresh. Please try again."),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
       );
     });
   }
@@ -153,9 +159,12 @@ class _RentalListPageState extends State<RentalListPage> {
                 const SnackBar(
                     content: Text('Property removed from wishlist'),
                     duration: Duration(seconds: 2))))
-            .catchError((error) => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Error removing property from wishlist'))));
+            .catchError((error) =>
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: const Text('Error removing property from wishlist'),
+                  duration: const Duration(seconds: 3),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                )));
       } else {
         context
             .read<WishlistProvider>()
@@ -167,8 +176,10 @@ class _RentalListPageState extends State<RentalListPage> {
                   ),
                 ))
             .catchError((error) => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Error adding property to wishlist'),
+                  SnackBar(
+                    content: const Text('Error adding property to wishlist'),
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                 ));
       }

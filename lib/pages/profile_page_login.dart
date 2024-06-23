@@ -172,6 +172,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     SnackBar(
                       content: Text(message),
                       duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.green[700],
                     ),
                   );
                 }

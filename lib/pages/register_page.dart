@@ -280,9 +280,10 @@ class _RegisterProfilePageState extends State<RegisterProfilePage> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to pick image. Please try again."),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: const Text("Failed to pick image. Please try again."),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
