@@ -259,6 +259,8 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
+          duration: const Duration(seconds: 3),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     });

@@ -4,7 +4,6 @@ import 'package:hrs/components/custom_chat_list.dart';
 import 'package:hrs/components/my_appbar.dart';
 import 'package:hrs/services/chat/chat_service.dart';
 
-
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
 
@@ -33,9 +32,11 @@ class _ChatListPageState extends State<ChatListPage> {
             } else if (snapshot.hasError) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content:
-                        Text('Failed to load chat rooms. Please try again.'),
+                        const Text('Failed to load chat rooms. Please try again.'),
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                 );
               });
@@ -48,9 +49,8 @@ class _ChatListPageState extends State<ChatListPage> {
                 separatorBuilder: (context, index) {
                   double indentValue = 40.0 + 16.0 * 2;
                   return Divider(
-                    // Indent the divider to start after the profile image
-                    indent: indentValue
-                  );
+                      // Indent the divider to start after the profile image
+                      indent: indentValue);
                 },
               );
             }
@@ -65,5 +65,3 @@ class _ChatListPageState extends State<ChatListPage> {
     );
   }
 }
-
-

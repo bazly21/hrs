@@ -30,7 +30,11 @@ class MyRentalList extends StatelessWidget {
             // Show an error message if there's an error fetching the data
             WidgetsBinding.instance.addPostFrameCallback((_) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Error fetching data')),
+                SnackBar(
+                  content: const Text('Error fetching data'),
+                  duration: const Duration(seconds: 3),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
               );
             });
 

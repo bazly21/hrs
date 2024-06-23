@@ -130,10 +130,11 @@ class _ChangePhoneNumberPageState extends State<ChangePhoneNumberPage> {
                   verificationFailed: (FirebaseAuthException e) {
                     // Handle verification failure
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
+                      SnackBar(
+                        content: const Text(
                             "An error occurred while verifying the phone number."),
-                        duration: Duration(seconds: 3),
+                        duration: const Duration(seconds: 3),
+                        backgroundColor: Theme.of(context).colorScheme.error,
                       ),
                     );
                   },
@@ -445,6 +446,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
           SnackBar(
             content: Text(errorMessage),
             duration: const Duration(seconds: 3),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -486,6 +488,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
             SnackBar(
               content: Text(errorMessage),
               duration: const Duration(seconds: 3),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }

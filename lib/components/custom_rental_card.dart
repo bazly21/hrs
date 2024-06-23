@@ -58,7 +58,11 @@ class RentalCard extends StatelessWidget {
             // Show an error message if there's an error
             if (errorMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(errorMessage)),
+                SnackBar(
+                  content: Text(errorMessage),
+                  duration: const Duration(seconds: 3),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
               );
             }
           });

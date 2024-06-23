@@ -65,6 +65,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text("Error: ${snapshot.error}"),
+                        duration: const Duration(seconds: 3),
+                        backgroundColor: Theme.of(context).colorScheme.error,
                       ),
                     );
                   });
@@ -123,10 +125,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     // Handle tap
                   },
                   child: Container(
-                    padding:
-                        const EdgeInsets.all(3.0),
-                    child:
-                        const Icon(Icons.expand_more),
+                    padding: const EdgeInsets.all(3.0),
+                    child: const Icon(Icons.expand_more),
                   ),
                 ),
               ],
@@ -181,14 +181,17 @@ class _ProfilePageState extends State<ProfilePage> {
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
 
-        ProfileMenu(text: "Wishlist", icon: Icons.favorite_rounded, onPressed: () {
-          // Navigate to Wishlist Page
-          NavigationUtils.pushPage(
-            context,
-            const WishlistListPage(),
-            SlideDirection.left,
-          );
-        }),
+        ProfileMenu(
+            text: "Wishlist",
+            icon: Icons.favorite_rounded,
+            onPressed: () {
+              // Navigate to Wishlist Page
+              NavigationUtils.pushPage(
+                context,
+                const WishlistListPage(),
+                SlideDirection.left,
+              );
+            }),
 
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),

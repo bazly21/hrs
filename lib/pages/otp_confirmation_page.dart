@@ -109,11 +109,11 @@ class _OTPConfirmationPageState extends State<OTPConfirmationPage> {
                 FocusScope.of(context).unfocus();
 
                 context.read<AuthService>().verifyOTP(
-                  context: context,
-                  verificationId: _verificationId!,
-                  otpCode: _otpController.text,
-                  role: widget.role,
-                );
+                      context: context,
+                      verificationId: _verificationId!,
+                      otpCode: _otpController.text,
+                      role: widget.role,
+                    );
               }
             },
             child: const Text("Confirm"),
@@ -246,6 +246,7 @@ class _OTPConfirmationPageState extends State<OTPConfirmationPage> {
             SnackBar(
               content: Text(errorMessage),
               duration: const Duration(seconds: 3),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }

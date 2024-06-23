@@ -34,8 +34,10 @@ class _ChatPageState extends State<ChatPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to send message. Please try again.'),
+            SnackBar(
+              content: const Text('Failed to send message. Please try again.'),
+              duration: const Duration(seconds: 3),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -66,7 +68,8 @@ class _ChatPageState extends State<ChatPage> {
   Container _messageTexfield() {
     return Container(
       height: 70.0,
-      padding: const EdgeInsets.only(left: 16.0, right: 8.0, bottom: 16.0, top: 16.0),
+      padding: const EdgeInsets.only(
+          left: 16.0, right: 8.0, bottom: 16.0, top: 16.0),
       decoration: BoxDecoration(
           border: Border(top: BorderSide(color: Colors.grey[300]!, width: 0.5)),
           color: Colors.white),

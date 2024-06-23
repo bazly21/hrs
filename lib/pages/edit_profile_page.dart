@@ -304,7 +304,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
 
       if (context.mounted) {
-        Navigator.pop(context, errorMessage);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+            
+    } finally {
+      if (context.mounted) {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -340,9 +353,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Failed to pick image. Please try again."),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: const Text("Failed to pick image. Please try again."),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }

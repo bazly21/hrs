@@ -279,6 +279,8 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Failed to submit application. Error: $error"),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       });
@@ -322,7 +324,8 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
 
     // Get the current date
     DateTime currentDate = DateTime.now();
-    currentDate = DateTime(currentDate.year, currentDate.month, currentDate.day);
+    currentDate =
+        DateTime(currentDate.year, currentDate.month, currentDate.day);
 
     // Check if the entered date is before today
     if (enteredDate.isBefore(currentDate)) {
