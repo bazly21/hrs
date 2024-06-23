@@ -2,13 +2,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hrs/components/custom_appbar.dart';
+import 'package:hrs/components/custom_phone_number_form.dart';
 import 'package:hrs/components/custom_textformfield.dart';
-import 'package:hrs/components/my_appbar.dart';
-import 'package:hrs/components/my_button.dart';
-import 'package:hrs/components/my_label.dart';
-import 'package:hrs/components/my_textfield.dart';
 import 'package:hrs/services/auth/auth_service.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,6 +22,7 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   // Text editing controller
   final _phoneNumberController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -36,62 +33,41 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(
-          text: widget.role == "Tenant" ? "Register" : "Register as Landlord"),
+      appBar: CustomAppBar(
+        title: widget.role == "Tenant" ? "Register" : "Register as Landlord",
+      ),
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              // Add space between elements
-              const SizedBox(height: 20),
-
-              // Phone number label
-              const MyLabel(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  text: "Phone number",
-                  fontSize: 16.0),
-
-              // Add space between elements
-              const SizedBox(height: 10),
-
-              // Phone Number textfield
-              MyTextField(
-                controller: _phoneNumberController,
-                hintText: "Enter your phone number",
-                obscureText: false,
-                textInputType: TextInputType.number,
-                filteringTextInputFormatter: [
-                  FilteringTextInputFormatter.digitsOnly
-                ],
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 28),
-
-              // Next button
-              CustomButton(
-                text: "Next",
-                onPressed: () => context.read<AuthService>().authentication(
-                    context: context,
-                    phoneNumber: _phoneNumberController.text,
-                    role: widget.role,
-                    method: "Register"),
-              ),
-
-              // Add space between elements
-              const SizedBox(height: 14),
-            ],
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: CustomPhoneNumberForm(
+          formKey: _formKey,
+          controller: _phoneNumberController,
+          buttonOnPressed: validate,
+          hasRegisterLink: false,
+          linkOnTap: null,
         ),
       ),
     );
   }
+
+  void validate() {
+    if (_formKey.currentState!.validate()) {
+      context.read<AuthService>().authentication(
+            context: context,
+            phoneNumber: _phoneNumberController.text,
+            role: widget.role,
+            method: "Register",
+          );
+    }
+  }
 }
 
 class RegisterProfilePage extends StatefulWidget {
-  const RegisterProfilePage(
-      {super.key, required this.phoneNumber, required this.role});
+  const RegisterProfilePage({
+    super.key,
+    required this.phoneNumber,
+    required this.role,
+  });
 
   final String phoneNumber;
   final String role;
