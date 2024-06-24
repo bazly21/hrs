@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/model/application/application_model.dart';
@@ -55,16 +56,14 @@ class _PropertyApplicationsSectionState
       child: FutureBuilder<Map<String, dynamic>>(
           future: propertyApplicationsFuture,
           builder: (context, snapshot) {
-            // If snapshot contains data
-            // Note that empty list also makes
-            // snapshot.hasData equal to true
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
             // If there is data and the data is not empty
             else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
               _hasPropertyRented = snapshot.data!['propertyStatus'] == "Rented";
-              _containAcceptedApplication = snapshot.data!['containsAcceptedApplication'];
+              _containAcceptedApplication =
+                  snapshot.data!['containsAcceptedApplication'];
 
               return ListView.builder(
                   itemCount: snapshot.data!['applicationList'].length,
@@ -100,7 +99,10 @@ class _PropertyApplicationsSectionState
   }
 
   List<Widget> _buildApplicantData(
-      int index, BuildContext context, Application applicationData) {
+    int index,
+    BuildContext context,
+    Application applicationData,
+  ) {
     return [
       _buildApplicantCard(index, applicationData, context),
 
@@ -125,7 +127,10 @@ class _PropertyApplicationsSectionState
   }
 
   Card _buildApplicantCard(
-      int index, Application applicationData, BuildContext context) {
+    int index,
+    Application applicationData,
+    BuildContext context,
+  ) {
     DateFormat dateFormat = DateFormat('dd/MM/yyyy');
     String tenancyDate = dateFormat.format(applicationData.moveInDate!);
 
@@ -262,8 +267,7 @@ class _PropertyApplicationsSectionState
         // If the user selects 'Start Tenancy'
         else if (result == "Start Tenancy") {
           showTenancyForm(context, applicationData);
-        }
-        else if (result == "Contact Tenant") {
+        } else if (result == "Contact Tenant") {
           // Go to the chat page
           NavigationUtils.pushPage(
               context,
@@ -315,11 +319,13 @@ class _PropertyApplicationsSectionState
         InkWell(
           onTap: () {
             NavigationUtils.pushPage(
-                    context,
-                    ProfileViewPage(
-                        userID: applicationData.applicantID!, role: "Tenant"),
-                    SlideDirection.left)
-                .then((message) {
+              context,
+              ProfileViewPage(
+                userID: applicationData.applicantID!,
+                role: "Tenant",
+              ),
+              SlideDirection.left,
+            ).then((message) {
               if (message != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -329,26 +335,31 @@ class _PropertyApplicationsSectionState
               }
             });
           },
-          child: const CircleAvatar(
-            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+          child: CustomCircleAvatar(
+            name: applicationData.applicantName!,
+            imageURL: applicationData.applicantProfilePic,
             radius: 40,
+            fontSize: 35,
           ),
         ),
         const SizedBox(height: 7),
+
+        // Display the rating bar if the applicant has rating (greater than 0)
         if (hasRating) ...[
           CustomRatingBar(rating: applicationData.applicantOverallRating!),
           const SizedBox(height: 7)
         ],
         CustomRichText(
-            mainText: hasRating
-                ? "${applicationData.applicantOverallRating!}"
-                : "No rating yet",
-            subText: hasRating
-                ? " (${applicationData.applicantRatingCount!} Reviews)"
-                : "",
-            mainFontSize: 14,
-            mainFontWeight: FontWeight.normal,
-            mainFontColor: hasRating ? Colors.black : Colors.black54)
+          mainText: hasRating
+              ? "${applicationData.applicantOverallRating!}"
+              : "No rating yet",
+          subText: hasRating
+              ? " (${applicationData.applicantRatingCount!} Reviews)"
+              : "",
+          mainFontSize: 14,
+          mainFontWeight: FontWeight.normal,
+          mainFontColor: hasRating ? Colors.black : Colors.black54,
+        )
       ],
     );
   }

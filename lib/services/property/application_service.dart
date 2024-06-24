@@ -9,6 +9,7 @@ class ApplicationService {
   final FirebaseFirestore _fireStore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // Get application list by propertyID
   static Future<Map<String, dynamic>> getPropertyApplication(
     String propertyID,
   ) async {
@@ -16,17 +17,22 @@ class ApplicationService {
     bool containsAcceptedApplication = false;
     bool hasTenantCriteria = false;
 
-    DocumentSnapshot<Map<String, dynamic>> propertyDoc = await FirebaseFirestore
-        .instance
+    // Fetch the property snapshot
+    final propertyDoc = await FirebaseFirestore.instance
         .collection('properties')
         .doc(propertyID)
         .get();
-    Map<String, dynamic>? propertyData = propertyDoc.data();
 
-    // Throw an error if property data is null or not exist
-    if (propertyData == null) throw Exception("Property data is not exist");
+    // Convert the property document to a map
+    final propertyData = propertyDoc.data();
 
-    // Fetch the rental property's applications
+    // Throw exception if property data is null or not exist
+    if (propertyData == null) {
+      throw Exception("Property data is not exist");
+    }
+
+    // Fetch the property's applications where status is not Declined
+    // and order in descending order by submittedAt
     QuerySnapshot applicationSnapshots = await FirebaseFirestore.instance
         .collection("properties")
         .doc(propertyID)
@@ -36,16 +42,20 @@ class ApplicationService {
         .orderBy("submittedAt", descending: true)
         .get();
 
+    // If there is application
     if (applicationSnapshots.docs.isNotEmpty) {
       // Fetch all applicant user documents in parallel
-      List<Application?> applicationList = await Future.wait(
+      final applicationList = await Future.wait(
         applicationSnapshots.docs.map((appDoc) async {
-          Map<String, dynamic>? applicationData =
-              appDoc.data() as Map<String, dynamic>?;
+          // Convert the application document to a map
+          final applicationData = appDoc.data() as Map<String, dynamic>?;
 
+          // Return null if applicationData or applicantID is not exist
           if (applicationData == null || appDoc["applicantID"] == null) {
             return null;
           }
+
+          // Get applicantID from application map
           String applicantID = appDoc["applicantID"];
 
           // Fetch applicant user document
@@ -54,14 +64,15 @@ class ApplicationService {
               .doc(applicantID)
               .get();
 
-          Map<String, dynamic>? applicantData =
-              applicantDoc.data() as Map<String, dynamic>?;
+          // Convert the applicant document to a map
+          final applicantData = applicantDoc.data() as Map<String, dynamic>?;
 
           // Return null if applicantData or moveIndDate is not exist
           if (applicantData == null || applicationData['moveInDate'] == null) {
             return null;
           }
 
+          // Convert moveInDate from Timestamp to DateTime
           DateTime formattedDate =
               (applicationData['moveInDate'] as Timestamp).toDate();
 
@@ -74,13 +85,13 @@ class ApplicationService {
                 .collection('tenancies')
                 .where('applicationID', isEqualTo: appDoc.id)
                 .get();
-            
+
             // If there is tenancy
             if (tenancySnapshot.docs.isNotEmpty) {
               Map<String, dynamic>? tenancyData =
                   tenancySnapshot.docs.first.data() as Map<String, dynamic>?;
               if (tenancyData != null) {
-                // If tenancy status is ended, 
+                // If tenancy status is ended,
                 // exclude the application from the list
                 if (tenancyData["status"] == "Ended") {
                   return null;
@@ -94,7 +105,7 @@ class ApplicationService {
             'applicationID': appDoc.id,
             'moveInDate': formattedDate,
             "applicantName": applicantData["name"],
-            "applicantProfilePic": applicantData["profilePic"],
+            "applicantProfilePic": applicantData["profilePictureURL"],
             "applicantOverallRating": applicantData["ratingAverage"]?["tenant"]
                 ?["overallRating"],
             "applicantRatingCount": applicantData["ratingCount"]?["tenant"],
@@ -110,17 +121,17 @@ class ApplicationService {
       }
 
       // Check if application list contains accepted application
-      // This will be used to disable the other application 
+      // This will be used to disable the other application
       // accept button if there is already
       containsAcceptedApplication = applicationList
-          .any((application) => application!.status == 'Accepted');
+          .any((application) => application.status == 'Accepted');
 
       hasTenantCriteria = propertyData.containsKey("tenantCriteria");
 
       if (hasTenantCriteria) {
         applicationList.sort((a, b) {
-          num aScore = a!.criteriaScore ?? 0;
-          num bScore = b!.criteriaScore ?? 0;
+          num aScore = a.criteriaScore ?? 0;
+          num bScore = b.criteriaScore ?? 0;
           return bScore.compareTo(aScore);
         });
       }

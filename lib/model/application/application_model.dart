@@ -50,7 +50,7 @@ class Application {
       tenancyDuration: applicationMap["tenancyDuration"],
       applicationID: applicationMap["applicationID"],
       applicantName: applicationMap["applicantName"] ?? "N/A",
-      applicantProfilePic: applicationMap["applicantProfilePic"] ?? "https://via.placeholder.com/150",
+      applicantProfilePic: applicationMap["applicantProfilePic"],
       applicantOverallRating: applicationMap["applicantOverallRating"] ?? 0.0,
       applicantRatingCount: applicationMap["applicantRatingCount"] ?? 0,
     );

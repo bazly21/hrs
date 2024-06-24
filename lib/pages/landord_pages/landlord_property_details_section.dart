@@ -264,15 +264,6 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
               PropertyDescription(
                   title: "Accessibility",
                   content: propertyData.accessibilities!),
-
-              // Location Label
-              const Text(
-                "Location",
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                    fontSize: 16.0),
-              ),
               // ********* Property Description Section (End) *********
             ],
           ),
