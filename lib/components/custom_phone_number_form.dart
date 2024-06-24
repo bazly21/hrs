@@ -4,38 +4,33 @@ import 'package:hrs/components/custom_textformfield.dart';
 import 'package:hrs/components/my_button.dart';
 
 class CustomPhoneNumberForm extends StatelessWidget {
+  final GlobalKey<FormState> formKey;
+  final TextEditingController controller;
+  final void Function() buttonOnPressed;
+  final void Function()? linkOnTap;
+  final bool hasRegisterLink;
+
   const CustomPhoneNumberForm({
     super.key,
-    required GlobalKey<FormState> formKey,
-    required TextEditingController controller,
-    required void Function() buttonOnPressed,
-    required void Function()? linkOnTap,
-    bool hasRegisterLink = true,
-  })  : _formKey = formKey,
-        _controller = controller,
-        _buttonOnPressed = buttonOnPressed,
-        _linkOnTap = linkOnTap,
-        _hasRegisterLink = hasRegisterLink,
-        assert(
+    required this.formKey,
+    required this.controller,
+    required this.buttonOnPressed,
+    required this.linkOnTap,
+    this.hasRegisterLink = true,
+  }) : assert(
           !hasRegisterLink || linkOnTap != null,
           'linkOnTap is required when hasRegisterLink is true',
         );
 
-  final GlobalKey<FormState> _formKey;
-  final TextEditingController _controller;
-  final void Function() _buttonOnPressed;
-  final void Function()? _linkOnTap;
-  final bool _hasRegisterLink;
-
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: _formKey,
+      key: formKey,
       child: Column(
         children: [
           // Phone number textfield
           CustomTextFormField(
-            controller: _controller,
+            controller: controller,
             label: "Phone number",
             hintText: "Enter your phone number",
             keyboardType: TextInputType.phone,
@@ -70,11 +65,11 @@ class CustomPhoneNumberForm extends StatelessWidget {
           // Log in button
           CustomButton(
             text: "Login",
-            onPressed: _buttonOnPressed,
+            onPressed: buttonOnPressed,
           ),
 
           // Only show the Register link if hasRegisterLink is true
-          if (_hasRegisterLink) ...[
+          if (hasRegisterLink) ...[
             // Add space between elements
             const SizedBox(height: 14),
 
@@ -82,7 +77,7 @@ class CustomPhoneNumberForm extends StatelessWidget {
             RichTextLink(
               text1: "Do not have an account? ",
               text2: "Register",
-              onTap: _linkOnTap!,
+              onTap: linkOnTap!,
             ),
           ]
         ],
