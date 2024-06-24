@@ -78,27 +78,50 @@ class ChatService extends ChangeNotifier {
         .where('users', arrayContains: userID)
         .snapshots()
         .asyncMap((querySnapshot) async {
-      List<ChatListItem> chatListItems = [];
-      for (var doc in querySnapshot.docs) {
-        // Get receiverID from users array
-        String receiverID =
-            doc.data()['users'].firstWhere((userId) => userId != userID);
-        // Get last message time and content
-        Timestamp lastMessageTime = doc.data()['lastMessageTimestamp'];
-        String lastMessage = doc.data()['lastMessage'];
-        // Get receiver's name from users collection
-        DocumentSnapshot<Map<String, dynamic>> receiverSnap =
-            await _fireStore.collection('users').doc(receiverID).get();
-        String receiverName = receiverSnap.data()!['name'];
+      // Get list of chat list items
+      // by iterating through each chat room using map function
+      final chatListItems =
+          await Future.wait(querySnapshot.docs.map((doc) async {
+        // Convert chat room data to map
+        final chatData = doc.data();
 
-        // Create ChatListItem with receiver's name and last message data
-        chatListItems.add(ChatListItem(
+        // Get list of users from users array
+        final users = List<String>.from(chatData['users']);
+
+        // Get receiverID from users array
+        String receiverID = users.firstWhere((userId) => userId != userID);
+
+        // Get last message time and content
+        Timestamp lastMessageTime = chatData['lastMessageTimestamp'];
+        String lastMessage = chatData['lastMessage'];
+
+        // Get receiver's name from users collection
+        final receiverSnapshot =
+            await _fireStore.collection('users').doc(receiverID).get();
+
+        // Convert receiverSnapshot to map
+        final receiverData = receiverSnapshot.data();
+
+        // Get receiver's name
+        // and profile picture URL
+        // from receiverData
+        String receiverName = receiverData!['name'];
+        String? receiverProfilePicUrl = receiverData['profilePictureURL'];
+
+        // Create and return ChatListItem
+        return ChatListItem(
           receiverID: receiverID,
           receiverName: receiverName,
+          receiverProfilePicUrl: receiverProfilePicUrl,
           lastMessageTime: lastMessageTime,
           lastMessage: lastMessage,
-        ));
-      }
+        );
+      }).toList());
+
+      // Sort chat list items by latest message time
+      chatListItems
+          .sort((a, b) => b.lastMessageTime!.compareTo(a.lastMessageTime!));
+
       return chatListItems;
     });
   }

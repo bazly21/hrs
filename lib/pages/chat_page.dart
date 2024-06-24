@@ -1,18 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hrs/components/my_appbar.dart';
+import 'package:hrs/components/custom_appbar.dart';
 import 'package:hrs/components/my_chatbubble.dart';
 import 'package:hrs/services/chat/chat_service.dart'; // Ensure this import path matches your file structure
 
 class ChatPage extends StatefulWidget {
   final String receiverID;
   final String receiverName;
+  final String? receiverProfilePicUrl;
 
   const ChatPage({
     super.key,
     required this.receiverID,
     required this.receiverName,
+    this.receiverProfilePicUrl,
   });
 
   @override
@@ -48,7 +50,10 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(text: widget.receiverName, hasImage: true),
+      appBar: ChatAppBar(
+        name: widget.receiverName,
+        imageUrl: widget.receiverProfilePicUrl,
+      ),
       body: Column(
         children: [
           // ********* Chat Bubble (Start) ********* **Database Required**
@@ -114,7 +119,9 @@ class _ChatPageState extends State<ChatPage> {
   Widget _buildMessageList() {
     return StreamBuilder<QuerySnapshot>(
       stream: chatService.getMessages(
-          firebaseAuth.currentUser!.uid, widget.receiverID),
+        firebaseAuth.currentUser!.uid,
+        widget.receiverID,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -124,11 +131,15 @@ class _ChatPageState extends State<ChatPage> {
           });
         } else if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
           return ListView.builder(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
-              return _buildChatBubble(snapshot.data!.docs[index]);
+              return _buildChatBubble(
+                snapshot.data!.docs[index],
+              );
             },
           );
         }
@@ -140,7 +151,7 @@ class _ChatPageState extends State<ChatPage> {
 
   // Build chat bubble
   Widget _buildChatBubble(DocumentSnapshot document) {
-    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+    final data = document.data() as Map<String, dynamic>;
 
     // Align the message to the right if it was sent by the current user
     // Align the message to the left if it was sent by the receiver

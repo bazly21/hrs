@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/appbar_shadow.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -74,10 +75,11 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
           controller: _controller,
           decoration: InputDecoration(
             enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.transparent),
+                borderSide: BorderSide(color: Colors.transparent),
                 borderRadius: BorderRadius.all(Radius.circular(10.0))),
             focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
+              borderSide:
+                  BorderSide(color: Theme.of(context).primaryColor, width: 2.0),
               borderRadius: const BorderRadius.all(Radius.circular(10.0)),
             ),
             prefixIcon: const Icon(Icons.search, color: Color(0xFF858585)),
@@ -94,6 +96,53 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
           cursorColor: Colors.black54,
           onChanged: _onChanged,
         ),
+      ),
+      backgroundColor: Colors.white,
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(70);
+}
+
+class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String name;
+  final String? imageUrl;
+
+  const ChatAppBar({
+    super.key,
+    required this.name,
+    this.imageUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      toolbarHeight: preferredSize.height,
+      flexibleSpace: const AppBarShadow(),
+      title: Row(
+        children: [
+          // User profile picture
+          CustomCircleAvatar(
+            name: name,
+            imageURL: imageUrl,
+            radius: 23.0,
+            fontSize: 18.0,
+          ),
+      
+          // Space between elements
+          const SizedBox(width: 10),
+      
+          // User name
+          Text(
+            name,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 20.0,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
     );
