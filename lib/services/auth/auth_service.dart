@@ -68,7 +68,6 @@ class AuthService with ChangeNotifier {
     required String role,
     required File? profileImageFile,
   }) async {
-
     User user = FirebaseAuth.instance.currentUser!;
 
     String uid = user.uid;
@@ -108,7 +107,7 @@ class AuthService with ChangeNotifier {
       }
     } catch (e) {
       String errorMessage = getErrorMessage(e);
-      
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
@@ -152,9 +151,12 @@ class AuthService with ChangeNotifier {
       },
       verificationFailed: (FirebaseAuthException e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text("An error occurred while verifying the phone number."),
+          SnackBar(
+            content: const Text(
+              "An error occurred while verifying the phone number.",
+            ),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       },
