@@ -182,7 +182,9 @@ class _ProfilePageState extends State<ProfilePage> {
         // Add space between elements
         SizedBox(height: MediaQuery.of(context).size.height * 0.017),
 
-        ProfileMenu(
+        // Display Wishlist Menu only for Tenant
+        if (_role == "Tenant") ...[
+          ProfileMenu(
             text: "Wishlist",
             icon: Icons.favorite_rounded,
             onPressed: () {
@@ -192,10 +194,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 const WishlistListPage(),
                 SlideDirection.left,
               );
-            }),
+            },
+          ),
 
-        // Add space between elements
-        SizedBox(height: MediaQuery.of(context).size.height * 0.017),
+          // Add space between elements
+          SizedBox(height: MediaQuery.of(context).size.height * 0.017),
+        ],
 
         ProfileMenu(
             text: "Rental History",
@@ -232,23 +236,25 @@ class _ProfilePageState extends State<ProfilePage> {
           onPressed: () => showLogoutConfirmationDialog(context),
         ),
 
-        // Add space between elements
-        SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+        if (_role == "Tenant") ...[
+          // Add space between elements
+          SizedBox(height: MediaQuery.of(context).size.height * 0.015),
 
-        const Divider(),
+          const Divider(),
 
-        // Add space between elements
-        SizedBox(height: MediaQuery.of(context).size.height * 0.015),
+          // Add space between elements
+          SizedBox(height: MediaQuery.of(context).size.height * 0.015),
 
-        ProfileMenu(
-          text: "Login as Landlord",
-          icon: Icons.login,
-          onPressed: () => NavigationUtils.pushPage(
-            context,
-            const LoginPage(role: "Landlord"),
-            SlideDirection.left,
+          ProfileMenu(
+            text: "Login as Landlord",
+            icon: Icons.login,
+            onPressed: () => NavigationUtils.pushPage(
+              context,
+              const LoginPage(role: "Landlord"),
+              SlideDirection.left,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
