@@ -117,10 +117,12 @@ class _WishlistListPageState extends State<WishlistListPage> {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
 
+                // Show loading animation
                 setState(() {
                   _isLoading = true;
                 });
-
+                
+                // Remove the property from the wishlist
                 _wishlistProvider
                     .removeFromWishlist(propertyID)
                     .then((_) async {
