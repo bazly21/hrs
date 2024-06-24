@@ -68,21 +68,8 @@ class AuthService with ChangeNotifier {
     required String role,
     required File? profileImageFile,
   }) async {
-    if (profileName.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter your name."),
-        ),
-      );
-      return;
-    }
 
-    User? user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      // Handle the case when the user is not logged in
-      return;
-    }
+    User user = FirebaseAuth.instance.currentUser!;
 
     String uid = user.uid;
 
@@ -120,23 +107,8 @@ class AuthService with ChangeNotifier {
         goToNavigationPage(context);
       }
     } catch (e) {
-      String errorMessage;
-
-      if (e is FirebaseException) {
-        switch (e.code) {
-          case 'storage/unauthorized':
-            errorMessage = unauthorizedErrorMessage;
-            break;
-          case 'storage/canceled':
-            errorMessage = canceledErrorMessage;
-            break;
-          default:
-            errorMessage =  genericRegisterErrorMessage;
-        }
-      } else {
-        errorMessage = genericRegisterErrorMessage;
-      }
-
+      String errorMessage = getErrorMessage(e);
+      
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
@@ -228,10 +200,11 @@ class AuthService with ChangeNotifier {
         // Navigate to the PasswordPage
         if (context.mounted) {
           NavigationUtils.pushPage(
-              context,
-              RegisterProfilePage(
-                  phoneNumber: userCredential.user!.phoneNumber!, role: role),
-              SlideDirection.left);
+            context,
+            RegisterProfilePage(
+                phoneNumber: userCredential.user!.phoneNumber!, role: role),
+            SlideDirection.left,
+          );
         }
       }
       // If the user is existing user
@@ -255,19 +228,20 @@ class AuthService with ChangeNotifier {
     } catch (e) {
       if (context.mounted) {
         showErrorSnackBar(
-            context: context,
-            errorMessage:
-                "An error occurred while verifying the OTP code. Please try again.",
-            showAction: false,
-            role: role);
+          context: context,
+          errorMessage: "Invalid OTP code. Please try again.",
+          showAction: false,
+          role: role,
+        );
       }
     }
   }
 
-  Future<bool> checkPhoneNumber(
-      {required BuildContext context,
-      required String phoneNumber,
-      required String role}) async {
+  Future<bool> checkPhoneNumber({
+    required BuildContext context,
+    required String phoneNumber,
+    required String role,
+  }) async {
     final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection("users")
         .where("phoneNumber", isEqualTo: phoneNumber)
@@ -301,7 +275,8 @@ class AuthService with ChangeNotifier {
     required bool showAction,
     required String role,
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
         content: Text(errorMessage),
         action: showAction
             ? SnackBarAction(
@@ -311,7 +286,12 @@ class AuthService with ChangeNotifier {
                       context, RegisterPage(role: role), SlideDirection.left);
                 },
               )
-            : null));
+            : null,
+        duration: const Duration(seconds: 3),
+        backgroundColor:
+            showAction ? null : Theme.of(context).colorScheme.error,
+      ),
+    );
   }
 
   String formatPhoneNum(String phoneNumber) {
