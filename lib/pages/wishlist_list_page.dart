@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_appbar.dart';
 import 'package:hrs/components/custom_rental_card.dart';
@@ -30,9 +29,7 @@ class _WishlistListPageState extends State<WishlistListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'My Wishlist'),
-      body: _isLoading
-          ? _buildLoadingAnimation()
-          : _buildMainBody(),
+      body: _isLoading ? _buildLoadingAnimation() : _buildMainBody(),
     );
   }
 
@@ -83,24 +80,11 @@ class _WishlistListPageState extends State<WishlistListPage> {
   }
 
   void _buildErrorMessage(
-      AsyncSnapshot<List<PropertyDetails>> snapshot, BuildContext context) {
+    AsyncSnapshot<List<PropertyDetails>> snapshot,
+    BuildContext context,
+  ) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      String errorMessage;
-      if (snapshot.error is FirebaseException) {
-        FirebaseException e = snapshot.error as FirebaseException;
-        switch (e.code) {
-          case 'auth/network-request-failed':
-            errorMessage = networkRequestFailedErrorMessage;
-            break;
-          case 'invalid-access':
-            errorMessage = invalidAccessErrorMessage;
-            break;
-          default:
-            errorMessage = genericFutureErrorMessage;
-        }
-      } else {
-        errorMessage = genericFutureErrorMessage;
-      }
+      String errorMessage = getErrorMessage(snapshot.error!);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -110,7 +94,8 @@ class _WishlistListPageState extends State<WishlistListPage> {
     });
   }
 
-  Center _buildLoadingAnimation() => const Center(child: CircularProgressIndicator());
+  Center _buildLoadingAnimation() =>
+      const Center(child: CircularProgressIndicator());
 
   void _removeWishlist(String propertyID) {
     // Show a dialog to confirm the removal of the property from the wishlist
@@ -141,7 +126,9 @@ class _WishlistListPageState extends State<WishlistListPage> {
                     .then((_) async {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Successfully removed the property from wishlist'),
+                      content: Text(
+                        'Successfully removed the property from wishlist',
+                      ),
                       duration: Duration(seconds: 3),
                     ),
                   );

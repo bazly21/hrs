@@ -23,8 +23,7 @@ class WishlistProvider with ChangeNotifier {
       _wishlistPropertyIDs =
           wishlistedSnapshot.docs.map((doc) => doc.id).toList();
       notifyListeners();
-    }
-    else {
+    } else {
       _wishlistPropertyIDs = [];
       notifyListeners();
     }
@@ -68,7 +67,9 @@ class WishlistProvider with ChangeNotifier {
     // If user is not logged in, throw an exception
     if (user == null) {
       throw FirebaseAuthException(
-          code: 'invalid-access', message: 'User is not logged in');
+        code: 'invalid-access',
+        message: 'User is not logged in',
+      );
     }
 
     // Get the user's wishlist
@@ -90,19 +91,51 @@ class WishlistProvider with ChangeNotifier {
     // Get the property details from the list of property IDs
     final propertyDetails = await Future.wait(
       propertyIds.map((propertyId) async {
+        // Fetch property snapshot from Firestore
         final propertySnapshot =
             await _firestore.collection('properties').doc(propertyId).get();
 
         final propertyData = propertySnapshot.data();
 
-        // If the property data is not exist or contains no field, return null
-        if (propertyData == null) {
+        // If the property data is not exist or contains no field,
+        // or the landlordID field is not exist, return null
+        if (propertyData == null || propertyData['landlordID'] == null) {
           return null;
         }
 
+        // Add the propertyID to the propertyData map
         propertyData['propertyID'] = propertyId;
 
-        return PropertyDetails.fromMapHalfDetails(propertyData);
+        // Then, fetch landlord snapshot from Firestore
+        final landlordSnapshot = await _firestore
+            .collection('users')
+            .doc(propertyData['landlordID'])
+            .get();
+
+        // Convert snapshot to map
+        final landlordData = landlordSnapshot.data();
+
+        // If the landlord data is not exist or contains no field, return null
+        if (landlordData == null) {
+          return null;
+        }
+
+        // Return the PropertyDetails object
+        return PropertyDetails(
+          propertyID: propertyData['propertyID'],
+          propertyName: propertyData['name'] ?? 'N/A',
+          address: propertyData['address'] ?? 'N/A',
+          rentalPrice: propertyData['rent'] ?? 0.0,
+          bathrooms: propertyData['bathrooms'] ?? 0,
+          bedrooms: propertyData['bedrooms'] ?? 0,
+          size: propertyData['size'] ?? 0.0,
+          image: List<String>.from(propertyData['image']),
+          landlordID: landlordSnapshot.id,
+          landlordName: landlordData['name'] ?? 'N/A',
+          landlordProfilePic: landlordData['profilePictureURL'],
+          landlordRatingCount: landlordData['ratingCount']?['landlord'] ?? 0,
+          landlordOverallRating: landlordData['ratingAverage']?['landlord']?['overallRating'] ?? 0.0,
+        );
       }),
     ).then((list) => list.whereType<PropertyDetails>().toList());
 
