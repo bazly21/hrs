@@ -7,6 +7,7 @@ import 'package:hrs/components/appbar_shadow.dart';
 import 'package:hrs/components/custom_textformfield.dart';
 import 'package:hrs/components/property_details_price_texfield.dart';
 import 'package:hrs/provider/image_provider.dart';
+import 'package:hrs/provider/refresh_provider.dart';
 import 'package:hrs/services/utils/error_message_utils.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -565,6 +566,12 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       await newPropertyRef.set(propertyDetailsMap);
 
       if (context.mounted) {
+        // Trigger refresh on the property list page
+        context.read<RefreshProvider>().propertyRefresh = true;
+
+        print("One: ${context.read<RefreshProvider>().propertyRefresh}");
+
+        // Navigate back to previous page with a success message
         Navigator.pop(context,'Property details has been added');
       }
     } catch (e) {

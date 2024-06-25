@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_appbar.dart';
 import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/pages/landord_pages/landlord_property_details.dart';
+import 'package:hrs/provider/refresh_provider.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:provider/provider.dart';
 
 class LandlordPropertyListPage extends StatefulWidget {
   const LandlordPropertyListPage({super.key});
@@ -19,6 +21,8 @@ class _LandlordPropertyListPageState extends State<LandlordPropertyListPage> {
   final TextEditingController _searchController = TextEditingController();
   late Future<List<PropertyDetails>?> propertyListFuture;
 
+  bool _isRefreshing = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +31,16 @@ class _LandlordPropertyListPageState extends State<LandlordPropertyListPage> {
 
   @override
   Widget build(BuildContext context) {
+    _isRefreshing = context.watch<RefreshProvider>().propertyRefresh;
+
+    if (_isRefreshing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        refreshRentalList().then((_) {
+          context.read<RefreshProvider>().propertyRefresh = false;
+        });
+      });
+    }
+    
     return Scaffold(
       appBar: SearchAppBar(
         hintText: 'Search property',
