@@ -5,7 +5,8 @@ class LandlordEndedTenancy {
   final double rentalPrice;
   final String propertyImageURL;
   final String tenantID;
-  final String tenantImageURL;
+  final String tenantName;
+  final String? tenantImageURL;
   final int tenantRatingCount;
   final double tenantRatingAverage;
   final String tenancyDocID;
@@ -19,7 +20,8 @@ class LandlordEndedTenancy {
     required this.rentalPrice,
     required this.propertyImageURL,
     required this.tenantID,
-    required this.tenantImageURL,
+    required this.tenantName,
+    this.tenantImageURL,
     required this.tenantRatingCount,
     required this.tenantRatingAverage,
     required this.tenancyDocID,
@@ -35,6 +37,7 @@ class LandlordEndedTenancy {
       rentalPrice: data['rentalPrice'],
       propertyImageURL: data['propertyImageURL'],
       tenantID: data['tenantID'],
+      tenantName: data['tenantName'],
       tenantImageURL: data['tenantImageURL'],
       tenantRatingCount: data['tenantRatingCount'],
       tenantRatingAverage: data['tenantRatingAverage'],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/model/tenancy/tenant_ended_tenancy.dart';
 import 'package:hrs/pages/rating_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -46,7 +47,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                 return ListView.builder(
                   itemCount: tenancies.length,
                   itemBuilder: (context, index) {
-                    return _buildRentalItem(tenancies[index]);
+                    return _buildRentalItem(tenancies[index], index == tenancies.length - 1);
                   },
                 );
               }
@@ -58,9 +59,12 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
     ));
   }
 
-  Container _buildRentalItem(TenantEndedTenancy tenancyData) {
+  Container _buildRentalItem(
+    TenantEndedTenancy tenancyData,
+    bool isLastIndex,
+  ) {
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.fromLTRB(16, 16, 16, isLastIndex ? 16 : 0),
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -110,10 +114,11 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            CircleAvatar(
-                              radius: 9,
-                              backgroundImage:
-                                  NetworkImage(tenancyData.landlordImageURL),
+                            CustomCircleAvatar(
+                              imageURL: tenancyData.landlordImageURL,
+                              name: tenancyData.landlordName,
+                              radius: 9.0,
+                              fontSize: 7.0,
                             ),
                             const SizedBox(width: 5),
                             const Icon(Icons.star,
@@ -180,16 +185,13 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          disabledBackgroundColor: Colors.white,
-                          disabledForegroundColor: Colors.black54,
+                          backgroundColor: Theme.of(context).primaryColor,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: const Color(0xFFB5A4F8),
+                          disabledForegroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              side: BorderSide(
-                                  color: tenancyData.isRated
-                                      ? Colors.grey
-                                      : Colors.black)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         onPressed: tenancyData.isRated
                             ? null
@@ -209,8 +211,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                                         .showSnackBar(SnackBar(
                                       content: Text(message),
                                       duration: const Duration(seconds: 3),
-                                      backgroundColor:
-                                          Colors.green[700],
+                                      backgroundColor: Colors.green[700],
                                     ));
 
                                     // Refresh the list of tenancies

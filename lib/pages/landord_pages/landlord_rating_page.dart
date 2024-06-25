@@ -1,6 +1,7 @@
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:flutter_rating_bar/flutter_rating_bar.dart";
+import "package:hrs/components/custom_appbar.dart";
 import "package:hrs/components/my_appbar.dart";
 import "package:hrs/model/rating/tenant_rating.dart";
 import "package:hrs/services/rating/rating_service.dart";
@@ -50,7 +51,7 @@ class _LandlordRatingPageState extends State<LandlordRatingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MyAppBar(text: "Rate Tenant"),
+      appBar: const CustomAppBar(title: "Rate Tenant"),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -78,37 +79,71 @@ class _LandlordRatingPageState extends State<LandlordRatingPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  // Show confirmation dialog
-                  showDialog(
-                    context: context,
-                    builder: (dialogContext) {
-                      return AlertDialog(
-                        title: const Text("Submit Rating"),
-                        content: const Text(
-                            "Are you sure you want to submit your rating?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        // Check if all ratings are provided
+                        bool isRatingComplete = _paymentRating > 0 &&
+                            _maintenanceRating > 0 &&
+                            _communicationRating > 0;
+                    
+                        // If all ratings are provided,
+                        // show a dialog to confirm the submission
+                        if (isRatingComplete) {
+                          showDialog(
+                            context: context,
+                            builder: (dialogContext) {
+                              return AlertDialog(
+                                title: const Text("Submit Rating"),
+                                content: const Text(
+                                    "Are you sure you want to submit your rating?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(dialogContext).pop();
+                                    },
+                                    child: const Text("Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(dialogContext).pop();
+                                      // Save the ratings and thoughts or perform any desired action
+                                      submitRating(context);
+                                    },
+                                    child: const Text("Submit"),
+                                  ),
+                                ],
+                              );
                             },
-                            child: const Text("Cancel"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(dialogContext).pop();
-                              // Save the ratings and thoughts or perform any desired action
-                              submitRating(context);
-                            },
-                            child: const Text("Submit"),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: const Text("Submit"),
+                          );
+                        }
+                        // Otherwise, show a snackbar to inform the user
+                        else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text(
+                                'Please provide ratings for all categories',
+                              ),
+                              duration: const Duration(seconds: 3),
+                              backgroundColor: Theme.of(context).colorScheme.error,
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text("Submit"),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

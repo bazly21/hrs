@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/model/application/application_model.dart';
 import 'package:hrs/model/property/property_details.dart';
@@ -59,7 +59,8 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
 
                           return _buildApplicationList(
                             propertyData,
-                            isLastIndex: index == applicationCount - 1,);
+                            isLastIndex: index == applicationCount - 1,
+                          );
                         },
                       );
                     }
@@ -75,7 +76,8 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
     );
   }
 
-  Widget _buildApplicationList(Application application, {bool isLastIndex = false}) {
+  Widget _buildApplicationList(Application application,
+      {bool isLastIndex = false}) {
     PropertyDetails propertyData = application.propertyDetails!;
 
     num rentalPrice = propertyData.rentalPrice!;
@@ -151,10 +153,11 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                             // Profile picture
                             InkWell(
                               onTap: () {},
-                              child: const CircleAvatar(
-                                radius: 9,
-                                backgroundImage: NetworkImage(
-                                    'https://via.placeholder.com/150'),
+                              child: CustomCircleAvatar(
+                                imageURL: propertyData.landlordProfilePic,
+                                name: propertyData.landlordName!,
+                                radius: 9.0,
+                                fontSize: 7.0,
                               ),
                             ),
 
@@ -180,8 +183,7 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                               const SizedBox(width: 2),
 
                               CustomRichText(
-                                  mainText: propertyData
-                                      .landlordOverallRating!
+                                  mainText: propertyData.landlordOverallRating!
                                       .toString(),
                                   subText:
                                       " (${propertyData.landlordRatingCount})",
@@ -215,14 +217,12 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                             subText: " /month"),
 
                         // Text to show the status of the application
-                        Text(
-                          application.status,
-                          style: TextStyle(
+                        Text(application.status,
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                               color: _getStatusTextColor(application.status),
-                          )
-                        )
+                            ))
                       ],
                     ),
                     //////// Rental Property's Price and Wishlist Section (End) //////
@@ -239,22 +239,7 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
   void _buildErrorMessage(
       AsyncSnapshot<List<Application>> snapshot, BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      String errorMessage;
-      if (snapshot.error is FirebaseException) {
-        FirebaseException e = snapshot.error as FirebaseException;
-        switch (e.code) {
-          case 'auth/network-request-failed':
-            errorMessage = networkRequestFailedErrorMessage;
-            break;
-          case 'invalid-access':
-            errorMessage = invalidAccessErrorMessage;
-            break;
-          default:
-            errorMessage = genericFutureErrorMessage;
-        }
-      } else {
-        errorMessage = genericFutureErrorMessage;
-      }
+      String errorMessage = getErrorMessage(snapshot.error!);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

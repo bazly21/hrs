@@ -79,10 +79,8 @@ class TenancyService {
         'propertyImageURL':
             propertyData['image']?[0] ?? 'https://via.placeholder.com/150',
         'tenantID': tenantID,
-        'tenantImageURL':
-            (tenantData['image'] != null && tenantData['image'].isNotEmpty)
-                ? tenantData['image'][0]
-                : 'https://via.placeholder.com/150',
+        'tenantName': tenantData['name'],
+        'tenantImageURL': tenantData['profilePictureURL'],
         'tenantRatingCount': tenantData['ratingCount']?["tenant"] ?? 0,
         'tenantRatingAverage': tenantData['ratingAverage']?["tenant"]
                 ?['overallRating'] as double? ??
@@ -153,10 +151,8 @@ class TenancyService {
           'propertyImageURL':
               propertyData['image'][0] ?? 'https://via.placeholder.com/150',
           'landlordID': landlordID,
-          'landlordImageURL': (landlordData['image'] != null &&
-                  landlordData['image'].isNotEmpty)
-              ? landlordData['image'][0]
-              : 'https://via.placeholder.com/150',
+          'landlordName': landlordData['name'] ?? 'N/A',
+          'landlordImageURL': landlordData['profilePictureURL'],
           'landlordRatingCount': landlordData['ratingCount']?["landlord"] ?? 0,
           'landlordRatingAverage': landlordData['ratingAverage']?["landlord"]
                   ?['overallRating'] as double? ??
