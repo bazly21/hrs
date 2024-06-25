@@ -84,25 +84,45 @@ class _RentalListPageState extends State<RentalListPage> {
               else if (snapshot.hasData && snapshot.data != null) {
                 int propertyCount = snapshot.data!.length;
 
-                return ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: propertyCount,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    // Return the rental list
-                    // return rentalList(
-                    //     context, snapshot.data![index], index, propertyCount);
-                    var propertyData = snapshot.data![index];
+                if (propertyCount > 0) {
+                  return ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: propertyCount,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      // Return the rental list
+                      // return rentalList(
+                      //     context, snapshot.data![index], index, propertyCount);
+                      var propertyData = snapshot.data![index];
 
-                    return RentalCard(
-                        propertyData: propertyData,
-                        isLastIndex: index == propertyCount - 1,
-                        requiresConsumer: true,
-                        iconOnPressed: () {
-                          toggleWishlist(propertyData.propertyID!);
-                        });
-                  },
-                );
+                      return RentalCard(
+                          propertyData: propertyData,
+                          isLastIndex: index == propertyCount - 1,
+                          requiresConsumer: true,
+                          iconOnPressed: () {
+                            toggleWishlist(propertyData.propertyID!);
+                          });
+                    },
+                  );
+                } else {
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints:
+                              BoxConstraints(minHeight: constraints.maxHeight),
+                          child: const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('No rental properties found'),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
               }
 
               // When there is no data
@@ -130,6 +150,9 @@ class _RentalListPageState extends State<RentalListPage> {
 
   Future<void> handleRefresh() async {
     await PropertyService.fetchAvailableProperties(context).then((properties) {
+      // Clear the search field
+      _searchController.clear();
+      
       setState(() {
         rentalListFuture = Future.value(properties);
       });
