@@ -140,11 +140,12 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
                 showIcon: true, // Set this to false to hide the icon button
                 onIconPressed: () {
                   NavigationUtils.pushPage(
-                          context,
-                          EditPropertyDetailsPage(
-                              propertyID: widget.propertyID),
-                          SlideDirection.up)
-                      .then((status) {
+                    context,
+                    EditPropertyDetailsPage(
+                      propertyID: widget.propertyID,
+                    ),
+                    SlideDirection.up,
+                  ).then((status) {
                     if (status != null && status['success']) {
                       // Refresh data
                       setState(() {
@@ -158,6 +159,7 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
                           SnackBar(
                             content: Text(status['message']),
                             duration: const Duration(seconds: 3),
+                            backgroundColor: Colors.green[700],
                           ),
                         );
                       });
