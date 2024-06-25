@@ -51,32 +51,52 @@ class RentalService {
           .limit(1)
           .get();
 
+      // Early return if no tenancy found
       if (tenancySnapshot.docs.isEmpty) {
-        return null; // Early return if no tenancy found
+        return null;
       }
 
       final DocumentSnapshot tenancyDoc = tenancySnapshot.docs.first;
 
-      final Map<String, dynamic>? tenancyData =
-          tenancyDoc.data() as Map<String, dynamic>?;
+      // Convert the tenancy document to a Map
+      final tenancyData = tenancyDoc.data() as Map<String, dynamic>?;
+
+      // Early return if tenancy data is null
+      // or not exist
       if (tenancyData == null) {
-        return null; // Early return if tenancy data is null
+        return null;
       }
 
+      // Get the propertyID
       final String propertyID = tenancyDoc.reference.parent.parent!.id;
-      final DocumentSnapshot<Map<String, dynamic>> propertyDoc =
+
+      // Fetch the property document
+      final propertyDoc =
           await _fireStore.collection('properties').doc(propertyID).get();
-      final Map<String, dynamic>? propertyData = propertyDoc.data();
+
+      // Convert property document to a Map
+      final propertyData = propertyDoc.data();
+
+      // Early return if property data is null
+      // or not exist
       if (propertyData == null) {
-        return null; // Early return if property data is null
+        return null;
       }
 
+      // Get the landlordID from property data
       final String landlordID = propertyData['landlordID'];
-      final DocumentSnapshot<Map<String, dynamic>> landlordDoc =
+
+      // Fetch the landlord document
+      final landlordDoc =
           await _fireStore.collection('users').doc(landlordID).get();
-      final Map<String, dynamic>? landlordData = landlordDoc.data();
+
+      // Convert landlord document to a Map
+      final landlordData = landlordDoc.data();
+
+      // Early return if landlord data is null
+      // or not exist
       if (landlordData == null) {
-        return null; // Early return if landlord data is null
+        return null;
       }
 
       // Construct the response map
@@ -87,6 +107,7 @@ class RentalService {
             propertyData['image']?[0] ?? 'https://via.placeholder.com/150',
         'landlordID': landlordID,
         'landlordName': landlordData['name'] ?? 'N/A',
+        'landlordProfilePictureUrl': landlordData['profilePictureURL'],
         'landlordRatingCount': landlordData['ratingCount']?['landlord'] ?? 0,
         'landlordRatingAverage': (landlordData['ratingAverage']?['landlord']
                     ?["overallRating"] as num?)
@@ -97,7 +118,6 @@ class RentalService {
         'tenancyEndDate': tenancyData['endDate'],
       };
     } catch (e) {
-      print("Error: $e ");
       return null; // Return null in case of any errors
     }
   }
@@ -160,7 +180,8 @@ class RentalService {
           (tenantData['ratingAverage']?["tenant"]?["overallRating"] as num?)
                   ?.toDouble() ??
               0.0,
-      'tenantProfilePictureUrl': tenantData['profilePictureURL'] ?? 'https://via.placeholder.com/150',
+      'tenantProfilePictureUrl':
+          tenantData['profilePictureURL'] ?? 'https://via.placeholder.com/150',
       'tenancyDuration': tenancyData['duration'],
       'tenancyStartDate': tenancyData['startDate'],
       'tenancyEndDate': tenancyData['endDate'],

@@ -1,44 +1,37 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_circleavatar.dart';
 import 'package:hrs/pages/chat_page.dart';
 import 'package:hrs/pages/login_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
-import 'package:hrs/services/auth/auth_service.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
-import 'package:provider/provider.dart';
 
 class UserDetailsSection extends StatelessWidget {
   const UserDetailsSection({
     super.key,
-    required String userName,
-    required double rating,
-    required int ratingCount,
-    required String userID,
-    String position = "Property Owner",
-    String textButton = "Chat with owner",
-    String role = "Landlord",
-    String? imageUrl,
-  })  : _userName = userName,
-        _role = role,
-        _position = position,
-        _rating = rating,
-        _ratingCount = ratingCount,
-        _imageUrl = imageUrl,
-        _textButton = textButton,
-        _userID = userID;
+    required this.userName,
+    required this.rating,
+    required this.ratingCount,
+    required this.userID,
+    this.position = "Property Owner",
+    this.textButton = "Chat with owner",
+    this.role = "Landlord",
+    this.imageUrl,
+  });
 
-  final String _userName;
-  final String _role;
-  final String _userID;
-  final String _position;
-  final String _textButton;
-  final String? _imageUrl;
-  final int _ratingCount;
-  final double _rating;
+  final String userName;
+  final String role;
+  final String userID;
+  final String position;
+  final String textButton;
+  final String? imageUrl;
+  final int ratingCount;
+  final double rating;
 
   @override
   Widget build(BuildContext context) {
-    String? role = context.watch<AuthService>().userRole;
+    // Check if user is logged in
+    bool isLoggedin = FirebaseAuth.instance.currentUser != null;
 
     return Row(
       children: [
@@ -46,12 +39,20 @@ class UserDetailsSection extends StatelessWidget {
         InkWell(
           onTap: () {
             NavigationUtils.pushPage(
-                context,
-                ProfileViewPage(userID: _userID, role: _role),
-                SlideDirection.left);
+              context,
+              ProfileViewPage(
+                userID: userID,
+                role: role,
+              ),
+              SlideDirection.left,
+            );
           },
           child: CustomCircleAvatar(
-              imageURL: _imageUrl, name: _userName, radius: 21.0, fontSize: 15),
+            imageURL: imageUrl,
+            name: userName,
+            radius: 21.0,
+            fontSize: 15,
+          ),
         ),
 
         // Add space between elements
@@ -63,7 +64,7 @@ class UserDetailsSection extends StatelessWidget {
           children: [
             // Landlord's Name **Database Required**
             Text(
-              _userName,
+              userName,
               style: const TextStyle(
                   fontWeight: FontWeight.normal,
                   color: Colors.black,
@@ -75,11 +76,12 @@ class UserDetailsSection extends StatelessWidget {
 
             // Title
             Text(
-              _position,
+              position,
               style: const TextStyle(
-                  fontWeight: FontWeight.normal,
-                  color: Color(0xFF7D7F88),
-                  fontSize: 14.0),
+                fontWeight: FontWeight.normal,
+                color: Color(0xFF7D7F88),
+                fontSize: 14.0,
+              ),
             ),
 
             // Add space between elements
@@ -95,11 +97,18 @@ class UserDetailsSection extends StatelessWidget {
 
         ElevatedButton(
           onPressed: () {
-            if (role != null) {
+            // If user is logged in, navigate to chat page
+            // Else, show a snackbar to prompt user to log in
+            if (isLoggedin) {
               NavigationUtils.pushPage(
-                  context,
-                  ChatPage(receiverID: _userID, receiverName: _userName),
-                  SlideDirection.left);
+                context,
+                ChatPage(
+                  receiverID: userID,
+                  receiverName: userName,
+                  receiverProfilePicUrl: imageUrl,
+                ),
+                SlideDirection.left,
+              );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -131,7 +140,7 @@ class UserDetailsSection extends StatelessWidget {
             ),
           ),
           child: Text(
-            _textButton,
+            textButton,
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.black),
           ),
@@ -142,7 +151,7 @@ class UserDetailsSection extends StatelessWidget {
 
   Widget _buildLandlordRating() {
     // If there is no rating
-    if (_ratingCount == 0 && _rating == 0.0) {
+    if (ratingCount == 0 && rating == 0.0) {
       return const Text(
         "No reviews yet",
         style: TextStyle(
@@ -167,17 +176,22 @@ class UserDetailsSection extends StatelessWidget {
 
           // Rating value
           RichText(
-              text: TextSpan(
-                  // Default text style
-                  style: const TextStyle(color: Colors.black, fontSize: 14),
-                  children: [
-                TextSpan(text: "$_rating"),
+            text: TextSpan(
+              // Default text style
+              style: const TextStyle(color: Colors.black, fontSize: 14),
+              children: [
+                TextSpan(text: "$rating"),
                 TextSpan(
-                    text: _ratingCount > 1
-                        ? " ($_ratingCount Reviews)"
-                        : " ($_ratingCount Review)",
-                    style: const TextStyle(color: Color(0xFF7D7F88)))
-              ])),
+                  text: ratingCount > 1
+                      ? " ($ratingCount Reviews)"
+                      : " ($ratingCount Review)",
+                  style: const TextStyle(
+                    color: Color(0xFF7D7F88),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       );
     }

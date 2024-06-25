@@ -22,8 +22,10 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
   @override
   void initState() {
     super.initState();
-    _loadProfileFuture =
-        RatingService.getUserRatings(widget.userID, widget.role);
+    _loadProfileFuture = RatingService.getUserRatings(
+      widget.userID,
+      widget.role,
+    );
   }
 
   @override
@@ -123,7 +125,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                                     mainFontWeight: FontWeight.w600,
                                   ),
                                   const SizedBox(height: 5.0),
-                      
+
                                   // If there are no ratings
                                   if (!hasRating) ...[
                                     const Text(
@@ -149,8 +151,10 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                                         ),
                                         CustomRatingBar(
                                           rating: widget.role == "Landlord"
-                                              ? userProfile.overallSupportRating!
-                                              : userProfile.overallPaymentRating!,
+                                              ? userProfile
+                                                  .overallSupportRating!
+                                              : userProfile
+                                                  .overallPaymentRating!,
                                           itemSize: 16.0,
                                         )
                                       ],

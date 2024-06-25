@@ -89,8 +89,9 @@ class _TenancyDetailsPageState extends State<TenancyDetailsPage> {
             height: 337, // The height of the image container
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(tenancyData[
-                    'propertyImageURL']), // Replace with your image URL
+                image: NetworkImage(
+                  tenancyData['propertyImageURL'],
+                ),
                 fit: BoxFit.cover,
               ),
             ),
@@ -132,6 +133,7 @@ class _TenancyDetailsPageState extends State<TenancyDetailsPage> {
                     // Landlord's details
                     UserDetailsSection(
                       userName: tenancyData['landlordName'],
+                      imageUrl: tenancyData['landlordProfilePictureUrl'],
                       rating: tenancyData['landlordRatingAverage'],
                       ratingCount: tenancyData['landlordRatingCount'],
                       userID: tenancyData['landlordID'],
