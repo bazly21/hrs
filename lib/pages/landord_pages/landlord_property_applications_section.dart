@@ -512,9 +512,11 @@ class _PropertyApplicationsSectionState
 
                         // Show success message if the saving operation is successful
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Tenancy information saved successfully.'),
+                          SnackBar(
+                            content: const Text(
+                                'Tenancy information saved successfully.'),
+                            duration: const Duration(seconds: 3),
+                            backgroundColor: Colors.green[700],
                           ),
                         );
 
@@ -523,9 +525,11 @@ class _PropertyApplicationsSectionState
                         (error) {
                           // Show error message if the saving operation is failed
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
+                            SnackBar(
+                              content: const Text(
                                   'Failed to save tenancy information. Please try again.'),
+                              duration: const Duration(seconds: 3),
+                              backgroundColor: Theme.of(context).colorScheme.error,
                             ),
                           );
                         },

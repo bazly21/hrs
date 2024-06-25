@@ -252,20 +252,27 @@ class _PropertyDetailsSectionState extends State<PropertyDetailsSection> {
               // ********* Property Description Section (Start) *********
               // Property Description Label
               PropertyDescription(
-                  title: "Description", content: propertyData.description!),
+                title: "Description",
+                content: propertyData.description!,
+              ),
 
               // Furnishing Description Label
               PropertyDescription(
-                  title: "Furnishing", content: propertyData.furnishing!),
+                title: "Furnishing",
+                content: propertyData.furnishing!,
+              ),
 
               // Facilities Description Label
               PropertyDescription(
-                  title: "Facilities", content: propertyData.facilities!),
+                title: "Facilities",
+                content: propertyData.facilities!,
+              ),
 
               // Accessibility Description Label
               PropertyDescription(
-                  title: "Accessibility",
-                  content: propertyData.accessibilities!),
+                title: "Accessibility",
+                content: propertyData.accessibilities!,
+              ),
               // ********* Property Description Section (End) *********
             ],
           ),

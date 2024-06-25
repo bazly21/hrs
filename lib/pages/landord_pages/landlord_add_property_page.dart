@@ -565,7 +565,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
       await newPropertyRef.set(propertyDetailsMap);
 
       if (context.mounted) {
-        Navigator.pop(context,'Property details updated successfully');
+        Navigator.pop(context,'Property details has been added');
       }
     } catch (e) {
       String errorMessage = getErrorMessage(e);

@@ -75,7 +75,10 @@ class _NavigationPage extends State<NavigationPage> {
       );
     } else if (index == 2 && role == 'Landlord') {
       NavigationUtils.pushPage(
-          context, const AddPropertyPage(), SlideDirection.up).then((message) {
+        context,
+        const AddPropertyPage(),
+        SlideDirection.up,
+      ).then((message) {
         if (message != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -85,7 +88,7 @@ class _NavigationPage extends State<NavigationPage> {
             ),
           );
         }
-          });
+      });
     } else {
       setState(() => _selectedIndex = index);
     }
