@@ -12,13 +12,18 @@ class ChatService extends ChangeNotifier {
 
   // Send message
   Future<void> sendMessage(String receiverID, String message) async {
+    // Get user ID and current timestamp
     final String userID = _firebaseAuth.currentUser!.uid;
     final Timestamp timestamp = Timestamp.now();
+
+    // Construct chat room ID from sender and receiver ID
     String chatRoomID = _getChatRoomID(userID, receiverID);
+
+    // Create chat room reference
     DocumentReference chatDocRef =
         _fireStore.collection('chats').doc(chatRoomID);
 
-    // Check if chat room exists
+    // Then check if chat room exists
     final bool ischatRoomExists = await _chatRoomExists(chatDocRef);
 
     // If chat room does not exist, create a new chat room
@@ -91,6 +96,11 @@ class ChatService extends ChangeNotifier {
         // Get receiverID from users array
         String receiverID = users.firstWhere((userId) => userId != userID);
 
+        // Return null if lastMessageTimestamp or lastMessage is null
+        if (chatData['lastMessageTimestamp'] == null ||
+            chatData['lastMessage'] == null) {
+          return null;
+        }
         // Get last message time and content
         Timestamp lastMessageTime = chatData['lastMessageTimestamp'];
         String lastMessage = chatData['lastMessage'];
@@ -116,7 +126,7 @@ class ChatService extends ChangeNotifier {
           lastMessageTime: lastMessageTime,
           lastMessage: lastMessage,
         );
-      }).toList());
+      })).then((list) => list.whereType<ChatListItem>().toList());
 
       // Sort chat list items by latest message time
       chatListItems
