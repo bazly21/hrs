@@ -461,27 +461,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
       verificationCompleted: (PhoneAuthCredential credential) async {},
       verificationFailed: (FirebaseAuthException e) {
         // Handle verification failure
-        String errorMessage;
-
-        switch (e.code) {
-          case 'auth/invalid-phone-number':
-            errorMessage = invalidPhoneNumberErrorMessage;
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = tooManyRequestsErrorMessage;
-            break;
-          case 'auth/network-request-failed':
-            errorMessage = networkRequestFailedErrorMessage;
-            break;
-          case 'phone-number-already-exists':
-            errorMessage = phoneNumberExistsErrorMessage;
-            break;
-          case 'auth/quota-exceeded':
-            errorMessage = quotaExceededErrorMessage;
-            break;
-          default:
-            errorMessage = unknownErrorMessage;
-        }
+        String errorMessage = getErrorMessage(e);
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
