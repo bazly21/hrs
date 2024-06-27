@@ -40,7 +40,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
         } else if (snapshot.hasError) {
           // Show snackbar with error message
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pop(context, "Unable to load profile. Please try again.");
+            Navigator.pop(context, "Unable to load profile. Please try again");
           });
         } else if (snapshot.hasData && snapshot.data != null) {
           return _buildMainBody(snapshot.data!);
