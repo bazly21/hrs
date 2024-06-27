@@ -376,7 +376,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
       // User is not logged in, navigate to LoginPage
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text("Please log in first before applying."),
+          content: const Text("Please log in first before applying"),
           duration: const Duration(seconds: 3),
           action: SnackBarAction(
             label: "Login",
