@@ -15,7 +15,7 @@ class CustomPhoneNumberForm extends StatelessWidget {
     required this.formKey,
     required this.controller,
     required this.buttonOnPressed,
-    required this.linkOnTap,
+    this.linkOnTap,
     this.hasRegisterLink = true,
   }) : assert(
           !hasRegisterLink || linkOnTap != null,
@@ -64,7 +64,9 @@ class CustomPhoneNumberForm extends StatelessWidget {
 
           // Log in button
           CustomButton(
-            text: "Login",
+            // If hasRegisterLink is false,
+            // the button text is "Register"
+            text: !hasRegisterLink ? "Register" : "Login",
             onPressed: buttonOnPressed,
           ),
 

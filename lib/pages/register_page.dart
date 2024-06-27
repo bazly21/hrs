@@ -44,7 +44,6 @@ class _RegisterPageState extends State<RegisterPage> {
           controller: _phoneNumberController,
           buttonOnPressed: validate,
           hasRegisterLink: false,
-          linkOnTap: null,
         ),
       ),
     );
