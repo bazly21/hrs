@@ -114,10 +114,12 @@ class _LandlordPropertyDetailsPageState
     if (isConfirmed ?? false) {
       await PropertyService.deleteProperty(widget.propertyID).then((_) {
         Navigator.pop(context, 'success');
-      }).catchError((error) {
+      }).catchError((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting property: $error'),
+            content: const Text('Error deleting property. Please try again'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            duration: const Duration(seconds: 3),
           ),
         );
       });
