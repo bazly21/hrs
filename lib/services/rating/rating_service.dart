@@ -32,6 +32,7 @@ class RatingService {
         .doc(tenancyDocID);
 
     // Perform all operations within a single transaction
+    // to ensure data consistency
     await FirebaseFirestore.instance.runTransaction((transaction) async {
       // Get landlord document snapshot
       DocumentSnapshot landlordSnapshot = await transaction.get(landlordDocRef);
@@ -89,10 +90,15 @@ class RatingService {
               3)
           .toStringAsFixed(1));
 
+      // Set the rating document
       transaction.set(ratingDocRef, landlordRating.toMap());
 
+      // Update the tenancy document to indicate
+      // that the landlord has rated
       transaction.update(tenancyDocRef, {"isRated.rateLandlord": true});
 
+      // Update the landlord document with
+      // the new rating count and average ratings
       transaction.update(landlordDocRef, {
         "ratingCount.landlord": ratingCount + 1,
         "ratingAverage.landlord": {
@@ -111,14 +117,18 @@ class RatingService {
     required String tenancyDocID,
     required String propertyID,
   }) async {
+    // Create document reference for tenant's rating
     final DocumentReference ratingDocRef = FirebaseFirestore.instance
         .collection("users")
         .doc(tenantID)
         .collection("ratings")
         .doc();
 
+    // Create document reference for tenant's profile
     final DocumentReference tenantDocRef =
         FirebaseFirestore.instance.collection("users").doc(tenantID);
+
+    // Create document reference for tenancy document
     final DocumentReference tenancyDocRef = FirebaseFirestore.instance
         .collection("properties")
         .doc(propertyID)
@@ -126,57 +136,72 @@ class RatingService {
         .doc(tenancyDocID);
 
     // Perform all operations within a single transaction
+    // to ensure data consistency
     await FirebaseFirestore.instance.runTransaction((transaction) async {
-      // Set operation: Save rating information in the database
+      // Get tenant document snapshot
       DocumentSnapshot tenantSnapshot = await transaction.get(tenantDocRef);
 
-      // Convert the tenant data to a map
-      Map<String, dynamic>? tenantData =
-          tenantSnapshot.data() as Map<String, dynamic>?;
+      // Check if the document exists
+      if (!tenantSnapshot.exists) {
+        throw Exception("Tenant does not exist");
+      }
 
-      if (tenantData == null) throw Exception("Landlord does not exist");
+      // Convert the tenant data to a map
+      final tenantData = tenantSnapshot.data() as Map<String, dynamic>;
 
       // Calculate the average ratings
       double totalPaymentRating = 0.0;
       double totalCommunicationRating = 0.0;
       double totalMaintenanceRating = 0.0;
-      int ratingCount = tenantData["ratingCount"]?["Tenant"] ?? 0;
+      int ratingCount = tenantData["ratingCount"]?["tenant"] ?? 0;
 
-      // Get the total ratings
+      // Get the total ratings for Payment
       totalPaymentRating =
-          ((tenantData["ratingAverage"]?["Tenant"]?["paymentRating"] ?? 0.0) *
+          ((tenantData["ratingAverage"]?["tenant"]?["paymentRating"] ?? 0.0) *
               ratingCount);
-      totalCommunicationRating = ((tenantData["ratingAverage"]?["Tenant"]
+
+      // Get the total ratings for Communication
+      totalCommunicationRating = ((tenantData["ratingAverage"]?["tenant"]
                   ?["communicationRating"] ??
               0.0) *
           ratingCount);
-      totalMaintenanceRating = ((tenantData["ratingAverage"]?["Tenant"]
+
+      // Get the total ratings for Maintenance
+      totalMaintenanceRating = ((tenantData["ratingAverage"]?["tenant"]
                   ?["maintenanceRating"] ??
               0.0) *
           ratingCount);
 
-      // Get new total ratings
+      // Get new total ratings by adding the new ratings
+      // to the current total ratings
       totalPaymentRating += tenantRating.paymentRating;
       totalCommunicationRating += tenantRating.communicationRating;
       totalMaintenanceRating += tenantRating.maintenanceRating;
 
-      // Calculate the average ratings
+      // Calculate the average ratings by dividing
+      // updated total ratings by the new rating count
+      // and rounding off to 1 decimal place
       double averagePaymentRating = double.parse(
-          (totalPaymentRating / (ratingCount + 1)).toStringAsFixed(2));
+          (totalPaymentRating / (ratingCount + 1)).toStringAsFixed(1));
       double averageCommunicationRating = double.parse(
-          (totalCommunicationRating / (ratingCount + 1)).toStringAsFixed(2));
+          (totalCommunicationRating / (ratingCount + 1)).toStringAsFixed(1));
       double averageMaintenanceRating = double.parse(
-          (totalMaintenanceRating / (ratingCount + 1)).toStringAsFixed(2));
+          (totalMaintenanceRating / (ratingCount + 1)).toStringAsFixed(1));
       double overallRating = double.parse(((averagePaymentRating +
                   averageCommunicationRating +
                   averageMaintenanceRating) /
               3)
-          .toStringAsFixed(2));
+          .toStringAsFixed(1));
 
+      // Set the rating document
       transaction.set(ratingDocRef, tenantRating.toMap());
 
+      // Update the tenancy document to indicate
+      // that the tenant has rated
       transaction.update(tenancyDocRef, {"isRated.rateTenant": true});
 
+      // Update the tenant document with
+      // the new rating count and average ratings
       transaction.update(tenantDocRef, {
         "ratingCount.tenant": ratingCount + 1,
         "ratingAverage.tenant": {

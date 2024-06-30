@@ -64,11 +64,6 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
     TenantEndedTenancy tenancyData,
     bool isLastIndex,
   ) {
-    num rentalPrice = tenancyData.rentalPrice;
-    String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
-        ? rentalPrice.toStringAsFixed(2)
-        : rentalPrice.toStringAsFixed(0);
-
     return Container(
       margin: EdgeInsets.fromLTRB(16, 16, 16, isLastIndex ? 16 : 0),
       width: double.infinity,
@@ -157,9 +152,10 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                           children: [
                             RichText(
                               text: TextSpan(
-                                text: tenancyData.rentalPrice == 0.0
-                                    ? 'N/A'
-                                    : 'RM$formattedRentalPrice',
+                                text: tenancyData.rentalPrice ==
+                                        tenancyData.rentalPrice.toInt()
+                                    ? 'RM${tenancyData.rentalPrice.toStringAsFixed(0)}'
+                                    : 'RM${tenancyData.rentalPrice.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                     fontSize: 18,
                                     color: Colors.black,
@@ -205,11 +201,14 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                                 // Create a Map to pass to the RatingPage
                                 final ratingInfo = {
                                   'propertyID': tenancyData.propertyID,
-                                  'propertyImageURL': tenancyData.propertyImageURL,
+                                  'propertyImageURL':
+                                      tenancyData.propertyImageURL,
                                   'propertyName': tenancyData.propertyName,
-                                  'propertyAddress': tenancyData.propertyAddress,
+                                  'propertyAddress':
+                                      tenancyData.propertyAddress,
                                   'landlordID': tenancyData.landlordID,
-                                  'landlordImageURL': tenancyData.landlordImageURL,
+                                  'landlordImageURL':
+                                      tenancyData.landlordImageURL,
                                   'landlordName': tenancyData.landlordName,
                                   'tenancyDocID': tenancyData.tenancyDocID,
                                 };

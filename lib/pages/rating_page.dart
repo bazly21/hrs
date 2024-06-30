@@ -218,7 +218,7 @@ class _RatingPageState extends State<RatingPage> {
         // Landlord Profile Picture
         CustomCircleAvatar(
           imageURL: widget.ratingInfo['landlordImageURL'],
-          name: "Landlord Name",
+          name: widget.ratingInfo['landlordName']!,
           radius: 28,
           fontSize: 22,
         ),

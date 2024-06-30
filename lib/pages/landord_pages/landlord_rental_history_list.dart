@@ -60,7 +60,8 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
                     return ListView.builder(
                       itemCount: tenancies.length,
                       itemBuilder: (context, index) {
-                        return _buildRentalItem(tenancies[index], index == tenancies.length - 1);
+                        return _buildRentalItem(
+                            tenancies[index], index == tenancies.length - 1);
                       },
                     );
                   }
@@ -211,25 +212,53 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
                         ),
                         onPressed: tenancyData.isRated
                             ? null
-                            : () => NavigationUtils.pushPage(
-                                        context,
-                                        LandlordRatingPage(
-                                          tenantID: tenancyData.tenantID,
-                                          tenancyDocID:
-                                              tenancyData.tenancyDocID,
-                                          propertyID: tenancyData.propertyID,
-                                        ),
-                                        SlideDirection.left)
-                                    .then((message) {
-                                  if (message != null) {
-                                    // Show success message
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(message)));
+                            : () {
+                                // Create a Map to pass to the RatingPage
+                                final ratingInfo = {
+                                  'propertyID': tenancyData.propertyID,
+                                  'propertyImageURL':
+                                      tenancyData.propertyImageURL,
+                                  'propertyName': tenancyData.propertyName,
+                                  'propertyAddress':
+                                      tenancyData.propertyAddress,
+                                  'tenantID': tenancyData.tenantID,
+                                  'tenantImageURL': tenancyData.tenantImageURL,
+                                  'tenantName': tenancyData.tenantName,
+                                  'tenancyDocID': tenancyData.tenancyDocID,
+                                };
 
-                                    // Refresh the list of tenancies
-                                    _refreshEndedTenancies();
+                                NavigationUtils.pushPage(
+                                  context,
+                                  LandlordRatingPage(
+                                    ratingInfo: ratingInfo,
+                                  ),
+                                  SlideDirection.left,
+                                ).then((value) {
+                                  if (value != null && value['success']) {
+                                    // Refresh the list of ended tenancies
+                                    setState(() {
+                                      _endedTenancies = Future.value(
+                                          value['updatedEndedTenancies']);
+                                    });
+
+                                    // Show success message
+                                    Future.delayed(
+                                      const Duration(milliseconds: 500),
+                                      () {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(value['message']),
+                                            duration:
+                                                const Duration(seconds: 3),
+                                            backgroundColor: Colors.green[700],
+                                          ),
+                                        );
+                                      },
+                                    );
                                   }
-                                }),
+                                });
+                              },
                         child: Text(tenancyData.isRated ? 'Rated' : 'Rate'),
                       ),
                     ),
