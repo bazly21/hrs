@@ -77,8 +77,9 @@ class _PropertyApplicationsSectionState
                           _buildApplicantData(index, context, applicationData),
                     );
                   });
-            } else {
-              // When there is no data
+            }
+            // When there is no data
+            else {
               return LayoutBuilder(
                 builder: (context, constraints) {
                   return SingleChildScrollView(
@@ -479,7 +480,8 @@ class _PropertyApplicationsSectionState
 
           return SingleChildScrollView(
             padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom),
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -494,54 +496,105 @@ class _PropertyApplicationsSectionState
                   if (endDate != null) _tenancyEndDateText(),
                   const SizedBox(height: 20),
                   // Submit button
-                  ElevatedButton(
-                    child: const Text('Submit'),
-                    onPressed: () {
-                      // Save tenancy information in database
-                      RentalService.saveTenancyInfo(
-                              propertyID: widget.propertyID,
-                              tenantID: tenantData.applicantID!,
-                              landlordID: _auth.currentUser!.uid,
-                              applicationID: tenantData.applicationID!,
-                              duration: int.parse(tenancyDuration!),
-                              startDate: startDate!,
-                              endDate: endDate!)
-                          .then((_) {
-                        // Close the modal bottom sheet
-                        Navigator.pop(context);
-
-                        // Show success message if the saving operation is successful
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: const Text(
-                                'Tenancy information saved successfully.'),
-                            duration: const Duration(seconds: 3),
-                            backgroundColor: Colors.green[700],
-                          ),
-                        );
-
-                        refreshData();
-                      }).catchError(
-                        (error) {
-                          // Show error message if the saving operation is failed
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                  'Failed to save tenancy information. Please try again.'),
-                              duration: const Duration(seconds: 3),
-                              backgroundColor: Theme.of(context).colorScheme.error,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                  _buildSubmitTenancyButton(context, tenantData),
                 ],
               ),
             ),
           );
         });
       },
+    );
+  }
+
+  Row _buildSubmitTenancyButton(BuildContext context, Application tenantData) {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              // Show confirmation dialog
+              showDialog(
+                context: context,
+                builder: (BuildContext innerContext) {
+                  return AlertDialog(
+                    title: const Text('Confirm Submission'),
+                    content: const Text(
+                      'Are you sure you want to save this tenancy information? Once submitted, this action cannot be undone',
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('Cancel'),
+                        onPressed: () {
+                          // Close the dialog
+                          Navigator.of(innerContext).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: const Text('Confirm'),
+                        onPressed: () {
+                          // Close the dialog
+                          Navigator.of(innerContext).pop();
+
+                          // Save tenancy information in database
+                          RentalService.saveTenancyInfo(
+                            propertyID: widget.propertyID,
+                            tenantID: tenantData.applicantID!,
+                            landlordID: _auth.currentUser!.uid,
+                            applicationID: tenantData.applicationID!,
+                            duration: int.parse(tenancyDuration!),
+                            startDate: startDate!,
+                            endDate: endDate!,
+                          ).then((_) {
+                            // Close the modal bottom sheet
+                            Navigator.pop(context);
+
+                            // Show success message if the saving operation is successful
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text(
+                                  'Tenancy information saved successfully',
+                                ),
+                                duration: const Duration(seconds: 3),
+                                backgroundColor: Colors.green[700],
+                              ),
+                            );
+
+                            // Refresh the application list
+                            refreshData();
+                          }).catchError(
+                            (_) {
+                              // Show error message if the saving operation is failed
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text(
+                                    'Failed to save tenancy information. Please try again',
+                                  ),
+                                  duration: const Duration(seconds: 3),
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+            child: const Text('Submit'),
+          ),
+        ),
+      ],
     );
   }
 

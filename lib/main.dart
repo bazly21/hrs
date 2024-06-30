@@ -5,7 +5,6 @@ import 'package:hrs/provider/image_provider.dart';
 import 'package:hrs/provider/refresh_provider.dart';
 import 'package:hrs/provider/wishlist_provider.dart';
 import 'package:hrs/services/auth/auth_service.dart';
-import 'package:hrs/test.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
@@ -42,12 +41,20 @@ class MyApp extends StatelessWidget {
         fontFamily: "SFProDisplay",
         scaffoldBackgroundColor: const Color(0xFFFCFCFC),
         primaryColor: const Color(0xFF8568F3),
+        popupMenuTheme: PopupMenuThemeData(
+          color: Colors.white,
+          surfaceTintColor: Theme.of(context).primaryColor,
+          textStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+          ),
+          // Set corner radius
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
       ),
-      // home: LoginPage(),
       home: const NavigationPage()
-      // home: const TestPage(),
-      // home:  ProfilePicture(),
-      // home: const RatingList()
     );
   }
 }
