@@ -7,19 +7,24 @@ import "package:hrs/model/user/tenant_profile.dart";
 
 class RatingService {
   // Submit rating to database
-  static Future<void> submitLandlordRating(
-      {required LandlordRating landlordRating,
-      required String landlordID,
-      required String tenancyDocID,
-      required String propertyID}) async {
+  static Future<void> submitLandlordRating({
+    required LandlordRating landlordRating,
+    required String landlordID,
+    required String tenancyDocID,
+    required String propertyID,
+  }) async {
+    // Create document reference for landlord's rating
     final DocumentReference ratingDocRef = FirebaseFirestore.instance
         .collection("users")
         .doc(landlordID)
         .collection("ratings")
         .doc();
 
+    // Create document reference for landlord's profile
     final DocumentReference landlordDocRef =
         FirebaseFirestore.instance.collection("users").doc(landlordID);
+
+    // Create document reference for tenancy document
     final DocumentReference tenancyDocRef = FirebaseFirestore.instance
         .collection("properties")
         .doc(propertyID)
@@ -28,7 +33,7 @@ class RatingService {
 
     // Perform all operations within a single transaction
     await FirebaseFirestore.instance.runTransaction((transaction) async {
-      // Set operation: Save rating information in the database
+      // Get landlord document snapshot
       DocumentSnapshot landlordSnapshot = await transaction.get(landlordDocRef);
 
       // Check if the document exists
@@ -37,8 +42,7 @@ class RatingService {
       }
 
       // Convert the landlord data to a map
-      Map<String, dynamic> landlordData =
-          landlordSnapshot.data() as Map<String, dynamic>;
+      final landlordData = landlordSnapshot.data() as Map<String, dynamic>;
 
       // Calculate the average ratings
       double totalSupportRating = 0.0;
@@ -46,37 +50,44 @@ class RatingService {
       double totalMaintenanceRating = 0.0;
       int ratingCount = landlordData["ratingCount"]?["landlord"] ?? 0;
 
-      // Get the total ratings
+      // Get the total ratings for Support
       totalSupportRating = ((landlordData["ratingAverage"]?["landlord"]
                   ?["supportRating"] ??
               0.0) *
           ratingCount);
+
+      // Get the total ratings for Communication
       totalCommunicationRating = ((landlordData["ratingAverage"]?["landlord"]
                   ?["communicationRating"] ??
               0.0) *
           ratingCount);
+
+      // Get the total ratings for Maintenance
       totalMaintenanceRating = ((landlordData["ratingAverage"]?["landlord"]
                   ?["maintenanceRating"] ??
               0.0) *
           ratingCount);
 
-      // Get new total ratings
+      // Get new total ratings by adding the new ratings
+      // to the current total ratings
       totalSupportRating += landlordRating.supportRating;
       totalCommunicationRating += landlordRating.communicationRating;
       totalMaintenanceRating += landlordRating.maintenanceRating;
 
-      // Calculate the average ratings
+      // Calculate the average ratings by dividing
+      // updated total ratings by the new rating count
+      // and rounding off to 1 decimal place
       double averageSupportRating = double.parse(
-          (totalSupportRating / (ratingCount + 1)).toStringAsFixed(2));
+          (totalSupportRating / (ratingCount + 1)).toStringAsFixed(1));
       double averageCommunicationRating = double.parse(
-          (totalCommunicationRating / (ratingCount + 1)).toStringAsFixed(2));
+          (totalCommunicationRating / (ratingCount + 1)).toStringAsFixed(1));
       double averageMaintenanceRating = double.parse(
-          (totalMaintenanceRating / (ratingCount + 1)).toStringAsFixed(2));
+          (totalMaintenanceRating / (ratingCount + 1)).toStringAsFixed(1));
       double overallRating = double.parse(((averageSupportRating +
                   averageCommunicationRating +
                   averageMaintenanceRating) /
               3)
-          .toStringAsFixed(2));
+          .toStringAsFixed(1));
 
       transaction.set(ratingDocRef, landlordRating.toMap());
 
@@ -94,11 +105,12 @@ class RatingService {
     });
   }
 
-  static Future<void> submitTenantRating(
-      {required TenantRating tenantRating,
-      required String tenantID,
-      required String tenancyDocID,
-      required String propertyID}) async {
+  static Future<void> submitTenantRating({
+    required TenantRating tenantRating,
+    required String tenantID,
+    required String tenancyDocID,
+    required String propertyID,
+  }) async {
     final DocumentReference ratingDocRef = FirebaseFirestore.instance
         .collection("users")
         .doc(tenantID)
@@ -234,8 +246,10 @@ class RatingService {
           communicationRating: ratingData["communicationRating"] ?? 0.0,
           maintenanceRating: ratingData["maintenanceRating"] ?? 0.0,
           comments: ratingData["comments"],
-          supportRating: role == "Landlord" ? ratingData["supportRating"] ?? 0.0 : null,
-          paymentRating: role == "Tenant" ? ratingData["paymentRating"] ?? 0.0 : null,
+          supportRating:
+              role == "Landlord" ? ratingData["supportRating"] ?? 0.0 : null,
+          paymentRating:
+              role == "Tenant" ? ratingData["paymentRating"] ?? 0.0 : null,
         );
 
         // return {
@@ -247,7 +261,6 @@ class RatingService {
         //   ...role == "Landlord"
         //       ? {"supportRating": ratingData["supportRating"]}
         //       : {"paymentRating": ratingData["paymentRating"]}
-          
       })).then((list) => list.whereType<RatingDetails>().toList());
     }
 

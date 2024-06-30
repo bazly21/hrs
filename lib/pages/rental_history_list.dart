@@ -47,7 +47,8 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                 return ListView.builder(
                   itemCount: tenancies.length,
                   itemBuilder: (context, index) {
-                    return _buildRentalItem(tenancies[index], index == tenancies.length - 1);
+                    return _buildRentalItem(
+                        tenancies[index], index == tenancies.length - 1);
                   },
                 );
               }
@@ -63,6 +64,11 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
     TenantEndedTenancy tenancyData,
     bool isLastIndex,
   ) {
+    num rentalPrice = tenancyData.rentalPrice;
+    String formattedRentalPrice = rentalPrice != rentalPrice.toInt()
+        ? rentalPrice.toStringAsFixed(2)
+        : rentalPrice.toStringAsFixed(0);
+
     return Container(
       margin: EdgeInsets.fromLTRB(16, 16, 16, isLastIndex ? 16 : 0),
       width: double.infinity,
@@ -153,7 +159,7 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                               text: TextSpan(
                                 text: tenancyData.rentalPrice == 0.0
                                     ? 'N/A'
-                                    : 'RM${tenancyData.rentalPrice.toStringAsFixed(2)}',
+                                    : 'RM$formattedRentalPrice',
                                 style: const TextStyle(
                                     fontSize: 18,
                                     color: Colors.black,
@@ -195,29 +201,53 @@ class _RentalHistoryListState extends State<RentalHistoryList> {
                         ),
                         onPressed: tenancyData.isRated
                             ? null
-                            : () => NavigationUtils.pushPage(
-                                        context,
-                                        RatingPage(
-                                          landlordID: tenancyData.landlordID,
-                                          tenancyDocID:
-                                              tenancyData.tenancyDocID,
-                                          propertyID: tenancyData.propertyID,
-                                        ),
-                                        SlideDirection.left)
-                                    .then((message) {
-                                  if (message != null) {
+                            : () {
+                                // Create a Map to pass to the RatingPage
+                                final ratingInfo = {
+                                  'propertyID': tenancyData.propertyID,
+                                  'propertyImageURL': tenancyData.propertyImageURL,
+                                  'propertyName': tenancyData.propertyName,
+                                  'propertyAddress': tenancyData.propertyAddress,
+                                  'landlordID': tenancyData.landlordID,
+                                  'landlordImageURL': tenancyData.landlordImageURL,
+                                  'landlordName': tenancyData.landlordName,
+                                  'tenancyDocID': tenancyData.tenancyDocID,
+                                };
+
+                                NavigationUtils.pushPage(
+                                  context,
+                                  RatingPage(
+                                    ratingInfo: ratingInfo,
+                                  ),
+                                  SlideDirection.left,
+                                ).then((value) {
+                                  // If a succes message is returned
+                                  // from the RatingPage,
+                                  if (value != null && value['success']) {
+                                    // Refresh the list of tenancies
+                                    setState(() {
+                                      _endedTenancies = Future.value(
+                                          value['updatedEndedTenancies']);
+                                    });
+
                                     // Show success message
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(SnackBar(
-                                      content: Text(message),
-                                      duration: const Duration(seconds: 3),
-                                      backgroundColor: Colors.green[700],
-                                    ));
+                                    Future.delayed(
+                                      const Duration(milliseconds: 500),
+                                      () {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          content: Text(value['message']),
+                                          duration: const Duration(seconds: 3),
+                                          backgroundColor: Colors.green[700],
+                                        ));
+                                      },
+                                    );
 
                                     // Refresh the list of tenancies
-                                    _refreshEndedTenancies();
+                                    // _refreshEndedTenancies();
                                   }
-                                }),
+                                });
+                              },
                         child: Text(tenancyData.isRated ? 'Rated' : 'Rate'),
                       ),
                     ),
