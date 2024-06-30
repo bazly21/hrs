@@ -19,10 +19,7 @@ class ProfilePageNoAccount extends StatelessWidget {
                 // Profile Picture
                 const CircleAvatar(
                   radius: 50.0,
-                  backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/150'), // Example URL
-                  backgroundColor: Colors
-                      .transparent, // Make background transparent if using image
+                  backgroundImage: AssetImage("images/blank_profile_picture.png"),
                 ),
 
                 // Add space between elements
