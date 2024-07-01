@@ -56,17 +56,21 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text("Unable to load data. Please try again later"),
+                              content: const Text(
+                                "Unable to load data. Please try again later",
+                              ),
                               duration: const Duration(seconds: 3),
-                              backgroundColor: Theme.of(context).colorScheme.error,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.error,
                             ),
                           );
                         });
                       } else if (snapshot.hasData &&
                           snapshot.data!.isNotEmpty) {
-                        final List<LandlordEndedTenancy> tenancies =
-                            snapshot.data!;
+                        final tenancies = snapshot.data!;
+
                         return ListView.builder(
+                          shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: tenancies.length,
                           itemBuilder: (context, index) {

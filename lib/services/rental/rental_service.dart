@@ -189,8 +189,7 @@ class RentalService {
           (tenantData['ratingAverage']?["tenant"]?["overallRating"] as num?)
                   ?.toDouble() ??
               0.0,
-      'tenantProfilePictureUrl':
-          tenantData['profilePictureURL'] ?? 'https://via.placeholder.com/150',
+      'tenantProfilePictureUrl': tenantData['profilePictureURL'],
       'tenancyDuration': tenancyData['duration'],
       'tenancyStartDate': tenancyData['startDate'],
       'tenancyEndDate': tenancyData['endDate'],
