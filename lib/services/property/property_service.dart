@@ -195,9 +195,15 @@ class PropertyService {
     // Filter properties based on searchQuery if it is not null and not empty
     if (searchQuery != null && searchQuery.isNotEmpty) {
       propertiesDetailsList = propertiesDetailsList.where((property) {
-        return property.address!
-            .toLowerCase()
-            .contains(searchQuery.toLowerCase());
+        // Convert searchQuery, property address,
+        // and property name to lowercase
+        final lowercaseQuery = searchQuery.toLowerCase();
+        final lowercaseAddress = property.address?.toLowerCase() ?? '';
+        final lowercasePropertyName =
+            property.propertyName?.toLowerCase() ?? '';
+
+        return lowercaseAddress.contains(lowercaseQuery) ||
+            lowercasePropertyName.contains(lowercaseQuery);
       }).toList();
     }
 
