@@ -72,19 +72,22 @@ class PropertyService {
           applicantID,
         );
 
-        // Then, if the user has applied
+        // Application with "Pending" status
         if (hasApplied) {
           // Set enableApplyButton based on tenancy status
           // If tenancy has ended, the apply button will be enabled
           // If tenancy is still active, the apply button will be disabled
           // If there is no tenancy, the apply button will be disabled
+          // enableApplyButton =
+          //     await TenancyService.checkUserTenancy(propertyID, applicantID);
+          // print("enableApplyButton: $enableApplyButton");
+          // hasApplied = !enableApplyButton;
+          enableApplyButton = false;
+        }
+        // Application with "Declined" or "Accepted" status
+        else {
           enableApplyButton =
               await TenancyService.checkUserTenancy(propertyID, applicantID);
-        }
-        // If the user is not applied yet
-        // The apply button will be enabled
-        else {
-          enableApplyButton = true;
         }
 
         // Get applicant data

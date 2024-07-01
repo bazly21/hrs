@@ -13,31 +13,37 @@ class TenancyService {
         .doc(propertyID)
         .collection("tenancies")
         .where("tenantID", isEqualTo: applicantID)
+        .where("status", isEqualTo: "Active")
         .orderBy("createdAt", descending: true)
         .limit(1)
         .get();
 
     // If tenancy snapshot is not exist
     // Meaning there is no tenancy for the user
-    // So, the apply button will be disabled
-    if (tenancySnapshots.docs.isEmpty) return false;
+    // So, the apply button will be enabled
+    if (tenancySnapshots.docs.isEmpty) return true;
 
     // If tenancy snapshot is exist
     // Meaning there is a tenancy for the user
-    DocumentSnapshot tenancyDoc = tenancySnapshots.docs.first;
-
-    if (tenancyDoc.data() == null) return false;
-
-    Map<String, dynamic> tenancyData =
-        tenancyDoc.data() as Map<String, dynamic>;
-
-    // If tenancy has ended, return true
-    // Meaning the apply button will be enabled
-    if (tenancyData["status"] == "Ended") return true;
-
-    // If tenancy is still active, return false
-    // Meaning the apply button will be disabled
+    // So, the apply button will be disabled
     return false;
+
+    // If tenancy snapshot is exist
+    // Meaning there is a tenancy for the user
+    // DocumentSnapshot tenancyDoc = tenancySnapshots.docs.first;
+
+    // if (tenancyDoc.data() == null) return false;
+
+    // Map<String, dynamic> tenancyData =
+    //     tenancyDoc.data() as Map<String, dynamic>;
+
+    // // If tenancy has ended, return true
+    // // Meaning the apply button will be enabled
+    // if (tenancyData["status"] == "Ended") return true;
+
+    // // If tenancy is still active, return false
+    // // Meaning the apply button will be disabled
+    // return false;
   }
 
   // Get landlord ended tenancies

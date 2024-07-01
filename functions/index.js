@@ -42,7 +42,7 @@ exports.updateTenancyAndPropertyStatus = functions.pubsub
           const propertyRef = db.collection("properties").doc(propertyID);
           propertyBatch.update(propertyRef, {status: "Available"});
 
-          // Update user's hasActiveTenancy field to false
+          // Update user"s hasActiveTenancy field to false
           const tenancyData = doc.data();
           const tenantID = tenancyData.tenantID;
           const tenantRef = db.collection("users").doc(tenantID);
@@ -60,6 +60,42 @@ exports.updateTenancyAndPropertyStatus = functions.pubsub
     }
   });
 
+  exports.updateApplicationStatusOnTenancyCreate = functions.firestore
+    .document("properties/{propertyId}/tenancies/{tenancyId}")
+    .onCreate(async (snapshot, context) => {
+        const propertyId = context.params.propertyId;
+        const db = admin.firestore();
+
+        try {
+            // Get all applications for this property with "Pending" status
+            const applicationsSnapshot = await db.collection("properties")
+                .doc(propertyId)
+                .collection("applications")
+                .where("status", "==", "Pending")
+                .get();
+
+            // If there are no pending applications, exit early
+            if (applicationsSnapshot.empty) {
+                console.log(`No pending applications found for property ${propertyId}`);
+                return;
+            }
+
+            // Prepare batch write
+            const batch = db.batch();
+
+            applicationsSnapshot.docs.forEach((doc) => {
+                batch.update(doc.ref, {status: "Declined"});
+            });
+
+            // Commit the batch
+            await batch.commit();
+
+            console.log(`Successfully updated`);
+        } catch (error) {
+            console.error("Error updating application statuses:", error);
+        }
+    });
+
 exports.calculateTenantCriteriaScore = functions.firestore
   .document("properties/{propertyId}/applications/{applicationId}")
   .onCreate(async (snapshot, context) => {
@@ -67,6 +103,7 @@ exports.calculateTenantCriteriaScore = functions.firestore
       const db = admin.firestore();
       const applicationData = snapshot.data();
       const propertyID = context.params.propertyId;
+      const applicantID = applicationData.applicantID;
 
       // Fetch the property document
       const propertySnapshot = await db
@@ -74,8 +111,14 @@ exports.calculateTenantCriteriaScore = functions.firestore
         .doc(propertyID)
         .get();
 
+      // Fetch applicant"s user document
+      const applicantSnapshot = await db
+        .collection("users")
+        .doc(applicantID)
+        .get();
+
       // Check if the property document exists
-      if (propertySnapshot.exists) {
+      if (propertySnapshot.exists && applicantSnapshot.exists) {
         // Extract tenantCriteria field from the property document
         const propertyData = propertySnapshot.data();
 
@@ -87,13 +130,17 @@ exports.calculateTenantCriteriaScore = functions.firestore
 
         const tenantCriteria = propertyData.tenantCriteria;
 
+        // Get the applicant"s overall rating
+        const applicantData = applicantSnapshot.data();
+        const overallRating = applicantData.ratingAverage.tenant.overallRating || 0;
+
         // Perform operations with tenantCriteria field
-        const criteriaScore = calculateCriteriaScore(tenantCriteria, applicationData);
+        const criteriaScore = calculateCriteriaScore(tenantCriteria, applicationData, overallRating);
 
         // Update the document with the calculated criteria score
         await snapshot.ref.update({criteriaScore: criteriaScore});
       } else {
-        console.log("Property document not found.");
+        console.log("Property or applicant not found");
       }
     } catch (error) {
       console.error("Error updating criteria score: ", error);
@@ -113,38 +160,42 @@ exports.calculateTenantCriteriaScore = functions.firestore
  * @param {number} applicationData.numberOfPax - The number of pax of the applicant.
  * @param {string} applicationData.nationality - The nationality of the applicant.
  * @param {number} applicationData.tenancyDuration - The tenancy duration of the applicant.
+ * @param {number} overallRating - The overall rating of the applicant.
  * @return {number} The calculated criteria score.
  */
-  function calculateCriteriaScore(tenantCriteria, applicationData) {
-    let score = 0;
+function calculateCriteriaScore(tenantCriteria, applicationData, overallRating) {
+  let score = 0;
 
-    // Calculate score based on profile type
-    if (applicationData.profileType === tenantCriteria.profileType) {
-      score += 10;
-    }
+  // Add overall rating to the score
+  score += overallRating;
 
-    // Calculate score based on number of pax
-    const numberOfPax = applicationData.numberOfPax;
-    const paxScore = {
-      "Single or Couple": numberOfPax <= 2 ? 10 : 0,
-      "Small Family (1 to 4 pax)": numberOfPax <= 4 ? (numberOfPax * 10) : 0,
-      "Large Family (5+ pax)": numberOfPax >= 5 ? ((numberOfPax - 4) * 10) : 0,
-    };
-    score += paxScore[tenantCriteria.numberOfPax] || 0;
-
-    // Calculate score based on nationality
-    if (applicationData.nationality === tenantCriteria.nationality) {
-      score += 10;
-    }
-
-    // Calculate score based on tenancy duration
-    const tenancyDuration = applicationData.tenancyDuration;
-    const durationScore = {
-      "Short term (< 4 Months)": tenancyDuration <= 3 ? (tenancyDuration * 10) : 0,
-      "Mid term (4-9 Months)": tenancyDuration >= 4 && tenancyDuration <= 9 ? ((tenancyDuration - 3) * 10) : 0,
-      "Long term (10-12 months)": tenancyDuration >= 10 && tenancyDuration <= 12 ? ((tenancyDuration - 9) * 10) : 0,
-    };
-    score += durationScore[tenantCriteria.tenancyDuration] || 0;
-
-    return score;
+  // Calculate score based on profile type
+  if (applicationData.profileType === tenantCriteria.profileType) {
+    score += 1;
   }
+
+  // Calculate score based on number of pax
+  const numberOfPax = applicationData.numberOfPax;
+  const paxScore = {
+    "Single or Couple": numberOfPax <= 2 ? 1 : 0,
+    "Small Family (1 to 4 pax)": numberOfPax <= 4 ? numberOfPax : 0,
+    "Large Family (5+ pax)": numberOfPax >= 5 ? (numberOfPax - 4) : 0,
+  };
+  score += paxScore[tenantCriteria.numberOfPax] || 0;
+
+  // Calculate score based on nationality
+  if (applicationData.nationality === tenantCriteria.nationality) {
+    score += 1;
+  }
+
+  // Calculate score based on tenancy duration
+  const tenancyDuration = applicationData.tenancyDuration;
+  const durationScore = {
+    "Short term (< 4 Months)": tenancyDuration <= 3 ? tenancyDuration : 0,
+    "Mid term (4-9 Months)": tenancyDuration >= 4 && tenancyDuration <= 9 ? (tenancyDuration - 3) : 0,
+    "Long term (10-12 months)": tenancyDuration >= 10 && tenancyDuration <= 12 ? (tenancyDuration - 9) : 0,
+  };
+  score += durationScore[tenantCriteria.tenancyDuration] || 0;
+
+  return score;
+}

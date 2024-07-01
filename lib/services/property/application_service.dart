@@ -166,30 +166,37 @@ class ApplicationService {
   }
 
   static Future<bool> checkUserApplication(
-      String propertyID, String applicantID) async {
+    String propertyID,
+    String applicantID,
+  ) async {
     QuerySnapshot applicationSnapshots = await FirebaseFirestore.instance
         .collection("properties")
         .doc(propertyID)
         .collection("applications")
         .where("applicantID", isEqualTo: applicantID)
+        .where("status", isEqualTo: "Pending")
         .orderBy("submittedAt", descending: true)
         .get();
 
     // If no application found (not apply), return false
     if (applicationSnapshots.docs.isEmpty) return false;
 
+    // If application with status "Pending"
+    // is found (already apply), return true
+    return true;
+
     // Take the first application
-    DocumentSnapshot applicationDoc = applicationSnapshots.docs.first;
-    Map<String, dynamic>? applicationData =
-        applicationDoc.data() as Map<String, dynamic>?;
+    // DocumentSnapshot applicationDoc = applicationSnapshots.docs.first;
+    // Map<String, dynamic>? applicationData =
+    //     applicationDoc.data() as Map<String, dynamic>?;
 
-    // If application data is null, return false
-    if (applicationData == null) return false;
+    // // If application data is null, return false
+    // if (applicationData == null) return false;
 
-    // If application status is not Declined, return true
-    if (applicationData["status"] != "Declined") return true;
+    // // If application status is not Declined, return true
+    // if (applicationData["status"] != "Declined") return true;
 
-    return false;
+    // return false;
   }
 
   // Save application
