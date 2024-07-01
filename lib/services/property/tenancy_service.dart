@@ -5,7 +5,9 @@ import 'package:hrs/model/tenancy/tenant_ended_tenancy.dart';
 
 class TenancyService {
   static Future<bool> checkUserTenancy(
-      String propertyID, String applicantID) async {
+    String propertyID,
+    String applicantID,
+  ) async {
     QuerySnapshot tenancySnapshots = await FirebaseFirestore.instance
         .collection("properties")
         .doc(propertyID)
@@ -15,8 +17,13 @@ class TenancyService {
         .limit(1)
         .get();
 
+    // If tenancy snapshot is not exist
+    // Meaning there is no tenancy for the user
+    // So, the apply button will be disabled
     if (tenancySnapshots.docs.isEmpty) return false;
 
+    // If tenancy snapshot is exist
+    // Meaning there is a tenancy for the user
     DocumentSnapshot tenancyDoc = tenancySnapshots.docs.first;
 
     if (tenancyDoc.data() == null) return false;
@@ -24,8 +31,12 @@ class TenancyService {
     Map<String, dynamic> tenancyData =
         tenancyDoc.data() as Map<String, dynamic>;
 
-    if (tenancyData["status"] == "Active") return true;
+    // If tenancy has ended, return true
+    // Meaning the apply button will be enabled
+    if (tenancyData["status"] == "Ended") return true;
 
+    // If tenancy is still active, return false
+    // Meaning the apply button will be disabled
     return false;
   }
 

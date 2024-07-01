@@ -16,6 +16,8 @@ class PropertyDetails {
   final int? landlordRatingCount;
   final double? landlordOverallRating;
   final bool? enableApplyButton;
+  final bool? hasActiveTenancy;
+  final bool? hasApplied;
   final String? landlordProfilePic;
 
   PropertyDetails({
@@ -36,6 +38,8 @@ class PropertyDetails {
     this.landlordRatingCount,
     this.landlordOverallRating,
     this.enableApplyButton,
+    this.hasActiveTenancy,
+    this.hasApplied,
     this.landlordProfilePic,
   });
 
@@ -57,7 +61,9 @@ class PropertyDetails {
       landlordProfilePic: data['landlordProfilePictureURL'],
       landlordRatingCount: data['landlordRatingCount'] ?? 0,
       landlordOverallRating: data['landlordOverallRating'] ?? 0.0,
+      hasActiveTenancy: data['hasActiveTenancy'] ?? false,
       enableApplyButton: data['enableApplyButton'] ?? true,
+      hasApplied: data['hasApplied'] ?? false,
     );
   }
 

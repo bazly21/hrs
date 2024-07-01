@@ -134,10 +134,10 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             ElevatedButton(
               onPressed: !propertyData.enableApplyButton!
                   ? null
-                  : () => _goToPage(context),
+                  : () => _goToPage(context, propertyData.hasActiveTenancy!),
               style: AppStyles.elevatedButtonStyle,
               child:
-                  Text(!propertyData.enableApplyButton! ? "Applied" : "Apply"),
+                  Text(propertyData.hasApplied! ? "Applied" : "Apply"),
             )
           ],
         ),
@@ -351,27 +351,42 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
     );
   }
 
-  void _goToPage(BuildContext context) {
+  void _goToPage(BuildContext context, bool hasActiveTenancy) {
+    // If user is logged in
     if (role != null) {
-      NavigationUtils.pushPage(
-        context,
-        ApplyRentalPage(
-          propertyID: widget.propertyID,
-        ),
-        SlideDirection.left,
-      ).then((message) {
-        if (message != null) {
-          refreshData();
+      // If user does not have an active tenancy
+      // navigate to ApplyRentalPage
+      if (!hasActiveTenancy) {
+        NavigationUtils.pushPage(
+          context,
+          ApplyRentalPage(
+            propertyID: widget.propertyID,
+          ),
+          SlideDirection.left,
+        ).then((message) {
+          if (message != null) {
+            refreshData();
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              duration: const Duration(seconds: 3),
-              backgroundColor: Colors.green[700],
-            ),
-          );
-        }
-      });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                duration: const Duration(seconds: 3),
+                backgroundColor: Colors.green[700],
+              ),
+            );
+          }
+        });
+      }
+      // If user has an active tenancy
+      // Show a snackbar message
+      else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Oops! It looks like you already have an active tenancy. Please complete your current tenancy before applying for a new rental"),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     } else {
       // User is not logged in, navigate to LoginPage
       ScaffoldMessenger.of(context).showSnackBar(

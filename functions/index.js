@@ -24,6 +24,7 @@ exports.updateTenancyAndPropertyStatus = functions.pubsub
         // Create batch writes for updating tenancies and properties
         const tenancyBatch = db.batch();
         const propertyBatch = db.batch();
+        const userBatch = db.batch();
 
         // Update the status of the expired tenancies to "Ended"
         expiredTenancies.forEach((doc) => {
@@ -40,10 +41,16 @@ exports.updateTenancyAndPropertyStatus = functions.pubsub
           const propertyID = doc.ref.parent.parent.id;
           const propertyRef = db.collection("properties").doc(propertyID);
           propertyBatch.update(propertyRef, {status: "Available"});
+
+          // Update user's hasActiveTenancy field to false
+          const tenancyData = doc.data();
+          const tenantID = tenancyData.tenantID;
+          const tenantRef = db.collection("users").doc(tenantID);
+          userBatch.update(tenantRef, {hasActiveTenancy: false});
         });
 
         // Commit the batch writes
-        await Promise.all([tenancyBatch.commit(), propertyBatch.commit()]);
+        await Promise.all([tenancyBatch.commit(), propertyBatch.commit(), userBatch.commit()]);
         console.log("Tenancy and property status updated successfully");
       } else {
         console.log("No expired tenancies found");

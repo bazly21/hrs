@@ -19,10 +19,13 @@ class PropertyService {
 
   // Get property full details including landlord details
   static Future<PropertyDetails> getPropertyFullDetails(
-      String propertyID, String? applicantID) async {
+    String propertyID,
+    String? applicantID,
+  ) async {
     Map<String, dynamic> propertyFullDetails = {};
     bool enableApplyButton = true;
     bool hasApplied = false;
+    bool hasActiveTenancy = false;
 
     DocumentSnapshot propertyDoc = await FirebaseFirestore.instance
         .collection('properties')
@@ -54,22 +57,53 @@ class PropertyService {
     // Early return if landlord data is not exist
     if (landlordData == null) throw ("Landlord data is not exist");
 
-    // Check user application if applicant ID is not null
-    if (applicantID != null) {
-      if (propertyData["status"] == "Rented") {
-        enableApplyButton = false;
-      } else {
+    // Disable apply button if property is rented
+    if (propertyData["status"] == "Rented") {
+      enableApplyButton = false;
+    }
+
+    // If property status is available
+    if (propertyData["status"] == "Available") {
+      // If user is logged in
+      if (applicantID != null) {
         // First, check if the user already applied for the property
         hasApplied = await ApplicationService.checkUserApplication(
-            propertyID, applicantID);
+          propertyID,
+          applicantID,
+        );
 
-        // Then, if the user has applied, check tenancy status
+        // Then, if the user has applied
         if (hasApplied) {
+          // Set enableApplyButton based on tenancy status
+          // If tenancy has ended, the apply button will be enabled
+          // If tenancy is still active, the apply button will be disabled
+          // If there is no tenancy, the apply button will be disabled
           enableApplyButton =
               await TenancyService.checkUserTenancy(propertyID, applicantID);
-        } else {
+        }
+        // If the user is not applied yet
+        // The apply button will be enabled
+        else {
           enableApplyButton = true;
         }
+
+        // Get applicant data
+        DocumentSnapshot applicantDoc = await FirebaseFirestore.instance
+            .collection("users")
+            .doc(applicantID)
+            .get();
+
+        // Throw exception if applicant data is not exist
+        if (!applicantDoc.exists){
+          throw Exception("Applicant data is not exist");
+        }
+
+        // Convert applicant data to a map
+        Map<String, dynamic> applicantData =
+            applicantDoc.data() as Map<String, dynamic>;
+
+        // Get hasActiveTenancy value
+        hasActiveTenancy = applicantData["hasActiveTenancy"] ?? false;
       }
     }
 
@@ -81,7 +115,9 @@ class PropertyService {
       "landlordRatingCount": landlordData["ratingCount"]?["landlord"],
       "landlordOverallRating": landlordData["ratingAverage"]?["landlord"]
           ?["overallRating"],
+      "hasApplied": hasApplied,
       "enableApplyButton": enableApplyButton,
+      "hasActiveTenancy": hasActiveTenancy,
     };
 
     PropertyDetails propertyDetails =
