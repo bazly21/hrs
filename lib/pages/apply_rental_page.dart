@@ -5,6 +5,7 @@ import "package:hrs/components/custom_dropdown.dart";
 import "package:hrs/components/custom_textformfield.dart";
 import "package:hrs/model/application/application_model.dart";
 import "package:hrs/services/property/application_service.dart";
+import "package:hrs/services/property/property_service.dart";
 import "package:intl/intl.dart";
 
 class ApplyRentalPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
   int? _selectedNumberOfPax;
   int? _selectedTenancyDuration;
   DateTime? _moveInDate;
+  bool _isSubmitting = false;
 
   // Get user ID
   final String? userUID = FirebaseAuth.instance.currentUser?.uid;
@@ -40,195 +42,201 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: "Apply Rent"),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16.0, 25.0, 16.0, 16.0),
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2), // Shadow color.
-                  spreadRadius: 3,
-                  blurRadius: 2, // Shadow blur radius.
-                  offset: const Offset(0, 2), // Vertical offset for the shadow.
-                ),
-              ]),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                CustomTextFormField(
-                  label: "Occupation",
-                  hintText: "Enter your occupation",
-                  // controller: _occupationController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter your occupation";
-                    }
+      body: _isSubmitting
+          ? const Center(child: CircularProgressIndicator())
+          : _buildMainBody(context),
+    );
+  }
 
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _occupation = value;
-                  },
-                ),
-                const SizedBox(height: 20),
-                CustomDropDownField(
-                  label: "Profile Type",
-                  hintText: "Select your profile type",
-                  items: _profileTypes.map((type) {
-                    return DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedProfileType = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return "Please select a profile type";
-                    }
+  SingleChildScrollView _buildMainBody(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16.0, 25.0, 16.0, 16.0),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2), // Shadow color.
+                spreadRadius: 3,
+                blurRadius: 2, // Shadow blur radius.
+                offset: const Offset(0, 2), // Vertical offset for the shadow.
+              ),
+            ]),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              CustomTextFormField(
+                label: "Occupation",
+                hintText: "Enter your occupation",
+                // controller: _occupationController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter your occupation";
+                  }
 
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                CustomDropDownField(
-                  label: "Number of Pax",
-                  hintText: "Select number of pax",
-                  items: _paxNumbers.map((pax) {
-                    return DropdownMenuItem<int>(
-                      value: pax,
-                      child: Text(pax.toString()),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedNumberOfPax = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return "Please select number of pax";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                CustomDropDownField(
-                  label: "Nationality",
-                  hintText: "Select your nationality",
-                  items: _nationalities.map((nationality) {
-                    return DropdownMenuItem<String>(
-                      value: nationality,
-                      child: Text(nationality),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedNationality = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return "Please select nationality";
-                    }
+                  return null;
+                },
+                onSaved: (value) {
+                  _occupation = value;
+                },
+              ),
+              const SizedBox(height: 20),
+              CustomDropDownField(
+                label: "Profile Type",
+                hintText: "Select your profile type",
+                items: _profileTypes.map((type) {
+                  return DropdownMenuItem<String>(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedProfileType = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return "Please select a profile type";
+                  }
 
-                    return null;
-                  },
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              CustomDropDownField(
+                label: "Number of Pax",
+                hintText: "Select number of pax",
+                items: _paxNumbers.map((pax) {
+                  return DropdownMenuItem<int>(
+                    value: pax,
+                    child: Text(pax.toString()),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedNumberOfPax = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return "Please select number of pax";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              CustomDropDownField(
+                label: "Nationality",
+                hintText: "Select your nationality",
+                items: _nationalities.map((nationality) {
+                  return DropdownMenuItem<String>(
+                    value: nationality,
+                    child: Text(nationality),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedNationality = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return "Please select nationality";
+                  }
+
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              CustomTextFormField(
+                label: "Move-in Date",
+                hintText: "dd-mm-YYYY",
+                controller: TextEditingController(
+                  text: _moveInDate == null
+                      ? ""
+                      : DateFormat("dd-MM-yyyy").format(_moveInDate!),
                 ),
-                const SizedBox(height: 20),
-                CustomTextFormField(
-                  label: "Move-in Date",
-                  hintText: "dd-mm-YYYY",
-                  controller: TextEditingController(
-                    text: _moveInDate == null
-                        ? ""
-                        : DateFormat("dd-MM-yyyy").format(_moveInDate!),
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime(2100),
-                      ).then((value) {
-                        if (value != null) {
-                          setState(() {
-                            _moveInDate = value;
-                          });
-                        }
-                      });
-                    },
-                    icon: const Icon(Icons.calendar_today),
-                  ),
-                  validator: validateDate,
-                  onChanged: (value) {
-                    // If value entered is valid date, save it
-                    if (validateDate(value) == null) {
-                      _moveInDate = DateFormat("dd-MM-yyyy").parse(value, true);
-                    }
-                  },
-                ),
-                const SizedBox(height: 20),
-                CustomDropDownField(
-                  label: "Tenancy Duration (months)",
-                  hintText: "Select tenancy duration",
-                  items: _tenancyDurations.map((duration) {
-                    return DropdownMenuItem<int>(
-                      value: duration,
-                      child: Text("$duration months"),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedTenancyDuration = value;
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2100),
+                    ).then((value) {
+                      if (value != null) {
+                        setState(() {
+                          _moveInDate = value;
+                        });
+                      }
                     });
                   },
-                  validator: (value) {
-                    if (value == null) {
-                      return "Please select tenancy duration";
-                    }
-                    return null;
-                  },
+                  icon: const Icon(Icons.calendar_today),
                 ),
-                const SizedBox(height: 35.0),
-                // Submit and Reset buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      onPressed: _resetFields,
-                      style: ElevatedButton.styleFrom(
-                        fixedSize: const Size(130, 42),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                validator: validateDate,
+                onChanged: (value) {
+                  // If value entered is valid date, save it
+                  if (validateDate(value) == null) {
+                    _moveInDate = DateFormat("dd-MM-yyyy").parse(value, true);
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              CustomDropDownField(
+                label: "Tenancy Duration (months)",
+                hintText: "Select tenancy duration",
+                items: _tenancyDurations.map((duration) {
+                  return DropdownMenuItem<int>(
+                    value: duration,
+                    child: Text("$duration months"),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTenancyDuration = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return "Please select tenancy duration";
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 35.0),
+              // Submit and Reset buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: _resetFields,
+                    style: ElevatedButton.styleFrom(
+                      fixedSize: const Size(130, 42),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text('Reset'),
                     ),
-                    ElevatedButton(
-                      onPressed: () => _submitApplication(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8568F3),
-                        foregroundColor: Colors.white,
-                        fixedSize: const Size(130, 42),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                    child: const Text('Reset'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _submitApplication(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8568F3),
+                      foregroundColor: Colors.white,
+                      fixedSize: const Size(130, 42),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Text('Apply'),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    child: const Text('Apply'),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -277,6 +285,7 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
         },
       );
 
+      // If user confirms submission
       if (confirmed == true) {
         // Create an application object
         Application application = Application(
@@ -289,24 +298,53 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
           tenancyDuration: _selectedTenancyDuration,
         );
 
-        // Save data to Firestore
         try {
+          // Set the submitting state to true
+          // to show the loading indicator
+          setState(() {
+            _isSubmitting = true;
+          });
+
+          // Save the application to the database
           await _applicationService.saveApplication(
-              widget.propertyID, application);
+            widget.propertyID,
+            application,
+          );
+
           // Reset the form after successful submission
           _resetFields();
 
-          if (context.mounted) {
-            Navigator.pop(context, "Application submitted successfully");
-          }
-        } catch (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Failed to submit application. Error: $error"),
-              duration: const Duration(seconds: 3),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+          // Fetch the updated property details
+          final updatedPropertyDetails =
+              await PropertyService.getPropertyFullDetails(
+            widget.propertyID,
+            userUID,
           );
+
+          if (context.mounted) {
+            Navigator.pop(context, {
+              "success": true,
+              "updatedPropertyDetails": updatedPropertyDetails,
+              "message": "Application submitted successfully",
+            });
+          }
+        } catch (_) {
+          // Set the submitting state to false
+          // to hide the loading indicator
+          setState(() {
+            _isSubmitting = false;
+          });
+
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text(
+                    "Failed to submit application. Please try again later"),
+                duration: const Duration(seconds: 3),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+            );
+          }
         }
       }
     }

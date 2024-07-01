@@ -383,6 +383,12 @@ class _LandlordRatingPageState extends State<LandlordRatingPage> {
         });
       }
     } catch (e) {
+      // Set the submitting state to false
+      // to hide the loading indicator
+      setState(() {
+        _isSubmitting = false;
+      });
+
       if (context.mounted) {
         scaffoldMessenger.showSnackBar(SnackBar(
           content: const Text(
@@ -393,11 +399,6 @@ class _LandlordRatingPageState extends State<LandlordRatingPage> {
         ));
       }
       print('Error submitting rating: $e');
-    } finally {
-      // Set the submitting state to false
-      setState(() {
-        _isSubmitting = false;
-      });
     }
   }
 }

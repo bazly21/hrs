@@ -136,8 +136,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
                   ? null
                   : () => _goToPage(context, propertyData.hasActiveTenancy!),
               style: AppStyles.elevatedButtonStyle,
-              child:
-                  Text(propertyData.hasApplied! ? "Applied" : "Apply"),
+              child: Text(propertyData.hasApplied! ? "Applied" : "Apply"),
             )
           ],
         ),
@@ -363,17 +362,25 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
             propertyID: widget.propertyID,
           ),
           SlideDirection.left,
-        ).then((message) {
-          if (message != null) {
-            refreshData();
+        ).then((value) {
+          // If user has successfully applied for a rental
+          if (value != null && value["success"]) {
+            // Update rentalDetailsFuture with the updated data
+            setState(() {
+              rentalDetailsFuture =
+                  Future.value(value["updatedPropertyDetails"]);
+            });
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                duration: const Duration(seconds: 3),
-                backgroundColor: Colors.green[700],
-              ),
-            );
+            // Show success message
+            Future.delayed(const Duration(milliseconds: 500), () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value['message']),
+                  duration: const Duration(seconds: 3),
+                  backgroundColor: Colors.green[700],
+                ),
+              );
+            });
           }
         });
       }
@@ -382,7 +389,8 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
       else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Oops! It looks like you already have an active tenancy. Please complete your current tenancy before applying for a new rental"),
+            content: Text(
+                "Oops! It looks like you already have an active tenancy. Please complete your current tenancy before applying for a new rental"),
             duration: Duration(seconds: 3),
           ),
         );
