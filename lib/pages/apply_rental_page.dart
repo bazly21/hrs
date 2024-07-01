@@ -214,13 +214,14 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
                       child: const Text('Reset'),
                     ),
                     ElevatedButton(
-                      onPressed: _submitApplication,
+                      onPressed: () => _submitApplication(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF8568F3),
                         foregroundColor: Colors.white,
                         fixedSize: const Size(130, 42),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                       child: const Text('Apply'),
                     ),
@@ -249,41 +250,65 @@ class ApplyRentalPageState extends State<ApplyRentalPage> {
     });
   }
 
-  Future<void> _submitApplication() async {
+  Future<void> _submitApplication(BuildContext context) async {
     // Get the occupation from the text field
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Create an application object
-      Application application = Application(
-        applicantID: userUID!,
-        occupation: _occupation,
-        profileType: _selectedProfileType,
-        numberOfPax: _selectedNumberOfPax,
-        nationality: _selectedNationality,
-        moveInDate: _moveInDate,
-        tenancyDuration: _selectedTenancyDuration,
+      // Show confirmation dialog
+      bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext innerContext) {
+          return AlertDialog(
+            title: const Text('Confirm Submission'),
+            content: const Text(
+                'Are you sure you want to submit this application? Once submitted, you will not be able to edit the details'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(innerContext).pop(false),
+              ),
+              TextButton(
+                child: const Text('Submit'),
+                onPressed: () => Navigator.of(innerContext).pop(true),
+              ),
+            ],
+          );
+        },
       );
 
-      // Save data to Firestore
-      await _applicationService
-          .saveApplication(widget.propertyID, application)
-          .then(
-        (_) {
+      if (confirmed == true) {
+        // Create an application object
+        Application application = Application(
+          applicantID: userUID!,
+          occupation: _occupation,
+          profileType: _selectedProfileType,
+          numberOfPax: _selectedNumberOfPax,
+          nationality: _selectedNationality,
+          moveInDate: _moveInDate,
+          tenancyDuration: _selectedTenancyDuration,
+        );
+
+        // Save data to Firestore
+        try {
+          await _applicationService.saveApplication(
+              widget.propertyID, application);
           // Reset the form after successful submission
           _resetFields();
 
-          Navigator.pop(context, "Application submitted successfully");
-        },
-      ).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Failed to submit application. Error: $error"),
-            duration: const Duration(seconds: 3),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      });
+          if (context.mounted) {
+            Navigator.pop(context, "Application submitted successfully");
+          }
+        } catch (error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to submit application. Error: $error"),
+              duration: const Duration(seconds: 3),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      }
     }
   }
 
