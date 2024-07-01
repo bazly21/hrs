@@ -14,7 +14,7 @@ class UserDetailsSection extends StatelessWidget {
     required this.ratingCount,
     required this.userID,
     this.position = "Property Owner",
-    this.textButton = "Chat with owner",
+    this.textButton = "Contact Owner",
     this.role = "Landlord",
     this.imageUrl,
   });
