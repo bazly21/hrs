@@ -151,14 +151,11 @@ class _ApplicationHistoryListState extends State<ApplicationHistoryList> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             // Profile picture
-                            InkWell(
-                              onTap: () {},
-                              child: CustomCircleAvatar(
-                                imageURL: propertyData.landlordProfilePic,
-                                name: propertyData.landlordName!,
-                                radius: 9.0,
-                                fontSize: 7.0,
-                              ),
+                            CustomCircleAvatar(
+                              imageURL: propertyData.landlordProfilePic,
+                              name: propertyData.landlordName!,
+                              radius: 9.0,
+                              fontSize: 7.0,
                             ),
 
                             // Add space between elements

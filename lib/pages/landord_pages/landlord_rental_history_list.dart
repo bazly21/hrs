@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/appbar_shadow.dart';
 import 'package:hrs/components/custom_circleavatar.dart';
+import 'package:hrs/components/custom_richtext.dart';
 import 'package:hrs/model/tenancy/landlord_ended_tenancy.dart';
 import 'package:hrs/pages/landord_pages/landlord_rating_page.dart';
 import 'package:hrs/services/navigation/navigation_utils.dart';
@@ -152,31 +153,49 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
                               radius: 9.0,
                               fontSize: 7.0,
                             ),
-                            const SizedBox(width: 5),
-                            if (tenancyData.tenantRatingAverage > 0 &&
-                                tenancyData.tenantRatingCount > 0)
-                              const Icon(Icons.star,
-                                  color: Colors.amber, size: 16),
-                            const SizedBox(width: 2),
-                            RichText(
-                              text: TextSpan(
-                                text: tenancyData.tenantRatingAverage == 0.0
-                                    ? 'No rating yet'
-                                    : '${tenancyData.tenantRatingAverage}',
-                                style: const TextStyle(
-                                    fontSize: 14, color: Colors.black),
-                                children: [
-                                  if (tenancyData.tenantRatingCount > 0)
-                                    TextSpan(
-                                      text:
-                                          ' (${tenancyData.tenantRatingCount})',
-                                      style: const TextStyle(
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                ],
-                              ),
+
+                            // Add space between elements
+                            // If the landlord has a rating
+                            // Set the width to 2, else set it to 5
+                            SizedBox(
+                              width: tenancyData.tenantRatingAverage > 0 &&
+                                      tenancyData.tenantRatingCount > 0
+                                  ? 2
+                                  : 5,
                             ),
+
+                            // If the landlord has a rating
+                            // show the star icon and the rating
+                            if (tenancyData.tenantRatingAverage > 0 &&
+                                tenancyData.tenantRatingCount > 0) ...[
+                              // Star icon
+                              const Icon(
+                                Icons.star_rounded,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
+
+                              // Add space between elements
+                              const SizedBox(width: 2),
+
+                              CustomRichText(
+                                mainText:
+                                    tenancyData.tenantRatingAverage.toString(),
+                                subText: " (${tenancyData.tenantRatingCount})",
+                                mainFontSize: 14,
+                                mainFontWeight: FontWeight.normal,
+                              ),
+                            ]
+                            // Else show no rating
+                            else ...[
+                              const Text(
+                                "No rating",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              )
+                            ],
                           ],
                         ),
                         const SizedBox(height: 15),

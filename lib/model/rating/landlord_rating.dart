@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class LandlordRating {
   final String reviewerID;
   final double supportRating;
@@ -22,6 +24,7 @@ class LandlordRating {
       'maintenanceRating': maintenanceRating,
       'communicationRating': communicationRating,
       'comments': comments,
+      'submittedAt': FieldValue.serverTimestamp(),
     };
   }
 }

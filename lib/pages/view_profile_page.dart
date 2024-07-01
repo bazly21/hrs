@@ -243,18 +243,8 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                               ],
                             );
                           },
-                        )
-                        // child: ListView.builder(
-                        //     itemCount: userProfile.ratings.length,
-                        //     itemBuilder: (context, index) {
-                        //       return _buildRatingDetails(
-                        //         index,
-                        //         userProfile.ratings[index],
-                        //         MediaQuery.of(context).size,
-                        //       );
-                        //     },
-                        //   ),
-                        )
+                        ),
+                      )
                     : const Center(
                         child: Text("No ratings yet"),
                       ),
@@ -281,6 +271,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             radius: 25.0,
             name: rating.reviewerName!,
             imageURL: rating.profilePictureUrl,
+            fontSize: 21.0,
           ),
 
           // Add space between elements
