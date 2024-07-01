@@ -27,49 +27,63 @@ class _LandlordRentalHistoryListState extends State<LandlordRentalHistoryList> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Rental History',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 20.0,
-              )),
+          title: const Text(
+            'Rental History',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 20.0,
+            ),
+          ),
           centerTitle: true,
           toolbarHeight: 70.0,
           flexibleSpace: const AppBarShadow(),
         ),
-        body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: _refreshEndedTenancies,
-            child: FutureBuilder<List<LandlordEndedTenancy>>(
-                future: _endedTenancies,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Error: ${snapshot.error}"),
-                        ),
+        body: RefreshIndicator(
+          onRefresh: _refreshEndedTenancies,
+          child: LayoutBuilder(builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: FutureBuilder<List<LandlordEndedTenancy>>(
+                    future: _endedTenancies,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text("Unable to load data. Please try again later"),
+                              duration: const Duration(seconds: 3),
+                              backgroundColor: Theme.of(context).colorScheme.error,
+                            ),
+                          );
+                        });
+                      } else if (snapshot.hasData &&
+                          snapshot.data!.isNotEmpty) {
+                        final List<LandlordEndedTenancy> tenancies =
+                            snapshot.data!;
+                        return ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: tenancies.length,
+                          itemBuilder: (context, index) {
+                            return _buildRentalItem(
+                              tenancies[index],
+                              index == tenancies.length - 1,
+                            );
+                          },
+                        );
+                      }
+                      return const Center(
+                        child: Text('No tenancies found'),
                       );
-                    });
-                  } else if (snapshot.hasData &&
-                      (snapshot.data!.isNotEmpty || snapshot.data != null)) {
-                    final List<LandlordEndedTenancy> tenancies = snapshot.data!;
-                    return ListView.builder(
-                      itemCount: tenancies.length,
-                      itemBuilder: (context, index) {
-                        return _buildRentalItem(
-                            tenancies[index], index == tenancies.length - 1);
-                      },
-                    );
-                  }
-                  return const Center(
-                    child: Text('No tenancies found'),
-                  );
-                }),
-          ),
+                    }),
+              ),
+            );
+          }),
         ));
   }
 
