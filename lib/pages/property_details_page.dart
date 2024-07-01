@@ -272,7 +272,7 @@ class _PropertyDetailsPageState extends State<PropertyDetailsPage> {
 
                   // Property Size Text **Database Required**
                   Text(
-                    "${propertyData.size} m\u00B2",
+                    "${propertyData.size} sqft",
                     style:
                         const TextStyle(fontSize: 14, color: Color(0xFF7D7F88)),
                   ),

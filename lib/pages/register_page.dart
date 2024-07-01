@@ -80,6 +80,7 @@ class _RegisterProfilePageState extends State<RegisterProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   File? _imageFile;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -92,7 +93,9 @@ class _RegisterProfilePageState extends State<RegisterProfilePage> {
     return Scaffold(
       appBar: const CustomAppBar(title: "Account Details"),
       backgroundColor: Colors.white,
-      body: _buildForm(context),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildForm(context),
     );
   }
 
@@ -233,12 +236,23 @@ class _RegisterProfilePageState extends State<RegisterProfilePage> {
             ),
             onPressed: () {
               if (_formKey.currentState!.validate()) {
+                // Show loading indicator
+                setState(() {
+                  _isLoading = true;
+                });
+
                 context.read<AuthService>().registerProfile(
-                    context: context,
-                    phoneNumber: widget.phoneNumber,
-                    profileName: _nameController.text,
-                    role: widget.role,
-                    profileImageFile: _imageFile);
+                      context: context,
+                      phoneNumber: widget.phoneNumber,
+                      profileName: _nameController.text,
+                      role: widget.role,
+                      profileImageFile: _imageFile,
+                    ).catchError((error) {
+                      // Hide loading indicator
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    });
               }
             },
             child: const Text("Create Account"),
