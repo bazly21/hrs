@@ -268,10 +268,10 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
         children: [
           // Profile Picture
           CustomCircleAvatar(
-            radius: 25.0,
+            radius: 20.0,
             name: rating.reviewerName!,
             imageURL: rating.profilePictureUrl,
-            fontSize: 21.0,
+            fontSize: 18.0,
           ),
 
           // Add space between elements
@@ -316,17 +316,17 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                   ),
 
                 // Add space between elements
-                SizedBox(height: screenSize.height * 0.008),
+                SizedBox(height: screenSize.height * 0.015),
 
                 // If there is comment, display the comment
                 if (rating.comments != null && rating.comments != "")
                   Text(
                     rating.comments!,
-                    style: const TextStyle(fontSize: 14.0),
+                    style: const TextStyle(fontSize: 15.0),
                   ),
 
                 // Add space between elements
-                SizedBox(height: screenSize.height * 0.002),
+                SizedBox(height: screenSize.height * 0.008),
 
                 // Review Date
                 // Only show the review date if it is available

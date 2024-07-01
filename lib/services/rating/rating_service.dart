@@ -4,6 +4,7 @@ import "package:hrs/model/rating/rating_details.dart";
 import "package:hrs/model/rating/tenant_rating.dart";
 import "package:hrs/model/user/landlord_profile.dart";
 import "package:hrs/model/user/tenant_profile.dart";
+import "package:intl/intl.dart";
 
 class RatingService {
   // Submit rating to database
@@ -265,6 +266,16 @@ class RatingService {
         // Early return if reviewer data is not exist
         if (reviewerData == null) return null;
 
+        // Fetch review date
+        final DateTime reviewDate = ratingData["submittedAt"].toDate();
+
+        // Convert date to dd-MM-yyyy format and time to HH:mm format
+        final String formattedDate = DateFormat("dd-MM-yyyy").format(reviewDate);
+        final String formattedTime = DateFormat("HH:mm").format(reviewDate);
+
+        // Combine date and time
+        final String formattedReviewDate = "$formattedDate $formattedTime";
+
         return RatingDetails(
           reviewerName: reviewerData["name"] ?? "N/A",
           profilePictureUrl: reviewerData["profilePictureURL"],
@@ -275,7 +286,7 @@ class RatingService {
               role == "Landlord" ? ratingData["supportRating"] ?? 0.0 : null,
           paymentRating:
               role == "Tenant" ? ratingData["paymentRating"] ?? 0.0 : null,
-          
+          reviewDate: formattedReviewDate,
         );
 
         // return {

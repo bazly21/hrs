@@ -6,7 +6,7 @@ class RatingDetails {
   final double? maintenanceRating;
   final double? communicationRating;
   final double? paymentRating;
-  final DateTime? reviewDate;
+  final String? reviewDate;
 
   RatingDetails({
     this.reviewerName,
