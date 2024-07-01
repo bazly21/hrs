@@ -94,7 +94,7 @@ class PropertyService {
             .get();
 
         // Throw exception if applicant data is not exist
-        if (!applicantDoc.exists){
+        if (!applicantDoc.exists) {
           throw Exception("Applicant data is not exist");
         }
 
@@ -132,8 +132,9 @@ class PropertyService {
   }
 
   static Future<List<PropertyDetails>?> fetchAvailableProperties(
-      BuildContext context,
-      {String? searchQuery}) async {
+    BuildContext context, {
+    String? searchQuery,
+  }) async {
     // Get current userID
     String? userID = FirebaseAuth.instance.currentUser?.uid;
     QuerySnapshot propertiesSnapshot;
@@ -194,7 +195,7 @@ class PropertyService {
     // Filter properties based on searchQuery if it is not null and not empty
     if (searchQuery != null && searchQuery.isNotEmpty) {
       propertiesDetailsList = propertiesDetailsList.where((property) {
-        return property.propertyName!
+        return property.address!
             .toLowerCase()
             .contains(searchQuery.toLowerCase());
       }).toList();
