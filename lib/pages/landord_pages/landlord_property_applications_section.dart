@@ -32,6 +32,7 @@ class _PropertyApplicationsSectionState
   bool _containAcceptedApplication = false;
   bool _hasPropertyRented = false;
   bool _hasTenantCriteria = false;
+  bool _isLoading = false;
   String? tenancyDuration;
   DateTime? startDate;
   DateTime? endDate;
@@ -51,6 +52,12 @@ class _PropertyApplicationsSectionState
 
   @override
   Widget build(BuildContext context) {
+    return _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : buildMainBody(context);
+  }
+
+  RefreshIndicator buildMainBody(BuildContext context) {
     return RefreshIndicator(
       onRefresh: refreshData,
       child: FutureBuilder<Map<String, dynamic>>(
@@ -258,12 +265,12 @@ class _PropertyApplicationsSectionState
         // Handle the menu item selected here
         if (result == "Undo Application") {
           showConfirmationAndUpdateStatus(
-              context: context,
-              confirmationTitle: "Confirm Undo",
-              confirmationContent:
-                  "Are you sure you want to undo this application?",
-              status: "Pending",
-              applicationID: applicationData.applicationID!);
+            confirmationTitle: "Confirm Undo",
+            confirmationContent:
+                "Are you sure you want to undo this application?",
+            status: "Pending",
+            applicationID: applicationData.applicationID!,
+          );
         }
         // If the user selects 'Start Tenancy'
         else if (result == "Start Tenancy") {
@@ -375,12 +382,12 @@ class _PropertyApplicationsSectionState
                 ? null
                 : () {
                     showConfirmationAndUpdateStatus(
-                        context: context,
-                        confirmationTitle: "Confirm Decline",
-                        confirmationContent:
-                            "Are you sure you want to decline this application?",
-                        status: "Declined",
-                        applicationID: applicationID);
+                      confirmationTitle: "Confirm Decline",
+                      confirmationContent:
+                          "Are you sure you want to decline this application?",
+                      status: "Declined",
+                      applicationID: applicationID,
+                    );
                   },
             style: AppStyles.declineButtonStyle,
             child: const Text("Decline"),
@@ -393,12 +400,12 @@ class _PropertyApplicationsSectionState
                 ? null
                 : () {
                     showConfirmationAndUpdateStatus(
-                        context: context,
-                        confirmationTitle: "Confirm Accept",
-                        confirmationContent:
-                            "Are you sure you want to accept this application?",
-                        status: "Accepted",
-                        applicationID: applicationID);
+                      confirmationTitle: "Confirm Accept",
+                      confirmationContent:
+                          "Are you sure you want to accept this application?",
+                      status: "Accepted",
+                      applicationID: applicationID,
+                    );
                   },
             style: AppStyles.acceptButtonStyle,
             child: const Text("Accept"),
@@ -417,25 +424,25 @@ class _PropertyApplicationsSectionState
     });
   }
 
-  Future<void> showConfirmationAndUpdateStatus(
-      {required BuildContext context,
-      required String confirmationTitle,
-      required String confirmationContent,
-      required String status,
-      required String applicationID}) async {
+  Future<void> showConfirmationAndUpdateStatus({
+    required String confirmationTitle,
+    required String confirmationContent,
+    required String status,
+    required String applicationID,
+  }) async {
     final bool? isConfirmed = await showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext innerContext) {
         return AlertDialog(
           title: Text(confirmationTitle),
           content: Text(confirmationContent),
           actions: <Widget>[
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => Navigator.of(innerContext).pop(false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => Navigator.of(innerContext).pop(true),
               child: const Text('Confirm'),
             ),
           ],
@@ -444,21 +451,54 @@ class _PropertyApplicationsSectionState
     );
 
     if (isConfirmed ?? false) {
-      await _firestore
-          .collection("properties")
-          .doc(widget.propertyID)
-          .collection("applications")
-          .doc(applicationID)
-          .update({
-        "status": status,
-      }).then((_) {
-        refreshData();
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Something wrong happened. Please try again')),
-        );
+      // Show a loading indicator
+      setState(() {
+        _isLoading = true;
       });
+
+      try {
+        await _firestore
+            .collection("properties")
+            .doc(widget.propertyID)
+            .collection("applications")
+            .doc(applicationID)
+            .update({"status": status});
+
+        // Refresh the application list
+        await refreshData();
+
+        // Hide the loading indicator
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (mounted) {
+          Future.delayed(const Duration(milliseconds: 200), () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Application successfully ${status == "Pending" ? "undo" : status.toLowerCase()}',
+                ),
+                duration: const Duration(seconds: 3),
+                backgroundColor: Colors.green[700],
+              ),
+            );
+          });
+        }
+      } catch (error) {
+        // Hide the loading indicator
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Something went wrong. Please try again'),
+            ),
+          );
+        }
+      }
     }
   }
 
