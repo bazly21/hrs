@@ -299,11 +299,6 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: const Color(0xFF462AB5),
-                surfaceTintColor: Colors.white,
-                disabledBackgroundColor: Colors.grey[200],
-                disabledForegroundColor: Colors.grey[500],
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                     side: const BorderSide(color: Colors.grey, width: 0.7))),
