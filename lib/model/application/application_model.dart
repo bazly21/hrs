@@ -3,7 +3,7 @@ import 'package:hrs/model/property/property_details.dart';
 
 class Application {
   final String? applicantID;
-  final int? criteriaScore;
+  final num? criteriaScore;
   final String? occupation;
   final String? profileType;
   final int? numberOfPax;
@@ -51,7 +51,7 @@ class Application {
       applicationID: applicationMap["applicationID"],
       applicantName: applicationMap["applicantName"] ?? "N/A",
       applicantProfilePic: applicationMap["applicantProfilePic"],
-      applicantOverallRating: applicationMap["applicantOverallRating"] ?? 0.0,
+      applicantOverallRating: (applicationMap["applicantOverallRating"] as num?)?.toDouble() ?? 0,
       applicantRatingCount: applicationMap["applicantRatingCount"] ?? 0,
     );
   }

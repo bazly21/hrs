@@ -136,6 +136,8 @@ class ApplicationService {
         });
       }
 
+      print("Step last");
+
       applicationMap = {
         "applicationList": applicationList,
         "hasTenantCriteria": hasTenantCriteria,

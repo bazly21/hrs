@@ -95,7 +95,7 @@ class _PropertyApplicationsSectionState
                       constraints:
                           BoxConstraints(minHeight: constraints.maxHeight),
                       child: const Center(
-                        child: Text('No applications found.'),
+                        child: Text('No applications found'),
                       ),
                     ),
                   );
