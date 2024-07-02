@@ -305,7 +305,7 @@ class _AddPropertyPageState extends State<AddPropertyPage> {
                         controller: _accessibilitiesController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter property name';
+                            return 'Please enter accessibilities';
                           }
                           return null;
                         },

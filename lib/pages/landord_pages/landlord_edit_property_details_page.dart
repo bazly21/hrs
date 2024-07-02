@@ -329,13 +329,13 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
 
                       // Accesibilities Textfield
                       CustomTextFormField(
-                        label: 'Property Name',
-                        hintText: 'Enter property name',
+                        label: 'Accessibilities',
+                        hintText: 'Enter accessibilities',
                         keyboardType: TextInputType.multiline,
                         controller: _accessibilitiesController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter property name';
+                            return 'Please enter accessibilities';
                           }
                           return null;
                         },

@@ -8,6 +8,7 @@ class CustomTextFormField extends StatelessWidget {
     required String hintText,
     TextEditingController? controller,
     TextInputType keyboardType = TextInputType.text,
+    bool readOnly = false,
     String? subText,
     Widget? prefixIcon,
     Widget? suffixIcon,
@@ -18,6 +19,7 @@ class CustomTextFormField extends StatelessWidget {
   })  : _label = label,
         _hintText = hintText,
         _controller = controller,
+        _readOnly = readOnly,
         _keyboardType = keyboardType,
         _subText = subText,
         _prefixIcon = prefixIcon,
@@ -31,6 +33,7 @@ class CustomTextFormField extends StatelessWidget {
   final String _hintText;
   final TextEditingController? _controller;
   final TextInputType _keyboardType;
+  final bool _readOnly;
   final String? _subText;
   final Widget? _prefixIcon;
   final Widget? _suffixIcon;
@@ -107,6 +110,7 @@ class CustomTextFormField extends StatelessWidget {
           onChanged: _onChanged,
           inputFormatters: _inputFormatters,
           onSaved: _onSaved,
+          readOnly: _readOnly,
         ),
       ],
     );

@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_circleavatar.dart';
+import 'package:hrs/components/custom_dropdown.dart';
 import 'package:hrs/components/custom_rating_bar.dart';
 import 'package:hrs/components/custom_richtext.dart';
+import 'package:hrs/components/custom_textformfield.dart';
 import 'package:hrs/model/application/application_model.dart';
 import 'package:hrs/pages/chat_page.dart';
 import 'package:hrs/pages/view_profile_page.dart';
@@ -28,7 +30,7 @@ class _PropertyApplicationsSectionState
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late Future<Map<String, dynamic>> propertyApplicationsFuture;
-  final TextEditingController _tenancyDateController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _containAcceptedApplication = false;
   bool _hasPropertyRented = false;
   bool _hasTenantCriteria = false;
@@ -42,12 +44,6 @@ class _PropertyApplicationsSectionState
     super.initState();
     propertyApplicationsFuture =
         ApplicationService.getPropertyApplication(widget.propertyID);
-  }
-
-  @override
-  void dispose() {
-    _tenancyDateController.dispose();
-    super.dispose();
   }
 
   @override
@@ -502,51 +498,72 @@ class _PropertyApplicationsSectionState
     }
   }
 
-  void showTenancyForm(BuildContext context, Application tenantData) {
+  void showTenancyForm(
+    BuildContext outerContext,
+    Application tenantData,
+  ) {
     showModalBottomSheet(
-      context: context,
+      context: outerContext,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return StatefulBuilder(builder: (context, setState) {
+        return StatefulBuilder(builder: (innerContext, setState) {
+          // Function to update the end date
+          // based on the start date and tenancy duration
           void updateEndDate() {
             // Only calculate endDate if both startDate and tenancyDuration are not null
             if (startDate != null && tenancyDuration != null) {
               setState(() {
-                endDate = startDate!
-                    .add(Duration(days: int.parse(tenancyDuration!) * 30));
+                // Parse tenancyDuration to an integer
+                int months = int.parse(tenancyDuration!);
+
+                // Calculate the end date by adding the number of months
+                endDate = DateTime(
+                  startDate!.year,
+                  startDate!.month + months,
+                  startDate!.day,
+                );
+
+                // Adjust for cases where the end month has fewer days than the start month
+                if (startDate!.day != endDate!.day) {
+                  endDate = endDate!.subtract(Duration(days: endDate!.day));
+                }
               });
             }
           }
 
+          // Main content of the tenancy form
           return SingleChildScrollView(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  tenancyDurationField(setState, updateEndDate),
-                  const SizedBox(height: 20),
-                  _tenancyDateField(
-                      context, setState, updateEndDate, tenantData.moveInDate!),
-                  const SizedBox(height: 20),
-                  // Caluculate the end date based on the start date and tenancy duration
-                  if (endDate != null) _tenancyEndDateText(),
-                  const SizedBox(height: 20),
-                  // Submit button
-                  _buildSubmitTenancyButton(context, tenantData),
-                ],
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    tenancyDurationField(setState, updateEndDate),
+                    const SizedBox(height: 20),
+                    _tenancyDateField(innerContext, setState, updateEndDate,
+                        tenantData.moveInDate!),
+                    const SizedBox(height: 20),
+                    // Caluculate the end date based on the start date and tenancy duration
+                    if (endDate != null) _tenancyEndDateText(),
+                    const SizedBox(height: 20),
+                    // Submit button
+                    _buildSubmitTenancyButton(innerContext, tenantData),
+                  ],
+                ),
               ),
             ),
           );
         });
       },
-    );
+    ).whenComplete(() => resetValues());
   }
 
-  Row _buildSubmitTenancyButton(BuildContext context, Application tenantData) {
+  Row _buildSubmitTenancyButton(BuildContext outerContext, Application tenantData) {
     return Row(
       children: [
         Expanded(
@@ -561,75 +578,94 @@ class _PropertyApplicationsSectionState
             ),
             onPressed: () {
               // Show confirmation dialog
-              showDialog(
-                context: context,
-                builder: (BuildContext innerContext) {
-                  return AlertDialog(
-                    title: const Text('Confirm Submission'),
-                    content: const Text(
-                      'Are you sure you want to save this tenancy information? Once submitted, this action cannot be undone',
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        child: const Text('Cancel'),
-                        onPressed: () {
-                          // Close the dialog
-                          Navigator.of(innerContext).pop();
-                        },
+              if (_formKey.currentState!.validate()) {
+                showDialog(
+                  context: outerContext,
+                  builder: (BuildContext innerContext) {
+                    return AlertDialog(
+                      title: const Text('Confirm Submission'),
+                      content: const Text(
+                        'Are you sure you want to save this tenancy information? Once submitted, this action cannot be undone',
                       ),
-                      TextButton(
-                        child: const Text('Confirm'),
-                        onPressed: () {
-                          // Close the dialog
-                          Navigator.of(innerContext).pop();
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () {
+                            // Close the dialog
+                            Navigator.of(innerContext).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: const Text('Confirm'),
+                          onPressed: () async {
+                            // Show a loading indicator
+                            setState(() {
+                              _isLoading = true;
+                            });
 
-                          // Save tenancy information in database
-                          RentalService.saveTenancyInfo(
-                            propertyID: widget.propertyID,
-                            tenantID: tenantData.applicantID!,
-                            landlordID: _auth.currentUser!.uid,
-                            applicationID: tenantData.applicationID!,
-                            duration: int.parse(tenancyDuration!),
-                            startDate: startDate!,
-                            endDate: endDate!,
-                          ).then((_) {
+                            // Close the dialog
+                            Navigator.of(innerContext).pop();
+
                             // Close the modal bottom sheet
-                            Navigator.pop(context);
+                            Navigator.pop(outerContext);
 
-                            // Show success message if the saving operation is successful
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text(
-                                  'Tenancy information saved successfully',
-                                ),
-                                duration: const Duration(seconds: 3),
-                                backgroundColor: Colors.green[700],
-                              ),
-                            );
-
-                            // Refresh the application list
-                            refreshData();
-                          }).catchError(
-                            (_) {
-                              // Show error message if the saving operation is failed
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Failed to save tenancy information. Please try again',
-                                  ),
-                                  duration: const Duration(seconds: 3),
-                                  backgroundColor:
-                                      Theme.of(context).colorScheme.error,
-                                ),
+                            // Save tenancy information in database
+                            try {
+                              await RentalService.saveTenancyInfo(
+                                propertyID: widget.propertyID,
+                                tenantID: tenantData.applicantID!,
+                                landlordID: _auth.currentUser!.uid,
+                                applicationID: tenantData.applicationID!,
+                                duration: int.parse(tenancyDuration!),
+                                startDate: startDate!,
+                                endDate: endDate!,
                               );
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
-              );
+
+                              // Refresh the application list
+                              await refreshData();
+
+                              // Hide loading indicator
+                              setState(() {
+                                _isLoading = false;
+                              });
+
+                              if (mounted) {
+                                // Show success message if the saving operation is successful
+                                Future.delayed(const Duration(milliseconds: 300), () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Text('Tenancy information saved successfully'),
+                                      duration: const Duration(seconds: 3),
+                                      backgroundColor: Colors.green[700],
+                                    ),
+                                  );
+                                });
+                              }
+                            } catch (error) {
+                              // Hide loading indicator
+                              setState(() {
+                                _isLoading = false;
+                              });
+
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text(
+                                        'Failed to save tenancy information. Please try again'),
+                                    duration: const Duration(seconds: 3),
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.error,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
             },
             child: const Text('Submit'),
           ),
@@ -648,124 +684,83 @@ class _PropertyApplicationsSectionState
     );
   }
 
-  Column tenancyDurationField(
-      StateSetter setState, void Function() updateEndDate) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Tenancy Duration',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        const SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            ),
-            contentPadding:
-                EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
-            hintText: 'Select one',
-            hintStyle: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.normal,
-              color: Colors.grey,
-            ),
-          ),
-          value: tenancyDuration,
-          items: List.generate(6, (index) => (index + 1).toString())
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                '$value months',
-                style: const TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.black,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: (newValue) {
-            setState(() {
-              tenancyDuration = newValue;
-            });
-            updateEndDate();
-          },
-        ),
-      ],
+  CustomDropDownField tenancyDurationField(
+    StateSetter setState,
+    void Function() updateEndDate,
+  ) {
+    return CustomDropDownField(
+      label: "Tenancy Duration",
+      hintText: "Select one",
+      items: List.generate(12, (index) => (index + 1).toString())
+          .map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text('$value months'),
+        );
+      }).toList(),
+      onChanged: (newValue) {
+        setState(() {
+          tenancyDuration = newValue;
+        });
+        updateEndDate();
+      },
+      validator: (value) {
+        if (value == null) {
+          return "Please select a tenancy duration";
+        }
+        return null;
+      },
     );
   }
 
-  Column _tenancyDateField(BuildContext context, StateSetter setState,
-      void Function() updateEndDate, DateTime tenancyDate) {
-    DateFormat format = DateFormat('dd/MM/yyyy');
-    String tenancyDateString =
-        format.format(tenancyDate); // Convert DateTime to String
+  CustomTextFormField _tenancyDateField(
+    BuildContext outerContext,
+    StateSetter setState,
+    void Function() updateEndDate,
+    DateTime tenancyDate,
+  ) {
+    return CustomTextFormField(
+      label: "Start Tenancy Date",
+      hintText: "dd/MM/yyyy",
+      controller: TextEditingController(
+        text: startDate == null
+            ? ""
+            : DateFormat("dd/MM/yyyy").format(startDate!),
+      ),
+      suffixIcon: IconButton(
+        onPressed: () async {
+          final DateTime? pickedDate = await showDatePicker(
+            context: outerContext,
+            initialDate: startDate ?? DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2101),
+          );
+          if (pickedDate != null) {
+            setState(() {
+              startDate = pickedDate;
+            });
+            updateEndDate();
+          }
+        },
+        icon: const Icon(Icons.calendar_today),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Please select a tenancy start date";
+        }
 
-    DateTime parsedDate = format.parse(tenancyDateString);
-
-    // Check if the parsed date is after the current date
-    if (parsedDate.isAfter(DateTime.now())) {
-      _tenancyDateController.text = tenancyDateString;
-      startDate = parsedDate;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Start Tenancy Date',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextFormField(
-          controller: _tenancyDateController,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-            ),
-            hintText: 'Select date',
-            hintStyle: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.normal,
-              color: Colors.grey,
-            ),
-            contentPadding:
-                EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
-            suffixIcon: Icon(Icons.calendar_today, color: Colors.black),
-          ),
-          style: const TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.normal,
-            color: Colors.black,
-          ),
-          readOnly: true, // Keep the field readOnly to prevent keyboard pop-up
-          onTap: () async {
-            final DateTime? pickedDate = await showDatePicker(
-              context: context,
-              initialDate: startDate ?? DateTime.now(),
-              firstDate: DateTime.now(),
-              lastDate: DateTime(2101),
-            );
-            if (pickedDate != null) {
-              setState(() {
-                startDate = pickedDate;
-                _tenancyDateController.text =
-                    DateFormat('dd/MM/yyyy').format(startDate!);
-              });
-              updateEndDate();
-            }
-          },
-        ),
-      ],
+        return null;
+      },
+      readOnly: true, // Keep the field readOnly to prevent keyboard pop-up
     );
+  }
+
+  void resetValues() {
+    setState(() {
+      tenancyDuration = null;
+      startDate = null;
+      endDate = null;
+      _formKey.currentState?.reset(); // Reset the form
+    });
   }
 }
