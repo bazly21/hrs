@@ -132,7 +132,7 @@ exports.calculateTenantCriteriaScore = functions.firestore
 
         // Get the applicant"s overall rating
         const applicantData = applicantSnapshot.data();
-        const overallRating = applicantData.ratingAverage.tenant.overallRating || 0;
+        const overallRating = applicantData.ratingAverage?.tenant?.overallRating || 0;
 
         // Perform operations with tenantCriteria field
         const criteriaScore = calculateCriteriaScore(tenantCriteria, applicationData, overallRating);
