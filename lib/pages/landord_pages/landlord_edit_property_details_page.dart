@@ -7,6 +7,7 @@ import 'package:hrs/components/custom_textformfield.dart';
 import 'package:hrs/components/property_details_price_texfield.dart';
 import 'package:hrs/model/property/property_details.dart';
 import 'package:hrs/provider/image_provider.dart';
+import 'package:hrs/provider/refresh_provider.dart';
 import 'package:hrs/services/property/property_service.dart';
 import 'package:hrs/services/utils/error_message_utils.dart';
 import 'package:image_picker/image_picker.dart';
@@ -602,6 +603,9 @@ class _EditPropertyDetailsPageState extends State<EditPropertyDetailsPage> {
           await PropertyService.getPropertyFullDetails(widget.propertyID, null);
 
       if (context.mounted) {
+        // Refresh property list in Property page
+        context.read<RefreshProvider>().propertyRefresh = true;
+
         Navigator.pop(context, {
           'success': true,
           'message': 'Property details updated successfully',

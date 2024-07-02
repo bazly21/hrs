@@ -121,17 +121,18 @@ class _WishlistListPageState extends State<WishlistListPage> {
                 setState(() {
                   _isLoading = true;
                 });
-                
+
                 // Remove the property from the wishlist
                 _wishlistProvider
                     .removeFromWishlist(propertyID)
                     .then((_) async {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
+                    SnackBar(
+                      content: const Text(
                         'Successfully removed the property from wishlist',
                       ),
-                      duration: Duration(seconds: 3),
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.green[700],
                     ),
                   );
 
