@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hrs/components/appbar_shadow.dart';
 import 'package:hrs/components/custom_circleavatar.dart';
+import 'package:hrs/pages/view_profile_page.dart';
+import 'package:hrs/services/auth/auth_service.dart';
+import 'package:hrs/services/navigation/navigation_utils.dart';
+import 'package:provider/provider.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -107,42 +111,59 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String name;
+  final String receiverID;
   final String? imageUrl;
 
   const ChatAppBar({
     super.key,
     required this.name,
+    required this.receiverID,
     this.imageUrl,
   });
 
   @override
   Widget build(BuildContext context) {
+    String? role = context.read<AuthService>().userRole;
+
     return AppBar(
       toolbarHeight: preferredSize.height,
       flexibleSpace: const AppBarShadow(),
-      title: Row(
-        children: [
-          // User profile picture
-          CustomCircleAvatar(
-            name: name,
-            imageURL: imageUrl,
-            radius: 23.0,
-            fontSize: 18.0,
-          ),
-      
-          // Space between elements
-          const SizedBox(width: 10),
-      
-          // User name
-          Text(
-            name,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 20.0,
-              color: Colors.black,
+      title: InkWell(
+        onTap: () {
+          // Navigate to the user's profile page
+          NavigationUtils.pushPage(
+            context,
+            ProfileViewPage(
+              userID: receiverID,
+              role: getRole(role),
             ),
-          ),
-        ],
+            SlideDirection.left,
+          );
+        },
+        child: Row(
+          children: [
+            // User profile picture
+            CustomCircleAvatar(
+              name: name,
+              imageURL: imageUrl,
+              radius: 23.0,
+              fontSize: 18.0,
+            ),
+
+            // Space between elements
+            const SizedBox(width: 10),
+
+            // User name
+            Text(
+              name,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 20.0,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
       ),
       backgroundColor: Colors.white,
     );
@@ -150,4 +171,12 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(70);
+
+  String getRole(role) {
+    if (role == 'Tenant') {
+      return 'Landlord';
+    } else {
+      return 'Tenant';
+    }
+  }
 }

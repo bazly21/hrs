@@ -235,28 +235,6 @@ class _ProfilePageState extends State<ProfilePage> {
           icon: Icons.logout,
           onPressed: () => showLogoutConfirmationDialog(context),
         ),
-
-        // Only show login as Landlord option
-        // if the user is Tenant
-        if (_role == "Tenant") ...[
-          // Add space between elements
-          SizedBox(height: MediaQuery.of(context).size.height * 0.015),
-
-          const Divider(),
-
-          // Add space between elements
-          SizedBox(height: MediaQuery.of(context).size.height * 0.015),
-
-          ProfileMenu(
-            text: "Login as Landlord",
-            icon: Icons.login,
-            onPressed: () => NavigationUtils.pushPage(
-              context,
-              const LoginPage(role: "Landlord"),
-              SlideDirection.left,
-            ),
-          ),
-        ],
       ],
     );
   }

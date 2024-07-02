@@ -34,7 +34,7 @@ class _ChatPageState extends State<ChatPage> {
         await chatService.sendMessage(widget.receiverID, message);
         messageController.clear();
       } catch (e) {
-        if (mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text('Failed to send message. Please try again.'),
@@ -52,6 +52,7 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: ChatAppBar(
         name: widget.receiverName,
+        receiverID: widget.receiverID,
         imageUrl: widget.receiverProfilePicUrl,
       ),
       body: Column(
