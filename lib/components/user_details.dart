@@ -45,7 +45,17 @@ class UserDetailsSection extends StatelessWidget {
                 role: role,
               ),
               SlideDirection.left,
-            );
+            ).then((message) {
+              if (message != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                    duration: const Duration(seconds: 3),
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                );
+              }
+            });
           },
           child: CustomCircleAvatar(
             imageURL: imageUrl,

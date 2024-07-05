@@ -227,11 +227,13 @@ class RatingService {
 
     // Fetch user ratings subcollection
     // based on the role of the user
+    // and order by the date submitted
     final QuerySnapshot ratingSnapshot = await FirebaseFirestore.instance
         .collection("users")
         .doc(userID)
         .collection("ratings")
         .where("ratedAs", isEqualTo: role)
+        .orderBy("submittedAt", descending: true)
         .get();
 
     List<RatingDetails> ratings = [];

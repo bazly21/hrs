@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hrs/components/custom_appbar.dart';
 import 'package:hrs/components/custom_dropdown.dart';
@@ -22,6 +24,8 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
   String? selectedNationality;
   String? selectedTenancyDuration;
 
+  bool _isLoading = true;
+
   final List<String> profileTypes = [
     'Student',
     'Working Adult',
@@ -42,10 +46,236 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
     'None'
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchInitialTenantCriteria(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const CustomAppBar(title: 'Set Tenant Criteria'),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildMainBody(context),
+    );
+  }
+
+  SingleChildScrollView _buildMainBody(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16.0, 25.0, 16.0, 16.0),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2), // Shadow color.
+                spreadRadius: 3,
+                blurRadius: 2, // Shadow blur radius.
+                offset: const Offset(0, 2), // Vertical offset for the shadow.
+              ),
+            ]),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomDropDownField(
+                label: 'Profile Type',
+                value: selectedProfileType,
+                hintText: 'Select desired profile type',
+                items: profileTypes.map((type) {
+                  return DropdownMenuItem<String>(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedProfileType = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a profile type';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20.0),
+              CustomDropDownField(
+                label: 'Number of Pax',
+                value: selectedNumberOfPax,
+                hintText: 'Select number of pax',
+                items: numberOfPaxOptions.map((pax) {
+                  return DropdownMenuItem<String>(
+                    value: pax,
+                    child: Text(pax),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedNumberOfPax = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select number of pax';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20.0),
+              CustomDropDownField(
+                label: 'Nationality',
+                value: selectedNationality,
+                hintText: 'Select desired tenant nationality',
+                items: nationalities.map((nationality) {
+                  return DropdownMenuItem<String>(
+                    value: nationality,
+                    child: Text(nationality),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedNationality = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select desired tenant nationality';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20.0),
+              CustomDropDownField(
+                label: 'Tenancy Duration',
+                value: selectedTenancyDuration,
+                hintText: 'Select desired tenancy duration',
+                items: tenancyDurations.map((duration) {
+                  return DropdownMenuItem<String>(
+                    value: duration,
+                    child: Text(duration),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedTenancyDuration = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select desired tenancy duration';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 35.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: resetFormFields,
+                    style: ElevatedButton.styleFrom(
+                      // backgroundColor: Colors.red[400],
+                      // foregroundColor: Colors.white,
+                      fixedSize: const Size(130, 42),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('Reset'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => saveTenantCriteria(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF8568F3),
+                      foregroundColor: Colors.white,
+                      fixedSize: const Size(130, 42),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('Save Criteria'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _fetchInitialTenantCriteria(BuildContext context) async {
+    try {
+      // Fetch the initial tenant criteria from Firestore
+      final DocumentSnapshot initialTenantCriteria = await FirebaseFirestore
+          .instance
+          .collection('properties')
+          .doc(widget.propertyID)
+          .get();
+
+      // If the document exists, extract the tenant criteria data
+      if (initialTenantCriteria.exists) {
+        // Convert the data to a Map
+        final data = initialTenantCriteria.data() as Map<String, dynamic>;
+
+        // If tenantCriteria exists, extract the data
+        if (data.containsKey('tenantCriteria')) {
+          // Fetch the tenantCriteria data
+          final tenantCriteria = data['tenantCriteria'] as Map<String, dynamic>;
+
+          // Set the initial values
+          setState(() {
+            selectedProfileType = tenantCriteria['profileType'] ?? 'None';
+            selectedNumberOfPax = tenantCriteria['numberOfPax'] ?? 'None';
+            selectedNationality = tenantCriteria['nationality'] ?? 'None';
+            selectedTenancyDuration = tenantCriteria['tenancyDuration'] ?? 'None';
+          });
+        }
+        // If tenantCriteria does not exist, set all fields to null
+        else {
+          setState(() {
+            selectedProfileType = null;
+            selectedNumberOfPax = null;
+            selectedNationality = null;
+            selectedTenancyDuration = null;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching initial tenant criteria: $e');
+
+      // Show an error message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Failed to fetch initial tenant criteria'),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } finally {
+      // Hide the loading indicator
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   void saveTenantCriteria(BuildContext context) async {
     // Create a map with the criteria data
     try {
       if (_formKey.currentState!.validate()) {
+        // Show a loading indicator
+        setState(() {
+          _isLoading = true;
+        });
+
         // If all fields are 'None', save tenantCriteria as null
         if (selectedProfileType == 'None' &&
             selectedNumberOfPax == 'None' &&
@@ -67,17 +297,21 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
 
           // Save the criteria data to Firestore
           await _applicationService.saveTenantCriteria(
-              widget.propertyID, criteriaData);
+            widget.propertyID,
+            criteriaData,
+          );
         }
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Tenant criteria saved successfully'),
-              duration: const Duration(seconds: 3),
-              backgroundColor: Colors.green[700],
-            ),
-          );
+          Future.delayed(const Duration(milliseconds: 200), () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text('Tenant criteria successfully saved'),
+                duration: const Duration(seconds: 3),
+                backgroundColor: Colors.green[700],
+              ),
+            );
+          });
         }
       }
     } catch (e) {
@@ -90,164 +324,22 @@ class _TenantCriteriaSettingPageState extends State<TenantCriteriaSettingPage> {
           ),
         );
       }
+    } finally {
+      // Hide the loading indicator
+      setState(() {
+        _isLoading = false;
+      });
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(title: 'Set Tenant Criteria'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16.0, 25.0, 16.0, 16.0),
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2), // Shadow color.
-                  spreadRadius: 3,
-                  blurRadius: 2, // Shadow blur radius.
-                  offset: const Offset(0, 2), // Vertical offset for the shadow.
-                ),
-              ]),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomDropDownField(
-                  label: 'Profile Type',
-                  hintText: 'Select desired profile type',
-                  items: profileTypes.map((type) {
-                    return DropdownMenuItem<String>(
-                      value: type,
-                      child: Text(type),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedProfileType = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please select a profile type';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20.0),
-                CustomDropDownField(
-                  label: 'Number of Pax',
-                  hintText: 'Select number of pax',
-                  items: numberOfPaxOptions.map((pax) {
-                    return DropdownMenuItem<String>(
-                      value: pax,
-                      child: Text(pax),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedNumberOfPax = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please select number of pax';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20.0),
-                CustomDropDownField(
-                  label: 'Nationality',
-                  hintText: 'Select desired tenant nationality',
-                  items: nationalities.map((nationality) {
-                    return DropdownMenuItem<String>(
-                      value: nationality,
-                      child: Text(nationality),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedNationality = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please select desired tenant nationality';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20.0),
-                CustomDropDownField(
-                  label: 'Tenancy Duration',
-                  hintText: 'Select desired tenancy duration',
-                  items: tenancyDurations.map((duration) {
-                    return DropdownMenuItem<String>(
-                      value: duration,
-                      child: Text(duration),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedTenancyDuration = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please select desired tenancy duration';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 35.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
-                      onPressed: resetFormFields,
-                      style: ElevatedButton.styleFrom(
-                        // backgroundColor: Colors.red[400],
-                        // foregroundColor: Colors.white,
-                        fixedSize: const Size(130, 42),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('Reset'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => saveTenantCriteria(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8568F3),
-                        foregroundColor: Colors.white,
-                        fixedSize: const Size(130, 42),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('Save Criteria'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   void resetFormFields() {
     setState(() {
+      _formKey.currentState?.reset();
+
       selectedProfileType = null;
       selectedNumberOfPax = null;
       selectedNationality = null;
       selectedTenancyDuration = null;
-
-      _formKey.currentState?.reset();
 
       // Remove the focus
       FocusScope.of(context).requestFocus(FocusNode());

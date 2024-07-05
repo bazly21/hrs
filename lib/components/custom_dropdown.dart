@@ -7,17 +7,20 @@ class CustomDropDownField extends StatelessWidget {
     super.key,
     required String label,
     required String hintText,
+    dynamic value,
     required List<DropdownMenuItem<dynamic>>? items,
     required void Function(dynamic?)? onChanged,
     String? Function(dynamic?)? validator,
   })  : _label = label,
         _hintText = hintText,
+        _value = value,
         _items = items,
         _validator = validator,
         _onChanged = onChanged;
 
   final String _label;
   final String _hintText;
+  final dynamic _value;
   final List<DropdownMenuItem<dynamic>>? _items;
   final void Function(dynamic?)? _onChanged;
   final String? Function(dynamic?)? _validator;
@@ -37,6 +40,7 @@ class CustomDropDownField extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<dynamic>(
+          value: _value,
           items: _items,
           onChanged: _onChanged,
           validator: _validator,
