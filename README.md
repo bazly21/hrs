@@ -1,8 +1,16 @@
 # House Renting System (HRS)
 
+## Overview
 The House Renting System is a mobile-based online renting platform. It provide basice features like any other online renting platform, but the system has two unique features which are:
-  - Reciprocal Rating Feature - Landlord and tenant can rate each other once the tenancy has ended
-  - Application Recommendation Feature - Suggest the most suitable applicant base on criteria set by the landlord
+  - **Reciprocal Rating Feature:** Landlord and tenant can rate each other once the tenancy has ended
+  - **Application Recommendation Feature:** Suggest the most suitable applicant base on criteria set by the landlord
+
+## Technologies Used
+  - **Frontend:** Flutter
+  - **Backend:** Firebase Functions
+  - **Database:** Firebase Firestore
+  - **Authentication:** Firebase Authentication
+  - **Storage:** Firebase Storage
 
 ## Getting Started
 
